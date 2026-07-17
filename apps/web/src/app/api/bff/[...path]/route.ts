@@ -7,11 +7,21 @@ import { ACCESS_COOKIE, API_BASE, cookieOptions, REFRESH_COOKIE } from "@/lib/ap
  * session bearer. Auto-refreshes once on 401 and rotates the cookies.
  * Only the paths the app actually uses are proxied.
  */
-const ALLOWED_PATHS = new Set(["quiz", "quiz/responses", "me", "me/photo"]);
+const UUID = "[0-9a-f-]{36}";
+const ALLOWED_PATTERNS = [
+  /^quiz$/,
+  /^quiz\/responses$/,
+  /^me$/,
+  /^me\/photo$/,
+  /^me\/bookings$/,
+  new RegExp(`^events/${UUID}/bookings$`),
+  new RegExp(`^bookings/${UUID}$`),
+  new RegExp(`^bookings/${UUID}/two-truths$`),
+];
 
 async function proxy(request: NextRequest, path: string[]): Promise<NextResponse> {
   const joined = path.join("/");
-  if (!ALLOWED_PATHS.has(joined)) {
+  if (!ALLOWED_PATTERNS.some((pattern) => pattern.test(joined))) {
     return NextResponse.json({ message: "not found" }, { status: 404 });
   }
 
@@ -77,5 +87,8 @@ export async function POST(request: NextRequest, context: Context) {
   return proxy(request, (await context.params).path);
 }
 export async function PATCH(request: NextRequest, context: Context) {
+  return proxy(request, (await context.params).path);
+}
+export async function DELETE(request: NextRequest, context: Context) {
   return proxy(request, (await context.params).path);
 }

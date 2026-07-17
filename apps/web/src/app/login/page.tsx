@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { LoginFlow } from "./login-flow";
 
@@ -8,5 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
-  return <LoginFlow />;
+  return (
+    // Suspense: useSearchParams (the ?next redirect) opts the page out of full prerender
+    <Suspense>
+      <LoginFlow />
+    </Suspense>
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 import { Button, Card, LogoMark } from "@mulaqat/ui";
@@ -17,6 +17,7 @@ function normalizePhone(raw: string): string | null {
 
 export function LoginFlow() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<"phone" | "code">("phone");
   const [phoneInput, setPhoneInput] = useState("");
   const [phone, setPhone] = useState("");
@@ -56,7 +57,14 @@ export function LoginFlow() {
       setError(result.message ?? "That code didn't match — try again.");
       return;
     }
-    router.push(result.data.has_personality ? "/you" : "/onboarding/quiz");
+    // New members do the quiz first; returning ones go where they were headed.
+    const next = searchParams.get("next");
+    const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : null;
+    if (!result.data.has_personality) {
+      router.push("/onboarding/quiz");
+    } else {
+      router.push(safeNext ?? "/tonight");
+    }
   }
 
   return (
