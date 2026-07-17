@@ -4,6 +4,9 @@ import { Queue, Worker } from "bullmq";
 import { BookingsModule } from "../bookings/bookings.module";
 import { BookingsService } from "../bookings/bookings.service";
 import { env } from "../config/env";
+import { MatchingModule } from "../matching/matching.module";
+import { MatchingService } from "../matching/matching.service";
+import { RevealService } from "../matching/reveal.service";
 
 const QUEUE = "housekeeping";
 
@@ -18,17 +21,35 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
   private queue: Queue | null = null;
   private worker: Worker | null = null;
 
-  constructor(private readonly bookings: BookingsService) {}
+  constructor(
+    private readonly bookings: BookingsService,
+    private readonly reveal: RevealService,
+    private readonly matching: MatchingService,
+  ) {}
 
   async onApplicationBootstrap(): Promise<void> {
     if (env.NODE_ENV === "test") return;
     const connection = { url: env.REDIS_URL };
     this.queue = new Queue(QUEUE, { connection });
     await this.queue.upsertJobScheduler("booking-expiry", { every: 60_000 });
+    // venue-reveal (T-24h) + match-trigger (T-36h): check every 5 min
+    await this.queue.upsertJobScheduler("venue-reveal", { every: 300_000 });
     this.worker = new Worker(
       QUEUE,
       async (job) => {
-        if (job.name === "booking-expiry") await this.bookings.expireStalePending();
+        if (job.name === "booking-expiry") {
+          await this.bookings.expireStalePending();
+        } else if (job.name === "venue-reveal") {
+          // T-36h: auto-run matching if an admin hasn't; T-24h: reveal.
+          for (const eventId of await this.reveal.dueForReveal(36)) {
+            await this.matching.runForEvent(eventId, "system").catch((error) => {
+              this.logger.warn(`auto-match skipped for ${eventId}: ${String(error)}`);
+            });
+          }
+          for (const eventId of await this.reveal.dueForReveal(24)) {
+            await this.reveal.revealEvent(eventId);
+          }
+        }
       },
       { connection },
     );
@@ -45,7 +66,7 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
 }
 
 @Module({
-  imports: [BookingsModule],
+  imports: [BookingsModule, MatchingModule],
   providers: [JobsService],
 })
 export class JobsModule {}

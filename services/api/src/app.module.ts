@@ -8,6 +8,7 @@ import { env } from "./config/env";
 import { EventsModule } from "./events/events.module";
 import { HealthModule } from "./health/health.module";
 import { JobsModule } from "./jobs/jobs.module";
+import { MatchingModule } from "./matching/matching.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { QuizModule } from "./quiz/quiz.module";
 import { RedisModule } from "./redis/redis.module";
@@ -36,6 +37,7 @@ import { UsersModule } from "./users/users.module";
     CitiesModule,
     EventsModule,
     BookingsModule,
+    MatchingModule,
     JobsModule,
   ],
 })
