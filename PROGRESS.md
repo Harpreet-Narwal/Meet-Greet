@@ -1,5 +1,37 @@
 # Mulaqat — Progress
 
+## M3 — Matching & the reveal   [DONE]
+- [x] **matching engine** (ai, pure/deterministic, no LLM): hard constraints (age ±4-median &
+  ≤8 spread, shared language, women-only, blocked pairs) + weighted chemistry scoring
+  (interest Jaccard, energy-variance balance, depth alignment, humor, novelty, optional embeddings)
+- [x] seed = language-group → age-sorted **validity-checked** chunking → blocked-pair repair;
+  then **steepest-ascent hill-climb** (validity-preserving swaps). Every table valid by construction.
+- [x] **matching eval suite ≥ 0.90**: 66 feasible-by-construction golden events → **composite 0.975,
+  ZERO hard-constraint violations**, quality measured as lift over best-of-40 random-valid. Blocks in ci-ai.
+- [x] engine unit tests (10): placement conservation, every constraint, determinism, no-LLM
+- [x] api: `POST /admin/events/:id/match` (proxy → persist match_run + assignments + seat bookings),
+  `GET …/match/explain`, `POST …/reveal`; `GET /events/:id/my-table`, `…/checkin-token`, `POST …/checkin`
+- [x] BullMQ: venue-reveal (T-24h) + match-trigger (T-36h) job (every 5 min; off under test)
+- [x] web: `/events/[id]/table` — locked countdown card → **3D flip** → venue + directions;
+  animated **table teaser** (silhouettes fill in with names as people check in, 8s poll); QR check-in
+- [x] **matching e2e (6)**: seeded 30-guest event → 5 valid tables w/ explanations, venue hidden
+  pre-reveal, time-travel reveal hook, QR check-in unlocks seat, host-only check-in gating
+- [x] `make test` green (12 turbo · 27 api e2e · ai ruff/mypy/pytest); `make eval` matching PASS
+
+### Decisions (M3)
+- **Hill-climb bug found & fixed**: the first implementation mutated tables mid-scan while iterating
+  their own contents → duplicated/lost attendees (masked as "violations"). Rewrote as steepest-ascent
+  (find best swap read-only, apply, rescan). Validity-preserving swaps never change the attendee multiset.
+- **Golden data is feasible by construction** (built from valid seed-tables) — the eval's zero-violation
+  requirement is only fair on solvable events; infeasible synthetic events would be an unfair gate.
+- **AiClient resolves AI_URL at call time** (not import) so e2e suites can retarget the ai service
+  per-file (onboarding uses a local stub; matching hits the real engine at :8000).
+- **api e2e now `--runInBand`**: DB-backed suites raced on shared state under parallel jest workers.
+- **Admin dashboard UI deferred to M6** ("admin polish" per plan §11) — the explain view + run-matching
+  are exposed and tested via API; the web admin surface lands with deck approvals & moderation queues.
+- QR token embeds the booking id + nonce; host/self gating enforced. Stored-nonce verification is a
+  noted M7 hardening (dev/mock flow is sufficient now).
+
 ## M2 — Events, booking & payments   [DONE]
 - [x] seed: 6 venues, 8 events (2 past) + tables, 30 quiz-completed users (deterministic LCG)
 - [x] cities + events modules: public list/detail (filters city/type/date/budget), admin CRUD behind RolesGuard
