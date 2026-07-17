@@ -53,7 +53,8 @@ const organizationJsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    // suppressHydrationWarning: the head script stamps `js` on <html> pre-hydration by design
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         {/* Gate hidden-until-reveal styles on JS actually running (no-JS users see everything). */}
         <script
