@@ -1,10 +1,13 @@
 import { Module } from "@nestjs/common";
 import { LoggerModule } from "nestjs-pino";
 
+import { AuthModule } from "./auth/auth.module";
 import { env } from "./config/env";
 import { HealthModule } from "./health/health.module";
 import { PrismaModule } from "./prisma/prisma.module";
+import { QuizModule } from "./quiz/quiz.module";
 import { RedisModule } from "./redis/redis.module";
+import { UsersModule } from "./users/users.module";
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { RedisModule } from "./redis/redis.module";
     PrismaModule,
     RedisModule,
     HealthModule,
+    AuthModule,
+    UsersModule,
+    QuizModule,
   ],
 })
 export class AppModule {}

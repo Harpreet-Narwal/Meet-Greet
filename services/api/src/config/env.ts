@@ -18,6 +18,10 @@ const EnvSchema = z.object({
   OTP_PROVIDER: z.enum(["mock", "msg91", "twilio"]).default("mock"),
   PAYMENT_PROVIDER: z.enum(["mock", "razorpay"]).default("mock"),
   S3_ENDPOINT: z.string().default("http://localhost:9000"),
+  // Browser-reachable base for stored object URLs (defaults to S3_ENDPOINT;
+  // in compose the internal endpoint is http://minio:9000 but photos are
+  // fetched by the browser via localhost).
+  S3_PUBLIC_URL: z.string().optional(),
   S3_BUCKET: z.string().default("mulaqat"),
   S3_ACCESS_KEY: z.string().default("mulaqat"),
   S3_SECRET_KEY: z.string().default("mulaqat123"),

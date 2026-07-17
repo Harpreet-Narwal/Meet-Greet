@@ -7,6 +7,8 @@
  */
 import { PrismaClient } from "@prisma/client";
 
+import { QUIZ_VERSION, quizQuestionsV1 } from "./seed-data/quiz-v1";
+
 const prisma = new PrismaClient();
 
 async function main(): Promise<void> {
@@ -68,8 +70,40 @@ async function main(): Promise<void> {
     });
   }
 
-  const [cities, users] = await Promise.all([prisma.city.count(), prisma.user.count()]);
-  console.log(`Seeded ✓  cities=${cities} users=${users} (quiz/venues/events/decks land in M1–M2)`);
+  // Quiz v1 — verbatim from docs/seed-content.md
+  for (const question of quizQuestionsV1) {
+    await prisma.quizQuestion.upsert({
+      where: {
+        version_locale_ord: { version: QUIZ_VERSION, locale: "en", ord: question.ord },
+      },
+      create: {
+        version: QUIZ_VERSION,
+        locale: "en",
+        ord: question.ord,
+        kind: question.kind,
+        text: question.text,
+        subtext: question.subtext,
+        traitKey: question.traitKey,
+        options: question.options as never,
+      },
+      update: {
+        kind: question.kind,
+        text: question.text,
+        subtext: question.subtext,
+        traitKey: question.traitKey,
+        options: question.options as never,
+      },
+    });
+  }
+
+  const [cities, users, quizQuestions] = await Promise.all([
+    prisma.city.count(),
+    prisma.user.count(),
+    prisma.quizQuestion.count({ where: { version: QUIZ_VERSION } }),
+  ]);
+  console.log(
+    `Seeded ✓  cities=${cities} users=${users} quiz_questions=${quizQuestions} (venues/events/decks land in M2)`,
+  );
 }
 
 main()

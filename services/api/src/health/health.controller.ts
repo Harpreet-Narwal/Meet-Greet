@@ -1,10 +1,12 @@
 import { Controller, Get, ServiceUnavailableException } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { Public } from "../auth/public.decorator";
 import { PrismaService } from "../prisma/prisma.service";
 import { RedisService } from "../redis/redis.service";
 
 @ApiTags("health")
+@Public()
 @Controller()
 export class HealthController {
   constructor(
