@@ -1,5 +1,38 @@
 # Mulaqat — Progress
 
+## M2 — Events, booking & payments   [DONE]
+- [x] seed: 6 venues, 8 events (2 past) + tables, 30 quiz-completed users (deterministic LCG)
+- [x] cities + events modules: public list/detail (filters city/type/date/budget), admin CRUD behind RolesGuard
+- [x] **venue privacy**: address only in payloads once status ∈ revealed/live/completed — e2e-asserted on list AND detail
+- [x] bookings: SELECT…FOR UPDATE capacity transaction, waitlist, two-truths, 48h-credit cancellation
+- [x] payments: provider abstraction (mock auto-succeeds | razorpay stub), webhook endpoint
+- [x] jobs: BullMQ housekeeping worker — booking-expiry every 60s (skipped under NODE_ENV=test)
+- [x] **oversell race e2e**: 10 concurrent bookings × 6 seats → exactly 6 confirmed, wall held in DB
+- [x] waitlist promotion on cancel + on expiry — e2e-asserted
+- [x] web public: /events/[slug] (ISR 300 + Event JSON-LD + canonical), /cities/[city], sitemap.ts, robots.ts
+- [x] web app: /explore (type+budget chips), booking flow (seat → two truths → confirmed/waitlist), /tonight
+- [x] **Playwright booking happy path** green (login → explore → book → mock-pay → two truths → confirmed → tonight)
+- [x] **Lighthouse: SEO 1.00, Performance 0.98** on /, /cities/bangalore, /events/[slug] (gates ≥ 0.95 / ≥ 0.90)
+- [x] `make test` green: 12 turbo tasks · 21 api e2e (4 suites) · 20 ai pytest
+
+### Decisions (M2)
+- Cancellation credit is a status (`refunded`) for v1 — a credits ledger is out of scope; the
+  policy boundary (48h) lives in bookings.types.ts and is e2e-tested from the event clock.
+- Waitlist promotion auto-charges via the provider abstraction; on mock it confirms instantly.
+  With a real provider the promoted booking sits pending_payment under the same 15-min expiry.
+- Free events (run club) skip payment entirely — straight to confirmed.
+- BFF allowlist moved to regex patterns (paths now carry UUIDs).
+- Login honors a sanitized `?next=` redirect after OTP (booking pages send users through it).
+- **Next 15.5 streaming metadata** rendered async `generateMetadata` into `<body>` (hoisted to
+  head via client JS) — Lighthouse's meta-description audit checks `<head>` and scored dynamic
+  pages 0.91. Fixed with `htmlLimitedBots: /.*/` in next.config so all UAs get blocking in-head
+  metadata. Fallback metadata (fetch timeout) now also carries a description, defensively.
+- **turbo web race**: `build` and `typecheck` both touch `.next/types`; added `apps/web/turbo.json`
+  making web's typecheck depend on its build so a combined `turbo run build typecheck` can't flake.
+  (The real gates — `make test`, CI — run these as separate sequential steps and never raced.)
+- Playwright booking test: the first click after a client-side nav lands in the freshly-mounted
+  component's hydration gap; `waitForURL` + `toBeEnabled` before the click makes it deterministic.
+
 ## M1 — Auth, profiles & the quiz   [DONE]
 - [x] phone-OTP auth: mock provider logs the code, `000000` accepted in dev; JWT access (15m) + refresh (30d); global guard with `@Public` escape hatch
 - [x] `GET/PATCH /v1/me`, presigned selfie upload to MinIO (bucket auto-created with public-read `photos/`)

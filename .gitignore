@@ -33,3 +33,6 @@ infra/terraform/**/*.tfplan
 .DS_Store
 .idea/
 .vscode/
+
+# lighthouse-ci artifacts
+.lighthouseci/

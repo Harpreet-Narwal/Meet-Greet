@@ -68,8 +68,16 @@ jobs:
           docker compose exec -T api sh -c "pnpm --filter @mulaqat/api db:deploy && pnpm --filter @mulaqat/api db:seed"
       - name: Install Playwright chromium
         run: pnpm --filter @mulaqat/web exec playwright install --with-deps chromium
-      - name: Onboarding flow (Playwright)
+      - name: Onboarding + booking flows (Playwright)
         run: pnpm --filter @mulaqat/web test:e2e
+      # Lighthouse gates run against a production build (dev server would sandbag perf)
+      - name: Build web for Lighthouse
+        run: pnpm --filter @mulaqat/web build
+      - name: Lighthouse — SEO ≥ 0.95, performance ≥ 0.90 on public pages
+        run: |
+          (cd apps/web && pnpm exec next start --port 3100 &)
+          for i in $(seq 1 30); do curl -sf http://localhost:3100/health && break; sleep 1; done
+          npx --yes @lhci/cli@0.14.0 autorun --config=apps/web/.lighthouserc.json
       - name: Upload traces on failure
         if: failure()
         uses: actions/upload-artifact@v4
