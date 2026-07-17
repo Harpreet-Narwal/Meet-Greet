@@ -15,6 +15,9 @@ const ALLOWED_PATTERNS = [
   /^me\/photo$/,
   /^me\/bookings$/,
   new RegExp(`^events/${UUID}/bookings$`),
+  new RegExp(`^events/${UUID}/my-table$`),
+  new RegExp(`^events/${UUID}/checkin-token$`),
+  new RegExp(`^events/${UUID}/checkin$`),
   new RegExp(`^bookings/${UUID}$`),
   new RegExp(`^bookings/${UUID}/two-truths$`),
 ];
