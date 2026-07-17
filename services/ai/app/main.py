@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.providers import ProviderNotConfiguredError
-from app.routers import decks, embeddings, health, profile
+from app.routers import decks, embeddings, health, match, profile
 
 
 def create_app() -> FastAPI:
@@ -16,6 +16,7 @@ def create_app() -> FastAPI:
     app.include_router(embeddings.router)
     app.include_router(decks.router)
     app.include_router(profile.router)
+    app.include_router(match.router)
 
     @app.exception_handler(ProviderNotConfiguredError)
     async def provider_not_configured(

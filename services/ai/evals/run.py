@@ -12,9 +12,12 @@ import sys
 from collections.abc import Callable
 
 from app.config import get_settings
+from evals.matching.eval import run as run_matching
 
 # suite name → runner returning a score in [0, 1]. Populated as milestones land.
-SUITES: dict[str, Callable[[], float]] = {}
+SUITES: dict[str, Callable[[], float]] = {
+    "matching": run_matching,
+}
 
 PLANNED = {"matching": "M3", "retrieval": "M6", "generation": "M6"}
 
