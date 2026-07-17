@@ -1,15 +1,18 @@
 # Mulaqat — Progress
 
-## M0 — Scaffold & pipelines   [IN PROGRESS]
+## M0 — Scaffold & pipelines   [DONE — CI proof pending first push]
 - [x] monorepo tooling (pnpm + turbo + root scripts)
 - [x] docker compose stack + Makefile + .env.example
 - [x] packages/ui tokens + base components, packages/types, packages/config
 - [x] services/ai boots `/health` (works with LLM_MODEL unset) — ruff/mypy/pytest green (12 tests)
 - [x] services/api `/health` + `/ready` + `/docs`, full Prisma schema (§5) + migrations + seed skeleton
 - [x] apps/web builds statically with brand landing, logos wired from assets/
-- [x] infra/terraform isolated skeleton — fmt clean, `validate` green for dev+prod
-- [x] CI workflows (web/api/ai/terraform/evals/release)
-- [ ] `make up && make seed && make test` green from clean clone  ← verifying now
+- [x] infra/terraform isolated skeleton — fmt clean, `validate` green for dev+prod (checked via dockerized terraform 1.9)
+- [x] CI workflows (web/api/ai/terraform/evals/release) — every step also executed locally
+- [x] **clean-slate acceptance**: `make down-v && make up && make seed && make test` all green
+      (web :3000 ✓ · api :4000 /health /ready /docs ✓ · ai :8000/health with models unset ✓)
+- [ ] push to GitHub → confirm the six workflows go green on a hello-world PR
+      (no remote configured yet — needs the operator's repo URL)
 
 ### Decisions
 - **UUID v7 PKs**: Postgres 16 has no native `uuidv7()`, so the base migration
