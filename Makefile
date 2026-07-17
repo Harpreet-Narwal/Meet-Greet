@@ -11,7 +11,7 @@ help: ## Show this help
 
 up: ## Boot the full local stack (creates .env from .env.example on first run)
 	@test -f .env || (cp .env.example .env && echo "Created .env from .env.example — set LLM_MODEL/EMBEDDING_MODEL when ready")
-	docker compose up -d --build
+	docker compose up -d --build --renew-anon-volumes
 	@echo ""
 	@echo "  web    → http://localhost:3000"
 	@echo "  api    → http://localhost:4000/docs"

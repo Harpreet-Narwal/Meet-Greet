@@ -38,13 +38,45 @@ jobs:
         run: pnpm --filter @mulaqat/web test
       - name: Build
         run: pnpm --filter @mulaqat/web build
-      # TODO(M2): replace with the Playwright booking happy path against the compose stack.
       - name: Smoke — landing page serves and carries the brand
         run: |
           pnpm --filter @mulaqat/web start &
           for i in $(seq 1 30); do curl -sf http://localhost:3000/health && break; sleep 1; done
           curl -sf http://localhost:3000/health | grep '"ok"'
           curl -sf http://localhost:3000/ | grep -i "mulaqat"
+
+  # M1 acceptance flow: login → quiz → archetype → profile against the compose stack.
+  # (Becomes the booking happy path in M2 per plan §9.2.)
+  e2e-flow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Boot the stack
+        run: |
+          cp .env.example .env
+          docker compose up -d --build postgres redis api ai web
+      - run: pnpm install --frozen-lockfile
+      - name: Wait for health + seed
+        run: |
+          for i in $(seq 1 60); do curl -sf http://localhost:4000/health && break; sleep 3; done
+          for i in $(seq 1 60); do curl -sf http://localhost:3000/health && break; sleep 3; done
+          docker compose exec -T api sh -c "pnpm --filter @mulaqat/api db:deploy && pnpm --filter @mulaqat/api db:seed"
+      - name: Install Playwright chromium
+        run: pnpm --filter @mulaqat/web exec playwright install --with-deps chromium
+      - name: Onboarding flow (Playwright)
+        run: pnpm --filter @mulaqat/web test:e2e
+      - name: Upload traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: apps/web/test-results
+          if-no-files-found: ignore
 
   docker:
     runs-on: ubuntu-latest

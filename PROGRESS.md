@@ -1,5 +1,35 @@
 # Mulaqat — Progress
 
+## M1 — Auth, profiles & the quiz   [DONE]
+- [x] phone-OTP auth: mock provider logs the code, `000000` accepted in dev; JWT access (15m) + refresh (30d); global guard with `@Public` escape hatch
+- [x] `GET/PATCH /v1/me`, presigned selfie upload to MinIO (bucket auto-created with public-read `photos/`)
+- [x] quiz v1 seeded **verbatim** from docs/seed-content.md (15 questions); `GET /v1/quiz` keeps trait weights server-side; `POST /v1/quiz/responses` → ai → profile persisted + facets (interests/dietary/languages/intent) applied to the user
+- [x] ai `/profile/compute`: deterministic trait normalization + the 8-archetype grid + template blurbs — zero LLM required
+- [x] web: `/login` (OTP) → quiz intro (asks first name) → one-question-per-screen quiz (springy, resumable via localStorage, honors reduced motion) → 3D flip archetype reveal with trait bars → OG story card (1080×1920) → selfie upload → `/you`
+- [x] typed client regenerated (`packages/types/src/api.gen.d.ts`)
+- [x] tests: ai 20 pytest · api 10 e2e (full onboarding journey, auth guards, facet assertions, ai-stub with internal-token assertion) · Playwright browser flow ×2 · `make test` green
+- [x] verified by hand: OG card renders (screenshot), selfie presign → PUT → public GET all 200
+
+### Decisions (M1)
+- **Auth.js v5 deferred** (plan §8 stack note): thin BFF session instead — httpOnly cookies set by
+  Next route handlers, `/api/bff/*` proxy with one-shot refresh rotation. Auth.js can wrap this
+  later with zero api changes. Recorded as stack friction per CLAUDE.md.
+- **Trait normalization**: api derives per-trait ceilings from the quiz definition (sum of max
+  |option weight| per question); ai clamps `sum/ceiling` to [-1,1]. Deterministic and unit-tested.
+- **ai does not read the DB for profiling** — api resolves selected options → weights and sends
+  them over; keeps the service boundary crisp.
+- **Presigned uploads sign against `S3_PUBLIC_URL`** (new env var): SigV4 signs the host, and the
+  browser hits `localhost:9000`, not the compose-internal `minio:9000`. Found by exercising the
+  path with curl — a signed-for-internal-host URL 403s.
+- **OG route inlines brand hex** — satori can't resolve CSS custom properties; documented as the
+  single sanctioned exception to the tokens-only rule.
+- **Motion + tests**: quiz/reveal wrapped in `MotionConfig reducedMotion="user"` (a11y), and
+  Playwright emulates reduced motion — springs otherwise never satisfy its stability check.
+- **`make up` now passes `--renew-anon-volumes`** — anonymous node_modules volumes survive
+  image rebuilds and shadow newly-added dependencies (cost an hour; worth documenting).
+- Photo flow e2e: presign+PUT+GET proven via curl; the browser UI path is manual-verified only
+  (Playwright skips file-picker upload for now).
+
 ## M0 — Scaffold & pipelines   [DONE — CI proof pending first push]
 - [x] monorepo tooling (pnpm + turbo + root scripts)
 - [x] docker compose stack + Makefile + .env.example
