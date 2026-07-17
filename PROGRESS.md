@@ -38,5 +38,22 @@
 - **prod compose override** disables ollama/mailhog via `deploy.replicas: 0` — prod uses a
   hosted LLM API through env (plan §9.3).
 
+### Decisions (landing design pass, 2026-07-17)
+- **Design working agreement**: operator supplied `system-prompt.md` (design principles —
+  intentional hierarchy, no AI-template tropes, WCAG AA, polish states). Applied on top of
+  CLAUDE.md; where they conflict, CLAUDE.md + brand.md win (Inter and the warm palette are
+  deliberate brand choices, not defaults).
+- **Button text on terracotta is ink, not white**: white on #D9603B is 3.7:1 (fails AA for
+  body-size); ink #1E1912 is 4.6:1. New constant token `--on-accent` (does not flip in dark).
+- **Testimonials section skipped** (plan §8 lists one): no real quotes exist pre-launch and
+  fabricated social proof is off-brand and dishonest. Replaced with formats + trust sections,
+  all copy sourced from plan-1 §5. Revisit when Phase-0 dinners produce real quotes.
+- **Hero visual = the brand mark, animated** (seats settle in, saffron "you" last, dashed
+  seating orbit): brand geometry instead of invented illustration/stock. Photography can
+  replace it when real event photos exist (product plan prefers photography).
+- **Scroll reveals are progressive enhancement**: hidden states gated on `html.js`; no-JS
+  users and `prefers-reduced-motion` get the full static page.
+- Verified via Playwright screenshots: desktop light/dark + mobile, stepped-scroll pass.
+
 ### Blockers
 - none

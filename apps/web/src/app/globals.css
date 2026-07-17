@@ -13,5 +13,131 @@ body {
 
 ::selection {
   background: var(--accent);
-  color: #fff;
+  color: var(--paper);
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* ── Scroll reveal (progressive enhancement: hidden state needs html.js) ── */
+html.js .reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+html.js .reveal.revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Hero table scene ── */
+.table-scene::before {
+  content: "";
+  position: absolute;
+  inset: -14%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent) 7%, transparent) 0%,
+    transparent 68%
+  );
+  z-index: -1;
+}
+
+.table-scene .seat {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+html.js .table-scene .orbit {
+  opacity: 0;
+  animation: orbit-in 1.2s ease 0.9s forwards;
+}
+
+@keyframes orbit-in {
+  to {
+    opacity: 1;
+  }
+}
+
+html.js .table-scene .seat {
+  opacity: 0;
+  transform: scale(0.4);
+  animation: seat-in 0.65s cubic-bezier(0.34, 1.4, 0.44, 1) forwards;
+}
+
+html.js .table-scene .table-top {
+  animation-duration: 0.9s;
+}
+
+html.js .table-scene .you-glow {
+  animation-name: seat-in, glow-breathe;
+  animation-duration: 0.65s, 5s;
+  animation-timing-function: cubic-bezier(0.34, 1.4, 0.44, 1), ease-in-out;
+  animation-iteration-count: 1, infinite;
+  animation-fill-mode: forwards, none;
+  animation-delay: 1.05s, 2s;
+}
+
+@keyframes seat-in {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes glow-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.22);
+  }
+}
+
+.table-chip {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: var(--shadow-soft);
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+html.js .table-chip {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: seat-in 0.6s ease forwards;
+}
+
+/* ── Frosted nav ── */
+.nav-blur {
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.js .reveal,
+  html.js .table-scene .seat,
+  html.js .table-chip {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
 }

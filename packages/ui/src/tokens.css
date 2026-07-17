@@ -12,6 +12,10 @@
   --sage: #7a8b6f; /* success, verified */
   --danger: #c24141;
 
+  /* Text on terracotta/saffron fills. Constant across themes: ink-on-accent is
+     4.6:1 (AA); white-on-accent is only 3.7:1 and fails for body-size text. */
+  --on-accent: #1e1912;
+
   --surface: #ffffff;
   --ink-soft: #6f6656;
   --line: #e9e2d6;
@@ -53,6 +57,7 @@
   --color-line: var(--line);
   --color-accent: var(--accent);
   --color-accent-2: var(--accent-2);
+  --color-on-accent: var(--on-accent);
   --color-sage: var(--sage);
   --color-danger: var(--danger);
 

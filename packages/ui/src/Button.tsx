@@ -1,16 +1,19 @@
 import type { ButtonHTMLAttributes, AnchorHTMLAttributes, ReactNode } from "react";
 import { cn } from "./cn";
 
-type Variant = "primary" | "secondary" | "ghost" | "danger";
+type Variant = "primary" | "secondary" | "ghost" | "danger" | "paper";
 type Size = "sm" | "md" | "lg";
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-accent text-white hover:brightness-105 active:scale-[0.98] shadow-soft",
+    "bg-accent text-on-accent font-bold hover:brightness-[1.06] hover:-translate-y-px active:translate-y-0 active:scale-[0.98] shadow-soft",
   secondary:
-    "bg-surface text-ink border border-line hover:border-accent/40 active:scale-[0.98]",
+    "bg-surface text-ink border border-line hover:border-accent/50 hover:-translate-y-px active:translate-y-0 active:scale-[0.98]",
   ghost: "bg-transparent text-ink hover:bg-ink/5 active:scale-[0.98]",
   danger: "bg-danger text-white hover:brightness-105 active:scale-[0.98]",
+  // For placement on accent-filled bands (the CTA block)
+  paper:
+    "bg-paper text-ink font-bold shadow-soft hover:brightness-[1.03] hover:-translate-y-px active:translate-y-0 active:scale-[0.98]",
 };
 
 const sizeClasses: Record<Size, string> = {
