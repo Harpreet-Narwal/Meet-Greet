@@ -1,0 +1,62 @@
+name: ci-web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/ci-web.yml"
+  pull_request:
+    paths:
+      - "apps/web/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/ci-web.yml"
+
+concurrency:
+  group: ci-web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm --filter @mulaqat/web lint
+      - name: Typecheck
+        run: pnpm --filter @mulaqat/web typecheck
+      - name: Unit tests (Vitest)
+        run: pnpm --filter @mulaqat/web test
+      - name: Build
+        run: pnpm --filter @mulaqat/web build
+      # TODO(M2): replace with the Playwright booking happy path against the compose stack.
+      - name: Smoke — landing page serves and carries the brand
+        run: |
+          pnpm --filter @mulaqat/web start &
+          for i in $(seq 1 30); do curl -sf http://localhost:3000/health && break; sleep 1; done
+          curl -sf http://localhost:3000/health | grep '"ok"'
+          curl -sf http://localhost:3000/ | grep -i "mulaqat"
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Docker build (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          target: runner
+          push: false
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,scope=web,mode=max

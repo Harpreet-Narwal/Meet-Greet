@@ -1,0 +1,165 @@
+name: ci-terraform
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infra/terraform/**"
+      - ".github/workflows/ci-terraform.yml"
+  pull_request:
+    paths:
+      - "infra/terraform/**"
+      - ".github/workflows/ci-terraform.yml"
+
+concurrency:
+  group: ci-terraform-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/terraform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.*"
+      - name: fmt check
+        run: terraform fmt -check -recursive
+      - name: validate (all envs, no backend)
+        run: |
+          for env in envs/dev envs/prod; do
+            (cd "$env" && terraform init -backend=false -input=false && terraform validate)
+          done
+      - uses: terraform-linters/setup-tflint@v4
+      - name: tflint
+        run: |
+          tflint --init
+          tflint --recursive
+
+  # Plan needs cloud credentials — runs only when AWS secrets are configured.
+  plan:
+    needs: validate
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [dev, prod]
+    defaults:
+      run:
+        working-directory: infra/terraform/envs/${{ matrix.env }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for AWS credentials
+        id: creds
+        env:
+          AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        run: echo "present=${{ env.AWS_KEY != '' }}" >> "$GITHUB_OUTPUT"
+      - uses: hashicorp/setup-terraform@v3
+        if: steps.creds.outputs.present == 'true'
+        with:
+          terraform_version: "1.9.*"
+      - name: terraform plan
+        if: steps.creds.outputs.present == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_db_password: ${{ secrets.TF_DB_PASSWORD }}
+        run: |
+          terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ matrix.env }}/terraform.tfstate" \
+            -backend-config="region=ap-south-1" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" -input=false
+          terraform plan -no-color -input=false -out=tf.plan | tee plan.txt
+      - name: Post plan as PR comment
+        if: steps.creds.outputs.present == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('infra/terraform/envs/${{ matrix.env }}/plan.txt', 'utf8');
+            const body = `### terraform plan — \`${{ matrix.env }}\`\n\n\`\`\`\n${plan.slice(-60000)}\n\`\`\``;
+            await github.rest.issues.createComment({
+              ...context.repo, issue_number: context.issue.number, body,
+            });
+      - name: Skipped (no AWS credentials configured)
+        if: steps.creds.outputs.present != 'true'
+        run: echo "AWS secrets not configured — plan skipped. Validate stage still gates this PR."
+
+  # Apply on merge to main — dev auto after plan review, prod behind manual approval
+  # (GitHub Environments `dev` and `prod` carry the protection rules).
+  apply-dev:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: dev
+    defaults:
+      run:
+        working-directory: infra/terraform/envs/dev
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for AWS credentials
+        id: creds
+        env:
+          AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        run: echo "present=${{ env.AWS_KEY != '' }}" >> "$GITHUB_OUTPUT"
+      - uses: hashicorp/setup-terraform@v3
+        if: steps.creds.outputs.present == 'true'
+        with:
+          terraform_version: "1.9.*"
+      - name: terraform apply (dev)
+        if: steps.creds.outputs.present == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_db_password: ${{ secrets.TF_DB_PASSWORD }}
+        run: |
+          terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=dev/terraform.tfstate" \
+            -backend-config="region=ap-south-1" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" -input=false
+          terraform apply -auto-approve -input=false
+      - name: Skipped (no AWS credentials configured)
+        if: steps.creds.outputs.present != 'true'
+        run: echo "AWS secrets not configured — apply skipped."
+
+  apply-prod:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: apply-dev
+    runs-on: ubuntu-latest
+    environment: prod # requires manual approval via environment protection
+    defaults:
+      run:
+        working-directory: infra/terraform/envs/prod
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for AWS credentials
+        id: creds
+        env:
+          AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        run: echo "present=${{ env.AWS_KEY != '' }}" >> "$GITHUB_OUTPUT"
+      - uses: hashicorp/setup-terraform@v3
+        if: steps.creds.outputs.present == 'true'
+        with:
+          terraform_version: "1.9.*"
+      - name: terraform apply (prod)
+        if: steps.creds.outputs.present == 'true'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_db_password: ${{ secrets.TF_DB_PASSWORD }}
+        run: |
+          terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=prod/terraform.tfstate" \
+            -backend-config="region=ap-south-1" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE }}" -input=false
+          terraform apply -auto-approve -input=false
+      - name: Skipped (no AWS credentials configured)
+        if: steps.creds.outputs.present != 'true'
+        run: echo "AWS secrets not configured — apply skipped."

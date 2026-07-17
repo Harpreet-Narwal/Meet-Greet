@@ -1,0 +1,59 @@
+name: evals
+
+on:
+  schedule:
+    - cron: "30 21 * * *" # 03:00 IST nightly
+  workflow_dispatch:
+
+concurrency:
+  group: evals-${{ github.ref }}
+  cancel-in-progress: false
+
+# CI-only pinned models — the ONLY place model names may appear outside .env
+# (CLAUDE.md prime directive 3). Application code stays model-agnostic.
+env:
+  CI_LLM_MODEL: "llama3.2:3b"
+  CI_EMBEDDING_MODEL: "nomic-embed-text"
+  CI_EMBEDDING_DIM: "768"
+
+jobs:
+  retrieval-and-generation:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/ai
+    services:
+      ollama:
+        image: ollama/ollama:latest
+        ports: ["11434:11434"]
+      qdrant:
+        image: qdrant/qdrant:latest
+        ports: ["6333:6333"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: services/ai/uv.lock
+      - run: uv sync --frozen
+      - name: Pull pinned CI models
+        run: |
+          curl -sf http://localhost:11434/api/pull -d "{\"name\": \"$CI_LLM_MODEL\"}"
+          curl -sf http://localhost:11434/api/pull -d "{\"name\": \"$CI_EMBEDDING_MODEL\"}"
+      - name: Retrieval + generation eval suites (blocking ≥ 0.90)
+        env:
+          LLM_MODEL: ${{ env.CI_LLM_MODEL }}
+          EMBEDDING_MODEL: ${{ env.CI_EMBEDDING_MODEL }}
+          EMBEDDING_DIM: ${{ env.CI_EMBEDDING_DIM }}
+          OLLAMA_BASE_URL: http://localhost:11434
+          QDRANT_URL: http://localhost:6333
+        run: |
+          uv run python -m evals.run --suite retrieval | tee eval-report.txt
+          uv run python -m evals.run --suite generation | tee -a eval-report.txt
+      - name: Upload eval report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: services/ai/eval-report.txt
+          if-no-files-found: warn

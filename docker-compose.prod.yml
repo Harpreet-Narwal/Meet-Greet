@@ -1,0 +1,39 @@
+# Production-shaped overrides (reference only — real prod runs on ECS via infra/terraform).
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+name: mulaqat
+services:
+  web:
+    build: { context: ., dockerfile: apps/web/Dockerfile, target: runner }
+    volumes: []
+    environment:
+      NODE_ENV: production
+
+  api:
+    build: { context: ., dockerfile: services/api/Dockerfile, target: runner }
+    environment:
+      NODE_ENV: production
+
+  ai:
+    build: { context: services/ai }
+
+  postgres:
+    ports: []
+
+  redis:
+    ports: []
+
+  qdrant:
+    ports: []
+
+  # Ollama is local-dev only. In prod, LLM_PROVIDER points at a hosted API via env —
+  # zero code change (see IMPLEMENTATION_PLAN.md §4 provider abstraction).
+  ollama:
+    deploy:
+      replicas: 0
+
+  minio:
+    ports: []
+
+  mailhog:
+    deploy:
+      replicas: 0

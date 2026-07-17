@@ -1,0 +1,17 @@
+{
+  "name": "@mulaqat/types",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@mulaqat/config": "workspace:*",
+    "typescript": "^5.7.2"
+  }
+}

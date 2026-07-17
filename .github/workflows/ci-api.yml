@@ -1,0 +1,96 @@
+name: ci-api
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/api/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/ci-api.yml"
+  pull_request:
+    paths:
+      - "services/api/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/ci-api.yml"
+
+concurrency:
+  group: ci-api-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DATABASE_URL: postgresql://mulaqat:mulaqat@localhost:5432/mulaqat
+  REDIS_URL: redis://localhost:6379
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: mulaqat
+          POSTGRES_PASSWORD: mulaqat
+          POSTGRES_DB: mulaqat
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U mulaqat"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Prisma generate + validate
+        run: |
+          pnpm --filter @mulaqat/api db:generate
+          pnpm --filter @mulaqat/api db:validate
+      - name: Migration drift check (schema ⇄ migrations)
+        working-directory: services/api
+        run: |
+          pnpm exec prisma migrate diff \
+            --from-migrations prisma/migrations \
+            --to-schema-datamodel prisma/schema.prisma \
+            --shadow-database-url "$DATABASE_URL" \
+            --exit-code
+      - name: Lint
+        run: pnpm --filter @mulaqat/api lint
+      - name: Typecheck
+        run: pnpm --filter @mulaqat/api typecheck
+      - name: Unit tests
+        run: pnpm --filter @mulaqat/api test
+      - name: Migrate + seed
+        run: |
+          pnpm --filter @mulaqat/api db:deploy
+          pnpm --filter @mulaqat/api db:seed
+      - name: E2E tests (real Postgres + Redis)
+        run: pnpm --filter @mulaqat/api test:e2e
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Docker build (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: services/api/Dockerfile
+          target: runner
+          push: false
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,scope=api,mode=max

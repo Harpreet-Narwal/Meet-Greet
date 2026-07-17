@@ -1,0 +1,35 @@
+# deps
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# builds
+dist/
+.next/
+.turbo/
+out/
+*.tsbuildinfo
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# env & secrets — never commit
+.env
+.env.local
+.env.*.local
+
+# test artifacts
+coverage/
+playwright-report/
+test-results/
+
+# terraform
+infra/terraform/**/.terraform/
+infra/terraform/**/*.tfstate*
+infra/terraform/**/*.tfplan
+
+# os / editor
+.DS_Store
+.idea/
+.vscode/

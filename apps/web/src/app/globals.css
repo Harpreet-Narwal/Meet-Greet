@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@import "@mulaqat/ui/tokens.css";
+
+/* The ui package lives outside this app — tell Tailwind to scan it for classes. */
+@source "../../../../packages/ui/src";
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}

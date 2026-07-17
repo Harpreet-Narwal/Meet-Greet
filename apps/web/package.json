@@ -1,0 +1,30 @@
+{
+  "name": "@mulaqat/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@mulaqat/types": "workspace:*",
+    "@mulaqat/ui": "workspace:*",
+    "next": "^15.5.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@mulaqat/config": "workspace:*",
+    "@tailwindcss/postcss": "^4.0.9",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "tailwindcss": "^4.0.9",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

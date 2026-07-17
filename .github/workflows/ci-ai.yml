@@ -1,0 +1,54 @@
+name: ci-ai
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/ai/**"
+      - ".github/workflows/ci-ai.yml"
+  pull_request:
+    paths:
+      - "services/ai/**"
+      - ".github/workflows/ci-ai.yml"
+
+concurrency:
+  group: ci-ai-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/ai
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: services/ai/uv.lock
+      - run: uv sync --frozen
+      - name: Ruff lint
+        run: uv run ruff check .
+      - name: Ruff format check
+        run: uv run ruff format --check .
+      - name: mypy
+        run: uv run mypy app evals
+      - name: pytest
+        run: uv run pytest -q
+      # Deterministic — no LLM needed. Blocking at ≥ EVAL_PASS_THRESHOLD once the suite lands (M3).
+      - name: Matching eval suite (blocking ≥ 0.90)
+        run: uv run python -m evals.run --suite matching
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Docker build (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: services/ai
+          push: false
+          cache-from: type=gha,scope=ai
+          cache-to: type=gha,scope=ai,mode=max
