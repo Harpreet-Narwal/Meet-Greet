@@ -7,6 +7,7 @@
  */
 import { PrismaClient } from "@prisma/client";
 
+import { buildSeedUsers, events as seedEvents, venues as seedVenues } from "./seed-data/demo-content";
 import { QUIZ_VERSION, quizQuestionsV1 } from "./seed-data/quiz-v1";
 
 const prisma = new PrismaClient();
@@ -96,13 +97,109 @@ async function main(): Promise<void> {
     });
   }
 
-  const [cities, users, quizQuestions] = await Promise.all([
+  // ── M2: venues, events (+tables), 30 quiz-completed users ────────────────
+  const venueIdBySlug = new Map<string, string>();
+  for (const venue of seedVenues) {
+    const row = await prisma.venue.upsert({
+      where: { cityId_slug: { cityId: bangalore.id, slug: venue.slug } },
+      update: { partnerStatus: "active" },
+      create: {
+        cityId: bangalore.id,
+        slug: venue.slug,
+        name: venue.name,
+        address: venue.address,
+        neighborhood: venue.neighborhood,
+        lat: venue.lat,
+        lng: venue.lng,
+        vibeTags: venue.vibeTags,
+        priceBand: venue.priceBand,
+        capacity: venue.capacity,
+        partnerStatus: "active",
+      },
+    });
+    venueIdBySlug.set(venue.slug, row.id);
+  }
+
+  const hostRow = await prisma.user.findUnique({ where: { phone: "+911000000002" } });
+  for (const event of seedEvents) {
+    const startsAt = new Date();
+    startsAt.setDate(startsAt.getDate() + event.daysFromNow);
+    startsAt.setHours(event.hour, 0, 0, 0);
+    const row = await prisma.event.upsert({
+      where: { slug: event.slug },
+      update: { startsAt, status: event.status },
+      create: {
+        cityId: bangalore.id,
+        venueId: venueIdBySlug.get(event.venueSlug),
+        type: event.type,
+        title: event.title,
+        slug: event.slug,
+        description: event.description,
+        startsAt,
+        durationMin: event.durationMin,
+        priceInr: event.priceInr,
+        capacity: event.capacity,
+        budgetBand: event.budgetBand,
+        womenOnly: event.womenOnly,
+        hostId: hostRow?.id,
+        status: event.status,
+        neighborhoodTeaser: event.neighborhoodTeaser,
+      },
+    });
+    for (let tableNumber = 1; tableNumber <= event.tables; tableNumber++) {
+      await prisma.eventTable.upsert({
+        where: { eventId_tableNumber: { eventId: row.id, tableNumber } },
+        update: {},
+        create: { eventId: row.id, tableNumber, capacity: 6 },
+      });
+    }
+  }
+
+  for (const seedUser of buildSeedUsers()) {
+    const row = await prisma.user.upsert({
+      where: { phone: seedUser.phone },
+      update: {},
+      create: {
+        phone: seedUser.phone,
+        fullName: seedUser.fullName,
+        firstName: seedUser.firstName,
+        gender: seedUser.gender,
+        dob: new Date(Date.UTC(seedUser.dobYear, 5, 15)),
+        cityId: bangalore.id,
+        dietary: seedUser.dietary,
+        languages: seedUser.languages,
+        interests: seedUser.interests,
+        relationshipIntent: seedUser.relationshipIntent,
+        selfieVerified: true,
+      },
+    });
+    await prisma.personalityProfile.upsert({
+      where: { userId: row.id },
+      update: {},
+      create: {
+        userId: row.id,
+        quizVersion: QUIZ_VERSION,
+        traitEnergy: seedUser.traits.energy,
+        traitDepth: seedUser.traits.depth,
+        traitNovelty: seedUser.traits.novelty,
+        traitStructure: seedUser.traits.structure,
+        humorStyles: seedUser.humorStyles,
+        archetype: seedUser.archetype,
+        archetypeEmoji: seedUser.archetypeEmoji,
+        completedAt: new Date("2026-07-01T09:00:00Z"),
+      },
+    });
+  }
+
+  const [cities, users, quizQuestions, venueCount, eventCount] = await Promise.all([
     prisma.city.count(),
     prisma.user.count(),
     prisma.quizQuestion.count({ where: { version: QUIZ_VERSION } }),
+    prisma.venue.count(),
+    prisma.event.count(),
   ]);
   console.log(
-    `Seeded ✓  cities=${cities} users=${users} quiz_questions=${quizQuestions} (venues/events/decks land in M2)`,
+    `Seeded ✓  cities=${cities} users=${users} quiz_questions=${quizQuestions} venues=${venueCount} events=${eventCount} (decks land with the game room)`,
   );
 }
 
