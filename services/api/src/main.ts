@@ -24,7 +24,8 @@ async function bootstrap(): Promise<void> {
   const document = SwaggerModule.createDocument(app, openApiConfig);
   SwaggerModule.setup("docs", app, document, { jsonDocumentUrl: "docs-json" });
 
-  await app.listen(env.PORT, "0.0.0.0");
+  // No host arg → dual-stack (::) so both IPv4 and IPv6 localhost probes work.
+  await app.listen(env.PORT);
 }
 
 void bootstrap();

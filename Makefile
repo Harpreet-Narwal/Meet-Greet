@@ -1,8 +1,8 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-# Load .env for targets that need model names etc.
--include .env
+# Read a var from .env, stripping inline comments/whitespace: $(call envvar,NAME)
+envvar = $$(grep -E '^$(1)=' .env 2>/dev/null | head -1 | cut -d= -f2- | sed 's/\#.*//' | xargs)
 
 .PHONY: help up down down-v logs seed test eval models
 
@@ -30,19 +30,23 @@ logs: ## Tail all service logs
 
 seed: ## Migrate + seed the database, then ingest decks into the vector store (skips gracefully if EMBEDDING_MODEL unset)
 	docker compose exec api sh -c "pnpm --filter @mulaqat/api db:deploy && pnpm --filter @mulaqat/api db:seed"
-	@curl -sf -X POST http://localhost:8000/decks/ingest \
-		-H "Authorization: Bearer $${INTERNAL_API_TOKEN:-dev-internal-token-change-me}" \
+	@TOKEN=$(call envvar,INTERNAL_API_TOKEN); \
+	curl -sf -X POST http://localhost:8000/decks/ingest \
+		-H "Authorization: Bearer $${TOKEN:-dev-internal-token-change-me}" \
 		-H "Content-Type: application/json" -d '{}' || echo "deck ingestion skipped (ai service not ready)"
 	@echo ""
 
 test: ## Run every workspace's tests (installs deps if needed)
 	pnpm install --frozen-lockfile
 	pnpm turbo run lint typecheck test
-	cd services/ai && uv sync --frozen && uv run ruff check . && uv run mypy app && uv run pytest -q
+	pnpm --filter @mulaqat/api test:e2e
+	cd services/ai && uv sync --frozen && uv run ruff check . && uv run mypy app evals && uv run pytest -q
 
 eval: ## Run the AI eval suites (matching always; retrieval/generation need Ollama models pulled)
 	cd services/ai && uv sync --frozen && uv run python -m evals.run --suite all
 
 models: ## Pull the Ollama models configured in .env
-	@if [ -n "$(LLM_MODEL)" ]; then docker compose exec ollama ollama pull "$(LLM_MODEL)"; else echo "LLM_MODEL not set in .env — skipping"; fi
-	@if [ -n "$(EMBEDDING_MODEL)" ]; then docker compose exec ollama ollama pull "$(EMBEDDING_MODEL)"; else echo "EMBEDDING_MODEL not set in .env — skipping"; fi
+	@LLM=$(call envvar,LLM_MODEL); \
+	if [ -n "$$LLM" ]; then docker compose exec ollama ollama pull "$$LLM"; else echo "LLM_MODEL not set in .env — skipping"; fi
+	@EMB=$(call envvar,EMBEDDING_MODEL); \
+	if [ -n "$$EMB" ]; then docker compose exec ollama ollama pull "$$EMB"; else echo "EMBEDDING_MODEL not set in .env — skipping"; fi

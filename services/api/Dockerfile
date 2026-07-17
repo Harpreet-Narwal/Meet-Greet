@@ -1,6 +1,7 @@
 # Mulaqat API — NestJS on Node 22. Build context = repo root (monorepo).
 FROM node:22-alpine AS base
-RUN corepack enable && corepack prepare pnpm@9.7.0 --activate
+# openssl: required for Prisma's engine detection on musl (else it falls back to openssl-1.1)
+RUN apk add --no-cache openssl && corepack enable && corepack prepare pnpm@9.7.0 --activate
 WORKDIR /app
 ENV CI=true
 
@@ -28,5 +29,5 @@ COPY --from=build /app /app
 USER node
 EXPOSE 4000
 HEALTHCHECK --interval=10s --timeout=3s --retries=10 \
-  CMD wget -qO- http://localhost:4000/health || exit 1
+  CMD wget -qO- http://127.0.0.1:4000/health || exit 1
 CMD ["node", "services/api/dist/main.js"]
