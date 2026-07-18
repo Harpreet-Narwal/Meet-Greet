@@ -6,6 +6,8 @@ import { BookingsModule } from "./bookings/bookings.module";
 import { ChatModule } from "./chat/chat.module";
 import { CitiesModule } from "./cities/cities.module";
 import { ConnectionsModule } from "./connections/connections.module";
+import { DecksModule } from "./decks/decks.module";
+import { SubscriptionsModule } from "./subscriptions/subscriptions.module";
 import { env } from "./config/env";
 import { EventsModule } from "./events/events.module";
 import { GamesModule } from "./games/games.module";
@@ -43,7 +45,9 @@ import { UsersModule } from "./users/users.module";
     MatchingModule,
     GamesModule,
     ChatModule,
+    SubscriptionsModule,
     ConnectionsModule,
+    DecksModule,
     JobsModule,
   ],
 })

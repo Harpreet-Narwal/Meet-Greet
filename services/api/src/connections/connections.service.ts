@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 
 import { PrismaService } from "../prisma/prisma.service";
+import { SubscriptionsService } from "../subscriptions/subscriptions.service";
 
 /**
  * Connect (friends) and Spark (opt-in dating) between people who attended the
@@ -14,7 +15,10 @@ import { PrismaService } from "../prisma/prisma.service";
  */
 @Injectable()
 export class ConnectionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly subscriptions: SubscriptionsService,
+  ) {}
 
   private async assertBothAttended(eventId: string, a: string, b: string): Promise<void> {
     const count = await this.prisma.booking.count({
@@ -40,6 +44,12 @@ export class ConnectionsService {
   ): Promise<{ status: "pending" | "mutual" }> {
     if (fromUserId === toUserId) throw new BadRequestException("that's you");
     await this.assertBothAttended(eventId, fromUserId, toUserId);
+
+    // Plus gate: free members get a limited number of Connects per event.
+    // Sparks are NOT capped — dating is never gated behind a limit here.
+    if (kind === "connect") {
+      await this.subscriptions.assertCanConnect(fromUserId, eventId);
+    }
 
     if (kind === "spark") {
       // Sparks require BOTH users open_to_dating (checked before anything persists)

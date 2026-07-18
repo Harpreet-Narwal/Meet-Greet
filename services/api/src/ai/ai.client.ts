@@ -53,6 +53,16 @@ export class AiClient {
   composeTables(request: MatchComposeRequest): Promise<MatchComposeResponse> {
     return this.post<MatchComposeResponse>("/match/compose", request);
   }
+
+  generateDeck(request: {
+    kind: string;
+    level?: number;
+    locale?: string;
+    count: number;
+    context_tags: string[];
+  }): Promise<{ cards: { text: string; safety_reviewed: boolean }[]; safety_reviewed: boolean }> {
+    return this.post("/decks/generate", request);
+  }
 }
 
 export interface MatchAttendee {
