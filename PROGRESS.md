@@ -1,5 +1,29 @@
 # Mulaqat — Progress
 
+## M7 — Hardening & launch readiness   [DONE]
+- [x] **Redis rate limiting** (`@Throttle` + fixed-window guard): OTP request 5/min, verify 10/min
+  per IP; fails OPEN on cache errors; bypassed under NODE_ENV=test
+- [x] **security/authz + IDOR e2e (7 tests)**: unauth → 401, tampered token → 401, IDOR on
+  bookings/chats → 404 (no existence leak), admin routes → 403 for users, refresh-as-access → 401,
+  Zod validation at boundaries
+- [x] **SEO**: dynamic OG images for events (`/og/event`, 1200×630) wired into event metadata +
+  Twitter card; sitemap/robots/JSON-LD/canonical/blocking-metadata from M2 intact
+- [x] **Lighthouse on all public pages**: `/`, `/cities/[city]`, `/events/[slug]`, `/explore` →
+  **SEO 1.00, Performance 0.98–0.99** (gates ≥ 0.95 / ≥ 0.90 met everywhere)
+- [x] **terraform validate + fmt clean** for dev AND prod (init -backend=false → validate: Success)
+- [x] **README runbook**: clone → running app in < 10 min, ops table, prod notes
+- [x] `make test` green (12 turbo · 43 api e2e across 8 suites · ai ruff/mypy/pytest)
+
+### Decisions (M7)
+- Rate limiter is a global APP_GUARD ordered before the JWT guard; only routes with `@Throttle`
+  metadata are limited. Fails open so a Redis blip never locks users out.
+- IDOR responses use 404 (not 403) for another user's booking/chat — never confirm the resource
+  exists to someone who shouldn't see it.
+- Dynamic OG images inline brand hex (satori can't read CSS custom properties) — same documented
+  exception as the archetype card.
+- `terraform plan` (vs validate) needs real AWS creds; ci-terraform runs it on PRs when secrets
+  exist and degrades to a logged skip otherwise (from M0). Validate+fmt+tflint gate every PR.
+
 ## M6 — RAG decks, membership & admin polish   [DONE]
 - [x] **RAG pipeline** (ai): corpus ingest (chunk → embed → qdrant), top-k retrieval, generation
   (retrieve exemplars → prompt → parse → moderate), deterministic safety+format moderation

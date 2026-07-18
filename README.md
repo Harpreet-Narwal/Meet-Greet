@@ -40,6 +40,42 @@ make eval    # all eval suites must score ≥ 0.90
 Dev conveniences: OTP login accepts `000000`, payments auto-succeed (mock provider),
 emails land in Mailhog at http://localhost:8025, photos go to MinIO.
 
+## First run, end to end (< 10 minutes)
+
+1. `git clone … && cd mulaqat`
+2. `make up` — first build pulls images and compiles; grab a chai. Ends with all URLs printed.
+3. `make seed` — 2 cities, 6 venues, 8 events, 30 quiz-completed users, the quiz, all game decks.
+4. Open http://localhost:3000 → **Get early access** → phone (any) → OTP `000000` → take the quiz
+   → see your archetype card.
+5. Admin: log in as `+911000000001` (seeded admin). Create/publish an event, run matching,
+   watch the explain view, reveal the venue.
+6. `make test` — the full gate (lint · typecheck · unit · api e2e · ai ruff/mypy/pytest).
+
+### Runbook — common operations
+
+| Task | Command |
+|---|---|
+| Boot / rebuild the stack | `make up` |
+| Tail logs | `make logs` |
+| Stop (keep data) | `make down` |
+| Wipe everything & start clean | `make down-v && make up && make seed` |
+| Run all tests | `make test` |
+| Run AI eval suites (≥ 0.90 gate) | `make eval` (matching always; retrieval/generation need models) |
+| Pull the configured Ollama models | `make models` |
+| Regenerate the typed API client | `pnpm gen:client` (api must be running) |
+| Web browser flows (Playwright) | `pnpm --filter @mulaqat/web test:e2e` |
+| Terraform plan (needs AWS creds) | `cd infra/terraform/envs/dev && terraform init … && terraform plan` |
+
+### Production notes
+
+- **Ollama is local-dev only.** In prod, point `LLM_PROVIDER` at a hosted API via env — zero code
+  change (the provider abstraction in `services/ai/app/providers` exists for exactly this).
+- Real Razorpay / SMS providers are env swaps behind the mock interfaces — add keys only when wiring them.
+- Infra lives in [infra/terraform](infra/terraform/) as an isolated workspace with its own pipeline;
+  its README documents extracting it to a standalone repo with one path-filter change.
+- Rate limiting (OTP abuse), server-side authz on every route, and Spark-privacy are covered by
+  `services/api/test/{security,spark-privacy}.e2e-spec.ts`.
+
 ## Working on it
 
 - `IMPLEMENTATION_PLAN.md` — the master engineering plan (milestones M0–M7)
