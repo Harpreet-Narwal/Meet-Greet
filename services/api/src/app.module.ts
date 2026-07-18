@@ -3,7 +3,9 @@ import { LoggerModule } from "nestjs-pino";
 
 import { AuthModule } from "./auth/auth.module";
 import { BookingsModule } from "./bookings/bookings.module";
+import { ChatModule } from "./chat/chat.module";
 import { CitiesModule } from "./cities/cities.module";
+import { ConnectionsModule } from "./connections/connections.module";
 import { env } from "./config/env";
 import { EventsModule } from "./events/events.module";
 import { GamesModule } from "./games/games.module";
@@ -40,6 +42,8 @@ import { UsersModule } from "./users/users.module";
     BookingsModule,
     MatchingModule,
     GamesModule,
+    ChatModule,
+    ConnectionsModule,
     JobsModule,
   ],
 })

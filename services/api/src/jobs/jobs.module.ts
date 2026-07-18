@@ -3,10 +3,13 @@ import { Queue, Worker } from "bullmq";
 
 import { BookingsModule } from "../bookings/bookings.module";
 import { BookingsService } from "../bookings/bookings.service";
+import { ChatModule } from "../chat/chat.module";
+import { ChatService } from "../chat/chat.service";
 import { env } from "../config/env";
 import { MatchingModule } from "../matching/matching.module";
 import { MatchingService } from "../matching/matching.service";
 import { RevealService } from "../matching/reveal.service";
+import { PrismaService } from "../prisma/prisma.service";
 
 const QUEUE = "housekeeping";
 
@@ -25,6 +28,8 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
     private readonly bookings: BookingsService,
     private readonly reveal: RevealService,
     private readonly matching: MatchingService,
+    private readonly chat: ChatService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -34,6 +39,9 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
     await this.queue.upsertJobScheduler("booking-expiry", { every: 60_000 });
     // venue-reveal (T-24h) + match-trigger (T-36h): check every 5 min
     await this.queue.upsertJobScheduler("venue-reveal", { every: 300_000 });
+    // rating-nudge (T+2h): opens the 7-day table group chat; chat-expiry: daily
+    await this.queue.upsertJobScheduler("rating-nudge", { every: 600_000 });
+    await this.queue.upsertJobScheduler("chat-expiry", { every: 24 * 3600_000 });
     this.worker = new Worker(
       QUEUE,
       async (job) => {
@@ -49,6 +57,20 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
           for (const eventId of await this.reveal.dueForReveal(24)) {
             await this.reveal.revealEvent(eventId);
           }
+        } else if (job.name === "rating-nudge") {
+          // T+2h: open the table group chat for events that just finished
+          const since = new Date(Date.now() - 6 * 3600_000);
+          const done = await this.prisma.event.findMany({
+            where: { startsAt: { lt: new Date(), gte: since } },
+            include: { tables: { select: { id: true } } },
+          });
+          for (const event of done) {
+            for (const table of event.tables) {
+              await this.chat.ensureTableGroupChat(event.id, table.id);
+            }
+          }
+        } else if (job.name === "chat-expiry") {
+          await this.chat.expireGroupChats();
         }
       },
       { connection },
@@ -66,7 +88,7 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
 }
 
 @Module({
-  imports: [BookingsModule, MatchingModule],
+  imports: [BookingsModule, MatchingModule, ChatModule],
   providers: [JobsService],
 })
 export class JobsModule {}
