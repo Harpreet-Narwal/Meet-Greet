@@ -17,8 +17,15 @@ class ChatMessage(BaseModel):
 class ChatProvider(Protocol):
     model: str
 
-    async def chat(self, messages: list[ChatMessage], *, temperature: float | None = None) -> str:
-        """Return the assistant's reply for the given conversation."""
+    async def chat(
+        self,
+        messages: list[ChatMessage],
+        *,
+        temperature: float | None = None,
+        format_json: bool = False,
+    ) -> str:
+        """Return the assistant's reply. `format_json` constrains output to valid
+        JSON where the provider supports it (used by the LLM-judge)."""
         ...
 
 
@@ -28,19 +35,25 @@ class OllamaChat:
         self.model = model
         self.temperature = temperature
 
-    async def chat(self, messages: list[ChatMessage], *, temperature: float | None = None) -> str:
+    async def chat(
+        self,
+        messages: list[ChatMessage],
+        *,
+        temperature: float | None = None,
+        format_json: bool = False,
+    ) -> str:
+        payload: dict[str, object] = {
+            "model": self.model,
+            "messages": [m.model_dump() for m in messages],
+            "stream": False,
+            "options": {
+                "temperature": self.temperature if temperature is None else temperature
+            },
+        }
+        if format_json:
+            payload["format"] = "json"
         async with httpx.AsyncClient(base_url=self.base_url, timeout=120.0) as client:
-            response = await client.post(
-                "/api/chat",
-                json={
-                    "model": self.model,
-                    "messages": [m.model_dump() for m in messages],
-                    "stream": False,
-                    "options": {
-                        "temperature": self.temperature if temperature is None else temperature
-                    },
-                },
-            )
+            response = await client.post("/api/chat", json=payload)
             response.raise_for_status()
             content: str = response.json()["message"]["content"]
             return content
@@ -53,7 +66,13 @@ class OpenAIChat:
         self.model = model
         self.temperature = temperature
 
-    async def chat(self, messages: list[ChatMessage], *, temperature: float | None = None) -> str:
+    async def chat(
+        self,
+        messages: list[ChatMessage],
+        *,
+        temperature: float | None = None,
+        format_json: bool = False,
+    ) -> str:
         raise NotImplementedError(
             "openai chat provider is a stub — use LLM_PROVIDER=ollama for local dev"
         )
@@ -66,7 +85,13 @@ class AnthropicChat:
         self.model = model
         self.temperature = temperature
 
-    async def chat(self, messages: list[ChatMessage], *, temperature: float | None = None) -> str:
+    async def chat(
+        self,
+        messages: list[ChatMessage],
+        *,
+        temperature: float | None = None,
+        format_json: bool = False,
+    ) -> str:
         raise NotImplementedError(
             "anthropic chat provider is a stub — use LLM_PROVIDER=ollama for local dev"
         )

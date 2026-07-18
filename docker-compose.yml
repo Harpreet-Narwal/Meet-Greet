@@ -51,6 +51,11 @@ services:
     image: ollama/ollama:latest
     ports: ["11434:11434"]
     volumes: ["ollama:/root/.ollama"]
+    # Keep one model resident at a time — the eval swaps generator↔judge in
+    # sequential phases, and local machines can't hold 3B+7B+embed at once.
+    environment:
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_KEEP_ALIVE: "30s"
     # Operator pulls their chosen models once (or: make models):
     #   docker compose exec ollama ollama pull <LLM_MODEL>
     #   docker compose exec ollama ollama pull <EMBEDDING_MODEL>

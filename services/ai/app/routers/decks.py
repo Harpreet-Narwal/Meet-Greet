@@ -1,8 +1,10 @@
-from typing import Any, Literal
+from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
+from app.decks import generate_cards, ingest_corpus, moderate_cards
+from app.decks.generate import GenerateRequest
 from app.deps import SettingsDep, require_internal_token
 from app.providers import get_chat_provider
 
@@ -15,32 +17,28 @@ class IngestRequest(BaseModel):
 
 @router.post("/ingest")
 async def ingest(body: IngestRequest, settings: SettingsDep) -> dict[str, Any]:
-    """(Re)ingest the deck corpus into the vector store.
-
-    Skips gracefully when no embedder is configured — `make seed` must succeed
-    on a stack with no models pulled (IMPLEMENTATION_PLAN.md §5).
-    """
-    if not settings.embeddings_configured:
-        return {"status": "skipped", "reason": "EMBEDDING_MODEL not configured"}
-    # TODO(M6): read corpus from ai.documents, chunk per card, embed, upsert.
-    return {"status": "skipped", "reason": "ingestion pipeline lands in M6 (corpus not seeded yet)"}
-
-
-class GenerateRequest(BaseModel):
-    kind: Literal["icebreaker", "hot_takes", "most_likely", "trivia", "two_truths"]
-    level: int | None = Field(default=None, ge=1, le=3)
-    locale: Literal["en", "hinglish"] = "en"
-    count: int = Field(default=10, ge=1, le=50)
-    context_tags: list[str] = Field(default_factory=list)
+    """(Re)ingest the deck corpus into the vector store. Skips gracefully when no
+    embedder is configured — `make seed` must succeed on a modelless stack."""
+    return await ingest_corpus(settings)
 
 
 @router.post("/generate")
 async def generate(body: GenerateRequest, settings: SettingsDep) -> dict[str, Any]:
-    """RAG-powered card generation. 503 with a clear error when no LLM is configured."""
+    """RAG-powered card generation. 503 with a clear error when no LLM is set."""
     get_chat_provider(settings)  # raises ProviderNotConfiguredError → 503
-    # TODO(M6): retrieve top-k exemplars, prompt from app/prompts/deck_generate.md,
-    # parse, moderate, return with safety_reviewed=false.
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="deck generation lands in M6",
-    )
+    cards = await generate_cards(settings, body)
+    return {"cards": [c.model_dump() for c in cards], "safety_reviewed": False}
+
+
+class ModerateRequest(BaseModel):
+    cards: list[str] = Field(min_length=1)
+
+
+@router.post("/moderate")
+async def moderate(body: ModerateRequest) -> dict[str, Any]:
+    """Deterministic safety pass — no LLM needed."""
+    verdicts = moderate_cards(body.cards)
+    return {
+        "verdicts": [{"text": v.text, "ok": v.ok, "reasons": v.reasons} for v in verdicts],
+        "accepted": sum(1 for v in verdicts if v.ok),
+    }

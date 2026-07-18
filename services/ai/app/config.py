@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     ollama_base_url: str = "http://ollama:11434"
     llm_model: str = ""  # operator sets this — empty means "not configured"
     llm_temperature: float = 0.7
+    # Dedicated judge model for the generation eval (a small generator model is
+    # a weak judge). Falls back to llm_model when unset. CI-pinned, eval-only.
+    eval_judge_model: str = ""
 
     # Embeddings
     embedding_provider: Literal["ollama", "openai"] = "ollama"
