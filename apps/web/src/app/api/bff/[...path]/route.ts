@@ -18,8 +18,14 @@ const ALLOWED_PATTERNS = [
   new RegExp(`^events/${UUID}/my-table$`),
   new RegExp(`^events/${UUID}/checkin-token$`),
   new RegExp(`^events/${UUID}/checkin$`),
+  new RegExp(`^events/${UUID}/debrief$`),
+  new RegExp(`^events/${UUID}/ratings$`),
+  new RegExp(`^events/${UUID}/connections$`),
   new RegExp(`^bookings/${UUID}$`),
   new RegExp(`^bookings/${UUID}/two-truths$`),
+  /^me\/connections$/,
+  /^chats$/,
+  new RegExp(`^chats/${UUID}/messages$`),
 ];
 
 async function proxy(request: NextRequest, path: string[]): Promise<NextResponse> {
