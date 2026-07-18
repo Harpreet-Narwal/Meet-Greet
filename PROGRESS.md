@@ -1,5 +1,32 @@
 # Mulaqat — Progress
 
+## M5 — Connections, Spark & chat   [DONE]
+- [x] **Spark privacy invariant** (the M5 crown jewel): a one-sided Spark is invisible to the
+  recipient in EVERY response shape — `/me/connections` (only mine-outgoing + mutual), `/debrief`
+  (only my own i_sparked/i_connected flags, no "sparked_me"), `/chats` (none until mutual). Sparks
+  require BOTH users open_to_dating AND both sent → only then `mutual` + a direct chat opens.
+- [x] Connect (friends) mutual-gated the same way; both only ever between people who attended the
+  same event (checked-in bookings) — no swipe-on-strangers, ever.
+- [x] ratings (`POST /events/:id/ratings`, private, one per booking) + `/events/:id/debrief`
+- [x] chat: direct (spark) + table-group (7-day expiry); `ChatGateway` (`/chat` ns, JWT, rooms
+  `chat:{id}`, member-gated); REST list/messages/send; sends blocked past `expires_at`
+- [x] jobs: rating-nudge (T+2h opens the table group chat), chat-expiry (daily)
+- [x] web: `/debrief/[id]` (star rating → Connect/Spark picker → **full-screen mutual-Spark glow**,
+  classy, no confetti), `/people` (chats + connected + "you reached out", never incoming one-sided),
+  `/people/chats/[id]` (realtime socket chat, reconnect-safe)
+- [x] **spark-privacy e2e (6 tests)**: one-sided invisible everywhere · mutual opens chat ·
+  friends_only can't spark · spark toward friends_only never mutualizes · connect mutual-gated
+- [x] `make test` green (12 turbo · 32 api e2e · ai); 4 Playwright regressions still green
+
+### Decisions (M5)
+- `myConnections` query is `OR[{fromUserId: me}, {status: mutual, toUserId: me}]` — structurally
+  impossible to surface an incoming pending spark. Belt: `direction` is only "outgoing" or "mutual".
+- No error oracle when sparking someone not open_to_dating — the spark is recorded silently (can
+  never mutualize) so the sender can't infer the recipient's intent from an error.
+- Table-group chats aren't deleted at T+7d; `expires_at` blocks sends and hides them from `/chats`
+  (reversible, keeps history for possible re-open). "chat-expiry" job reports the count for observability.
+- `/debrief/[id]` and `/people/chats/[id]` use event/chat UUIDs (not under `/events/[slug]`).
+
 ## M4 — The game room   [DONE]
 - [x] **5 game engines** as pure state-machine reducers (`games/engines/`): icebreaker (level-vote
   majority unlocks L2/L3), hot_takes (A/B split), most_likely (**counts only, never who voted**),
