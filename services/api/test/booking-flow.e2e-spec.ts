@@ -39,17 +39,19 @@ describe("events & booking flow (e2e)", () => {
 
   it("hides the venue on unrevealed events in every response shape", async () => {
     const list = await request(app.getHttpServer()).get("/v1/events?city=bangalore").expect(200);
-    const unrevealed = list.body.filter((event: { status: string }) => event.status === "published");
-    expect(unrevealed.length).toBeGreaterThan(0);
-    for (const event of unrevealed) {
+    const published = list.body.filter((event: { status: string }) => event.status === "published");
+    expect(published.length).toBeGreaterThan(0);
+    // the core privacy invariant: no published event exposes its venue in the list
+    for (const event of published) {
       expect(event.venue).toBeNull();
     }
-    const detail = await request(app.getHttpServer())
-      .get(`/v1/events/${unrevealed[0].slug}`)
+    // and on a seeded event's detail, the teaser stands in for the hidden venue
+    const seeded = await request(app.getHttpServer())
+      .get("/v1/events/chai-and-chill-dyu-w1")
       .expect(200);
-    expect(detail.body.venue).toBeNull();
-    expect(JSON.stringify(detail.body)).not.toContain("address");
-    expect(detail.body.neighborhood_teaser).toBeTruthy(); // teaser instead
+    expect(seeded.body.venue).toBeNull();
+    expect(JSON.stringify(seeded.body)).not.toContain("address");
+    expect(seeded.body.neighborhood_teaser).toBeTruthy();
   });
 
   it("filters by type and budget", async () => {

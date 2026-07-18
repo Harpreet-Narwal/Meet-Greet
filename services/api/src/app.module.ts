@@ -6,6 +6,7 @@ import { BookingsModule } from "./bookings/bookings.module";
 import { CitiesModule } from "./cities/cities.module";
 import { env } from "./config/env";
 import { EventsModule } from "./events/events.module";
+import { GamesModule } from "./games/games.module";
 import { HealthModule } from "./health/health.module";
 import { JobsModule } from "./jobs/jobs.module";
 import { MatchingModule } from "./matching/matching.module";
@@ -38,6 +39,7 @@ import { UsersModule } from "./users/users.module";
     EventsModule,
     BookingsModule,
     MatchingModule,
+    GamesModule,
     JobsModule,
   ],
 })

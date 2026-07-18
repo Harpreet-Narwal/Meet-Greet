@@ -7,6 +7,7 @@
  */
 import { PrismaClient } from "@prisma/client";
 
+import { decks as seedDecks } from "./seed-data/decks";
 import { buildSeedUsers, events as seedEvents, venues as seedVenues } from "./seed-data/demo-content";
 import { QUIZ_VERSION, quizQuestionsV1 } from "./seed-data/quiz-v1";
 
@@ -191,15 +192,50 @@ async function main(): Promise<void> {
     });
   }
 
-  const [cities, users, quizQuestions, venueCount, eventCount] = await Promise.all([
-    prisma.city.count(),
-    prisma.user.count(),
-    prisma.quizQuestion.count({ where: { version: QUIZ_VERSION } }),
-    prisma.venue.count(),
-    prisma.event.count(),
-  ]);
+  // ── Game decks (verbatim from docs/seed-content.md, safety_reviewed=true) ──
+  for (const deck of seedDecks) {
+    const existing = await prisma.deck.findFirst({ where: { title: deck.title, source: "seed" } });
+    const row = existing
+      ? await prisma.deck.update({ where: { id: existing.id }, data: { status: "active" } })
+      : await prisma.deck.create({
+          data: {
+            kind: deck.kind,
+            locale: deck.locale,
+            title: deck.title,
+            level: deck.level,
+            source: "seed",
+            status: "active",
+          },
+        });
+    for (const [ord, card] of deck.cards.entries()) {
+      await prisma.deckCard.upsert({
+        where: { deckId_ord: { deckId: row.id, ord } },
+        update: { text: card.text, answer: card.answer, safetyReviewed: true },
+        create: {
+          deckId: row.id,
+          ord,
+          text: card.text,
+          answer: card.answer,
+          tags: [],
+          safetyReviewed: true,
+        },
+      });
+    }
+  }
+
+  const [cities, users, quizQuestions, venueCount, eventCount, deckCount, cardCount] =
+    await Promise.all([
+      prisma.city.count(),
+      prisma.user.count(),
+      prisma.quizQuestion.count({ where: { version: QUIZ_VERSION } }),
+      prisma.venue.count(),
+      prisma.event.count(),
+      prisma.deck.count(),
+      prisma.deckCard.count(),
+    ]);
   console.log(
-    `Seeded ✓  cities=${cities} users=${users} quiz_questions=${quizQuestions} venues=${venueCount} events=${eventCount} (decks land with the game room)`,
+    `Seeded ✓  cities=${cities} users=${users} quiz_questions=${quizQuestions} venues=${venueCount} ` +
+      `events=${eventCount} decks=${deckCount} deck_cards=${cardCount}`,
   );
 }
 

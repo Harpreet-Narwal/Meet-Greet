@@ -86,6 +86,7 @@ export class RevealService {
       neighborhood_teaser: booking.event.neighborhoodTeaser,
       starts_at: booking.event.startsAt.toISOString(),
       table_number: booking.table?.tableNumber ?? null,
+      table_id: booking.tableId, // for the game-room socket
       seats: tablemates,
       checked_in: booking.status === "checked_in",
     };
