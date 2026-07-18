@@ -85,6 +85,15 @@ def test_deterministic_same_seed_same_tables() -> None:
     assert [t.user_ids for t in r1.tables] == [t.user_ids for t in r2.tables]
 
 
+def test_tongueless_attendees_group_into_one_table_not_singletons() -> None:
+    # six attendees who listed no languages must form one table, not six of one
+    attendees = [Attendee(user_id=f"u{i}", languages=[], age=27) for i in range(6)]
+    result = compose_tables(MatchRequest(attendees=attendees))
+    assert len(result.tables) == 1
+    assert len(result.tables[0].user_ids) == 6
+    assert result.score_summary["hard_constraint_violations"] == 0
+
+
 def test_works_without_llm_or_embeddings() -> None:
     # matching is pure math — no embeddings provided, engine still runs
     attendees = [_attendee(f"u{i}", age=27) for i in range(6)]

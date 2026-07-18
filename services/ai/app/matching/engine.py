@@ -20,32 +20,27 @@ from app.matching.scoring import score_table
 ALGO_VERSION = "v1"
 
 
-def _num_tables(n: int, params: MatchParams) -> int:
-    """Choose a table count so every table lands in [min_table_size, table_size]."""
-    size = params.table_size
-    tables = max(1, round(n / size))
-    # grow until no table would exceed table_size
-    while tables * size < n:
-        tables += 1
-    # shrink while every table still meets the minimum
-    while tables > 1 and (n / (tables - 1)) <= size:
-        tables -= 1
-    return max(1, tables)
-
-
 def _language_groups(attendees: list[Attendee]) -> list[list[Attendee]]:
     """Partition into groups that each share a common language, so every table
     formed inside a group satisfies the language constraint. English-common
-    events collapse to one group; islands separate out."""
+    events collapse to one group; islands separate out.
+
+    Attendees who listed no languages can share any table (the language
+    constraint treats an all-tongueless table as valid), so they collect into a
+    single fallback group rather than isolating each into a min-size-violating
+    singleton table.
+    """
     groups: list[tuple[set[str], list[Attendee]]] = []
+    tongueless: list[Attendee] = []
     # place the most-linguistically-flexible last so islands seed their own group
     ordered = sorted(attendees, key=lambda a: (len(a.languages), a.user_id))
     for attendee in ordered:
         langs = set(attendee.languages)
+        if not langs:
+            tongueless.append(attendee)
+            continue
         placed = False
         for common, members in groups:
-            if not langs:
-                continue
             new_common = common & langs
             if new_common:
                 common.clear()
@@ -55,7 +50,16 @@ def _language_groups(attendees: list[Attendee]) -> list[list[Attendee]]:
                 break
         if not placed:
             groups.append((set(langs), [attendee]))
-    return [members for _common, members in groups]
+
+    result = [members for _common, members in groups]
+    if tongueless:
+        # fold them into the largest existing group if one exists, else their own
+        if result:
+            result.sort(key=len, reverse=True)
+            result[0].extend(tongueless)
+        else:
+            result.append(tongueless)
+    return result
 
 
 def _chunk_by_age(
