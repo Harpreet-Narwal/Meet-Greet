@@ -37,11 +37,17 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     };
   }
   const description = `${EVENT_TYPE_LABELS[event.type]} in Bengaluru — ${formatEventDate(event.starts_at)} IST. ${event.description.slice(0, 140)}`;
+  const ogImage = `/og/event?${new URLSearchParams({
+    title: event.title,
+    type: event.type,
+    when: formatEventDate(event.starts_at),
+  }).toString()}`;
   return {
     title: event.title,
     description,
     alternates: { canonical: `/events/${event.slug}` },
-    openGraph: { title: event.title, description, type: "website" },
+    openGraph: { title: event.title, description, type: "website", images: [ogImage] },
+    twitter: { card: "summary_large_image", title: event.title, description, images: [ogImage] },
   };
 }
 
