@@ -50,7 +50,7 @@ export function TableReveal({ eventId }: { eventId: string }) {
 
   async function load() {
     const result = await getJson<MyTable>(`/api/bff/events/${eventId}/my-table`);
-    if (result.status === 401) return router.replace("/login?next=/events/" + eventId + "/table");
+    if (result.status === 401) return router.replace("/login?next=/tables/" + eventId + "");
     if (!result.ok || !result.data) return setError("Couldn't load your table.");
     setTable(result.data);
   }
@@ -190,12 +190,20 @@ export function TableReveal({ eventId }: { eventId: string }) {
           {revealed ? (
             <div className="mt-8">
               {table.checked_in ? (
-                <Card className="flex items-center gap-3 p-5">
-                  <Badge tone="sage">Checked in</Badge>
-                  <span className="text-[15px] text-ink-soft">
-                    You&apos;re in. The game room unlocks when your host kicks off.
-                  </span>
-                </Card>
+                <div className="flex flex-col gap-3">
+                  <Card className="flex items-center gap-3 p-5">
+                    <Badge tone="sage">Checked in</Badge>
+                    <span className="text-[15px] text-ink-soft">You&apos;re in. Let the games begin.</span>
+                  </Card>
+                  <Button
+                    size="lg"
+                    className="w-full"
+                    onClick={() => router.push(`/rooms/${eventId}`)}
+                    data-testid="to-room"
+                  >
+                    Open the game room 🎲
+                  </Button>
+                </div>
               ) : (
                 <Button size="lg" className="w-full" disabled={checking} onClick={checkIn} data-testid="checkin-btn">
                   {checking ? "Checking you in…" : "I'm here — check me in"}
