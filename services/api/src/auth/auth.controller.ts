@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, Post, UnauthorizedException } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { Throttle } from "../common/rate-limit.guard";
 import { ZodValidationPipe } from "../common/zod-validation.pipe";
 import { AuthService } from "./auth.service";
 import {
@@ -24,6 +25,7 @@ export class AuthController {
   ) {}
 
   @Public()
+  @Throttle(5, 60)
   @Post("otp/request")
   @HttpCode(200)
   @ApiOperation({ summary: "Send a login code to a phone (mock provider logs it; 000000 works in dev)" })
@@ -35,6 +37,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle(10, 60)
   @Post("otp/verify")
   @HttpCode(200)
   @ApiOperation({ summary: "Verify the code → JWT access (15m) + refresh (30d)" })

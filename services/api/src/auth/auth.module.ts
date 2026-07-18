@@ -2,6 +2,7 @@ import { Global, Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 
+import { RateLimitGuard } from "../common/rate-limit.guard";
 import { env } from "../config/env";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
@@ -17,7 +18,13 @@ import { OtpService } from "./otp.service";
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, OtpService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
+  providers: [
+    AuthService,
+    OtpService,
+    // rate limiter runs first, then JWT auth
+    { provide: APP_GUARD, useClass: RateLimitGuard },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}
