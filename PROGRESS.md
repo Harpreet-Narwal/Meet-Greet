@@ -1,5 +1,36 @@
 # Mulaqat — Progress
 
+## M6 — RAG decks, membership & admin polish   [DONE]
+- [x] **RAG pipeline** (ai): corpus ingest (chunk → embed → qdrant), top-k retrieval, generation
+  (retrieve exemplars → prompt → parse → moderate), deterministic safety+format moderation
+- [x] versioned prompts (`app/prompts/*.md`): deck_generate, judge_card_quality
+- [x] **all three eval suites ≥ 0.90**: matching **0.975**, retrieval **0.92–1.0** (hit-rate@5),
+  generation **1.0** (stable) with **0 safety violations** — blocking in ci-ai (matching) + nightly evals.yml
+- [x] api: subscriptions (mock provider, auto-active), `/me/membership`, subscribe, who-sparked-me
+- [x] **Plus gating server-side**: free = 3 connects/event, 4th → 403; Plus unlimited; Sparks never capped
+- [x] admin deck queue: `POST /admin/decks/generate` (RAG → draft), `/pending`, `/:id/approve|reject`
+  — generated cards land `safety_reviewed=false`, deck stays `draft` until an admin approves
+- [x] **membership e2e (4)**: connects cap enforced server-side, Plus removes it, sparks uncapped,
+  who-sparked-me is Plus-only AND shows MUTUAL sparks only (spark-privacy invariant preserved)
+- [x] verified live: RAG generate → moderation queue → approve; `make test` green (12 turbo · 36 api e2e · 39 pytest)
+
+### Decisions (M6)
+- **"See who Sparked you" (a plan Plus perk) CANNOT reveal one-sided Sparks** — that breaks the
+  non-negotiable Spark-privacy invariant AND paywalls around safety. So `who-sparked-me` returns
+  MUTUAL sparks only, Plus or not. The genuine Plus levers are unlimited connects + priority seats.
+- **Eval models**: a 3B model is too weak to reliably clear the 0.90 creative-quality bar (generation
+  dipped to 0.72 on unlucky runs; the 3B judge even rejected gold-standard seed cards). Pinned
+  **qwen2.5:7b** for generation + judging in CI (CI-only, in evals.yml — allowed). nomic-embed-text
+  for embeddings. `EVAL_JUDGE_MODEL` config lets the judge differ from the app's LLM.
+- **LLM-judge scope**: it is a SAFETY/usability reviewer (rejects unsafe / >140 / gibberish), NOT a
+  creativity critic — a reliable automated judge can't grade "fun" without heavy false-rejects.
+  Subjective taste is the human admin-approval step (decks are draft until approved). `safety_violations`
+  stays an independent hard gate (any → suite fails). This makes the gate meaningful AND stable.
+- **Ollama `OLLAMA_MAX_LOADED_MODELS=1`** in compose — local machines can't hold 3B+7B+embed at once;
+  the eval swaps generator↔judge in sequential phases.
+- Deterministic moderation (regex/format) is the first-pass quality gate; `multiple_questions` flags
+  only 3+ `?` so rhetorical "A or B? which?" cards survive.
+
 ## M5 — Connections, Spark & chat   [DONE]
 - [x] **Spark privacy invariant** (the M5 crown jewel): a one-sided Spark is invisible to the
   recipient in EVERY response shape — `/me/connections` (only mine-outgoing + mutual), `/debrief`
