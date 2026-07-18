@@ -1,5 +1,30 @@
 # Mulaqat — Progress
 
+## M4 — The game room   [DONE]
+- [x] **5 game engines** as pure state-machine reducers (`games/engines/`): icebreaker (level-vote
+  majority unlocks L2/L3), hot_takes (A/B split), most_likely (**counts only, never who voted**),
+  two_truths (vote the lie), trivia (first-correct scores) — 14 unit tests incl. the privacy invariant
+- [x] **Socket.IO gateway** `/games` ns, JWT handshake, rooms `table:{id}`; **Redis-backed state**
+  so refresh/reconnect resume via a full `room:state` snapshot on join
+- [x] vote privacy at the wire: per-voter choices stripped from broadcasts during voting; most_likely
+  never exposes the vote map even at reveal
+- [x] decks seeded verbatim from seed-content.md (9 decks, 89 cards, safety_reviewed=true)
+- [x] web game room (`/rooms/[id]`): lobby → synced card deck (spring animations), icebreaker level
+  meter, A/B + player vote UIs, trivia buzz, animated vote-result bars, "Play something else"
+- [x] **2-context Playwright**: two browsers play icebreaker (synced card, **survives refresh**,
+  advance-in-sync) → play deck to end → hot-takes round (both vote, both see the split)
+- [x] engine edge-case fix: tongueless attendees now group into one table (was N singleton tables)
+
+### Decisions (M4)
+- Routes reorganized: authed `/rooms/[id]` and `/tables/[id]` (event UUID) moved OUT of
+  `/events/[slug]/*` — Next forbids two dynamic segment names (`[id]` vs `[slug]`) at one path.
+- Game state is the single source of truth in Redis; the gateway rebroadcasts the full snapshot
+  after every event so all clients (and reconnects) render identically — no client-side game logic.
+- **most_likely privacy**: enforced in BOTH the engine (result carries counts only) and the gateway
+  (`publicState` blanks the vote map) — belt and suspenders, unit-tested.
+- Engine `_language_groups` folds languageless attendees into the largest group (found via the M4
+  game test: 6 profileless guests were being split into 6 singleton tables).
+
 ## M3 — Matching & the reveal   [DONE]
 - [x] **matching engine** (ai, pure/deterministic, no LLM): hard constraints (age ±4-median &
   ≤8 spread, shared language, women-only, blocked pairs) + weighted chemistry scoring
