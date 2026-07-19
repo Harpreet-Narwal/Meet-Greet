@@ -1,5 +1,19 @@
 # Mulaqat — Progress
 
+## Homepage redesign + retheme   [DONE — 2026-07-19, operator-directed]
+- Palette rethemed per operator direction (reference: sinqlo.com scheme): warm off-white #f9f9f6,
+  ink #231f20, ONE vivid orange accent #ff832c, coral spark #ff847e, pastel chips (yellow/green/
+  blue/coral/beige, backgrounds only), band #f3f2f0. Supersedes assets/brand.md terracotta.
+  AA kept: ink-on-orange 6.6:1; ink-soft darkened to #6c6766 (5.1:1) — reference grey failed AA.
+- Homepage rebuilt on the getquoti.ai structure (operator reference): sticky nav with real routes,
+  display hero + stacked claims + archetype social-proof row, 3 pain points, value band, 5 format
+  cards, 4-step how-it-works, alternating feature blocks with honest mock-UI cards, trust strip,
+  pricing teaser, native-details FAQ, orange CTA band, 4-column footer.
+- New marketing routes: /how-it-works (with FAQPage JSON-LD), /pricing, /safety — shared
+  MarketingNav/MarketingFooter; sitemap updated. Logo SVGs + OG cards recolored.
+- Verified: build green, screenshots light/dark/mobile, Lighthouse SEO 1.00 / Perf 0.97 / A11y 1.00.
+
+
 ## M7 — Hardening & launch readiness   [DONE]
 - [x] **Redis rate limiting** (`@Throttle` + fixed-window guard): OTP request 5/min, verify 10/min
   per IP; fails OPEN on cache errors; bypassed under NODE_ENV=test

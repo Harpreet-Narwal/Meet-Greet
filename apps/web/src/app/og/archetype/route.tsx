@@ -8,11 +8,11 @@ export const runtime = "edge";
  * Satori can't read CSS custom properties, so brand hex values are inlined
  * here — single sanctioned exception to the tokens-only rule (see PROGRESS.md).
  */
-const PAPER = "#FAF7F2";
-const INK = "#1E1912";
-const INK_SOFT = "#6F6656";
-const TERRACOTTA = "#D9603B";
-const SAFFRON = "#ECA72C";
+const PAPER = "#f9f9f6";
+const INK = "#231f20";
+const INK_SOFT = "#6c6766";
+const ORANGE = "#ff832c";
+const CORAL = "#ff847e";
 
 const ARCHETYPES: Record<string, string> = {
   "Warm Firecracker": "You light up rooms AND go deep. Dangerous combination. Tables fight over you.",
@@ -46,7 +46,7 @@ function mark(size: number) {
           width: size * 0.34,
           height: size * 0.34,
           borderRadius: 9999,
-          background: TERRACOTTA,
+          background: ORANGE,
         }}
       />
       {positions.map((p, i) => (
@@ -59,7 +59,7 @@ function mark(size: number) {
             width: dot * 2,
             height: dot * 2,
             borderRadius: 9999,
-            background: p.you ? SAFFRON : INK,
+            background: p.you ? CORAL : INK,
           }}
         />
       ))}
@@ -101,7 +101,7 @@ export function GET(request: NextRequest): ImageResponse {
               display: "flex",
               fontSize: 96,
               fontWeight: 700,
-              color: TERRACOTTA,
+              color: ORANGE,
               marginTop: 24,
               textAlign: "center",
               letterSpacing: -3,

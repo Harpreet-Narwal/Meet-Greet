@@ -1,12 +1,12 @@
 <svg width="560" height="200" viewBox="0 0 560 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mulaqat logo">
   <!-- Mark -->
-  <circle cx="88" cy="100" r="30" fill="#D9603B"/>
-  <circle cx="88" cy="38" r="12" fill="#ECA72C"/>
-  <circle cx="141.69" cy="69" r="12" fill="#1E1912"/>
-  <circle cx="141.69" cy="131" r="12" fill="#1E1912"/>
-  <circle cx="88" cy="162" r="12" fill="#1E1912"/>
-  <circle cx="34.31" cy="131" r="12" fill="#1E1912"/>
-  <circle cx="34.31" cy="69" r="12" fill="#1E1912"/>
+  <circle cx="88" cy="100" r="30" fill="#ff832c"/>
+  <circle cx="88" cy="38" r="12" fill="#ff847e"/>
+  <circle cx="141.69" cy="69" r="12" fill="#231f20"/>
+  <circle cx="141.69" cy="131" r="12" fill="#231f20"/>
+  <circle cx="88" cy="162" r="12" fill="#231f20"/>
+  <circle cx="34.31" cy="131" r="12" fill="#231f20"/>
+  <circle cx="34.31" cy="69" r="12" fill="#231f20"/>
   <!-- Wordmark (convert to outlines before production use) -->
-  <text x="176" y="127" font-family="Inter, 'SF Pro Display', -apple-system, 'Segoe UI', sans-serif" font-size="76" font-weight="700" letter-spacing="-2.5" fill="#1E1912">mulaqat</text>
+  <text x="176" y="127" font-family="Inter, 'SF Pro Display', -apple-system, 'Segoe UI', sans-serif" font-size="76" font-weight="700" letter-spacing="-2.5" fill="#231f20">mulaqat</text>
 </svg>
