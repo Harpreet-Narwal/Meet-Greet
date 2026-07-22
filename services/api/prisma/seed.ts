@@ -122,10 +122,15 @@ async function main(): Promise<void> {
   }
 
   const hostRow = await prisma.user.findUnique({ where: { phone: "+911000000002" } });
+  const IST_OFFSET_MS = (5 * 60 + 30) * 60 * 1000; // Asia/Kolkata is UTC+5:30
   for (const event of seedEvents) {
+    // event.hour is IST wall-clock (8 PM dinner = 20). Build the instant whose
+    // IST representation is that hour, regardless of the server's timezone, so
+    // the UI (which formats in Asia/Kolkata) shows the intended local time.
     const startsAt = new Date();
     startsAt.setDate(startsAt.getDate() + event.daysFromNow);
-    startsAt.setHours(event.hour, 0, 0, 0);
+    startsAt.setUTCHours(event.hour, 0, 0, 0);
+    startsAt.setTime(startsAt.getTime() - IST_OFFSET_MS);
     const row = await prisma.event.upsert({
       where: { slug: event.slug },
       update: { startsAt, status: event.status },

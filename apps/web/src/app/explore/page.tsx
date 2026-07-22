@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { ButtonLink, Logo, cn } from "@mulaqat/ui";
+import { ButtonLink, cn } from "@mulaqat/ui";
 
+import { AppNav } from "@/components/app-nav";
 import { EventCard } from "@/components/event-card";
 import { EVENT_TYPE_LABELS, publicApi, type PublicEvent } from "@/lib/public-api";
 
@@ -43,21 +44,7 @@ export default async function ExplorePage({ searchParams }: Props) {
 
   return (
     <div className="min-h-dvh">
-      <header className="nav-blur sticky top-0 z-50 border-b border-line/60">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-3.5">
-          <Link href="/" aria-label="Mulaqat home">
-            <Logo size={26} />
-          </Link>
-          <div className="flex items-center gap-2">
-            <ButtonLink href="/tonight" variant="ghost" size="sm">
-              Tonight
-            </ButtonLink>
-            <ButtonLink href="/you" variant="secondary" size="sm">
-              You
-            </ButtonLink>
-          </div>
-        </div>
-      </header>
+      <AppNav active="explore" />
 
       <main className="mx-auto w-full max-w-5xl px-6 py-12">
         <h1 className="text-[clamp(1.9rem,4.5vw,2.6rem)] font-bold tracking-tight">

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { Badge, ButtonLink, Card, Logo } from "@mulaqat/ui";
+import { Badge, ButtonLink, Card } from "@mulaqat/ui";
 
+import { AppNav } from "@/components/app-nav";
 import { EventCard } from "@/components/event-card";
 import { apiFetch } from "@/lib/api";
 import {
@@ -52,21 +52,7 @@ export default async function TonightPage() {
 
   return (
     <div className="min-h-dvh">
-      <header className="nav-blur sticky top-0 z-50 border-b border-line/60">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-3.5">
-          <Link href="/" aria-label="Mulaqat home">
-            <Logo size={26} />
-          </Link>
-          <div className="flex items-center gap-2">
-            <ButtonLink href="/explore" variant="ghost" size="sm">
-              Explore
-            </ButtonLink>
-            <ButtonLink href="/you" variant="secondary" size="sm">
-              You
-            </ButtonLink>
-          </div>
-        </div>
-      </header>
+      <AppNav active="tonight" />
 
       <main className="mx-auto w-full max-w-5xl px-6 py-12">
         {next ? (
