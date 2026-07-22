@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Badge, ButtonLink, Card, Logo } from "@mulaqat/ui";
 import { BRAND_NAME_DISPLAY } from "@mulaqat/types";
 
+import { MarketingFooter } from "@/components/marketing-footer";
 import { formatINR } from "@/lib/format";
 import { APP_URL } from "@/lib/config";
 import {
@@ -169,6 +170,7 @@ export default async function EventPage({ params }: Params) {
           </p>
         )}
       </main>
+      <MarketingFooter />
     </div>
   );
 }

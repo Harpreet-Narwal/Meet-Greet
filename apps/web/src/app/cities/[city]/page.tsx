@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ButtonLink, Logo } from "@mulaqat/ui";
 
 import { EventCard } from "@/components/event-card";
+import { MarketingFooter } from "@/components/marketing-footer";
 import { publicApi, type PublicCity, type PublicEvent } from "@/lib/public-api";
 
 export const revalidate = 300;
@@ -84,6 +85,7 @@ export default async function CityPage({ params }: Params) {
           </div>
         )}
       </main>
+      <MarketingFooter />
     </div>
   );
 }
