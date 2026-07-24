@@ -35,11 +35,10 @@ export const metadata: Metadata = {
   },
 };
 
+// Light is the default regardless of OS setting, so this is a single colour
+// rather than a prefers-color-scheme pair.
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f9f9f6" },
-    { media: "(prefers-color-scheme: dark)", color: "#191715" },
-  ],
+  themeColor: "#fffefd",
 };
 
 const organizationJsonLd = {
@@ -53,12 +52,20 @@ const organizationJsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    // suppressHydrationWarning: the head script stamps `js` on <html> pre-hydration by design
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    // suppressHydrationWarning: the head script stamps `js`/`data-theme` on
+    // <html> pre-hydration by design
+    <html lang="en" className={inter.variable} data-theme="light" suppressHydrationWarning>
       <head>
-        {/* Gate hidden-until-reveal styles on JS actually running (no-JS users see everything). */}
+        {/* Gate hidden-until-reveal styles on JS actually running (no-JS users see
+            everything), and restore an opted-into dark theme before first paint.
+            The OS preference is deliberately ignored: a first visit is light. */}
         <script
-          dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add("js")` }}
+          dangerouslySetInnerHTML={{
+            __html:
+              `document.documentElement.classList.add("js");` +
+              `try{var t=localStorage.getItem("mulaqat-theme");` +
+              `if(t==="dark"||t==="light")document.documentElement.dataset.theme=t;}catch(e){}`,
+          }}
         />
         <script
           type="application/ld+json"

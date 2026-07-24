@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from "react";
 import { cn } from "./cn";
 
-/** Flat pastel fills — sinqlo-style cards are colour blocks, not floating panels. */
+/** Optional tinted fills; the default surface card is white with a soft lift. */
 type Tone = "surface" | "yellow" | "green" | "blue" | "coral" | "beige";
 
 const toneClasses: Record<Tone, string> = {
@@ -24,9 +24,9 @@ export function Card({ large = false, tone = "surface", className, ...props }: C
   return (
     <div
       className={cn(
-        // Beige hairline instead of grey + shadow: the scheme is flat, so depth
-        // comes from the colour block itself, not from a drop shadow.
-        "border border-chip-beige text-ink",
+        // Hairline plus a soft lift — Hinge's cards sit slightly above the page
+        // rather than reading as flat colour blocks.
+        "border border-line/70 text-ink shadow-soft",
         toneClasses[tone],
         large ? "rounded-card-lg" : "rounded-card",
         className,

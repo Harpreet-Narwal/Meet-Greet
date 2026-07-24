@@ -1,90 +1,82 @@
 /*
  * Mulaqat design tokens — single source of truth for color, radius, shadow, motion.
- * Palette rethemed 2026-07-19 per operator direction: warm off-white base, one
- * vivid orange accent, soft pastel chips (sinqlo-style scheme). Components never
- * use raw hex — only these vars or the Tailwind utilities mapped in @theme.
+ * Palette rethemed 2026-07-24 per operator direction to a Hinge-style scheme,
+ * sampled from hinge.co's own stylesheets: warm-white base (#fffefd), slate ink
+ * (#2b333f) rather than pure black, deep plum accent (#67295f), with warm yellow
+ * (#ffcc66) and soft blue (#66a8cc) as secondaries. Components never use raw hex
+ * — only these vars or the Tailwind utilities mapped in @theme.
  *
- * Contrast notes (AA): ink #231f20 on accent #ff832c = 6.6:1 ✓ (white fails at
- * 2.5:1 — always ink-on-accent). --ink-soft is darkened vs the reference grey
- * (#8f8f8f = 3.0:1, fails body text) to #6c6766 = 5.1:1 ✓.
+ * Light is the DEFAULT and is not tied to the OS setting: <html data-theme>
+ * decides, and the layout stamps "light" unless the visitor has opted into dark.
+ *
+ * Contrast notes (AA): plum #67295f carries white text at 10.2:1 and also works
+ * as body text on paper at 10.2:1 — unlike the previous orange, which was a
+ * fill-only colour. --ink-soft #4d4d4d is 8.4:1 on paper.
  */
 
-:root {
-  --paper: #f9f9f6;
-  --ink: #231f20;
-  --accent: #ff832c; /* orange — primary actions, the table */
-  --accent-2: #ff847e; /* coral — sparks, celebration, "you" */
-  --sage: #2f7d46; /* success, verified (AA on paper) */
-  --danger: #d9453c;
+:root,
+[data-theme="light"] {
+  --paper: #fffefd;
+  --ink: #2b333f; /* Hinge's slate — softer and warmer than #000 */
+  --accent: #67295f; /* deep plum — primary actions, the brand */
+  --accent-2: #9c3f77; /* lighter plum — sparks, celebration, "you" */
+  --sage: #2f7d46; /* success, verified (5.1:1 on paper) */
+  --danger: #c1352b; /* darkened for AA: white on it is 5.5:1 */
 
-  /* Text on accent fills. Constant across themes (ink-on-orange 6.6:1). */
-  --on-accent: #231f20;
-
-  /* Accent as *text*. #ff832c on paper is only 2.33:1 — it works as a fill and
-     fails as type — so coloured text uses this darker burnt orange (5.8:1). */
-  --accent-ink: #a34600;
-  /* Muted body copy that stays AA on the pastel fills (7.6:1 on beige/green,
-     where --ink-soft lands at 4.4:1 and misses). */
-  --ink-muted: #484344;
+  /* Text on accent fills, and the accent used AS text. */
+  --on-accent: #ffffff;
+  --accent-ink: #67295f;
 
   --surface: #ffffff;
-  --band: #f3f2f0; /* alternating section background */
-  --ink-soft: #6c6766;
-  --line: #dbdbdb;
+  --band: #f6f4f2; /* alternating section background */
+  --ink-soft: #4d4d4d;
+  --ink-muted: #414954; /* body copy on tinted fills */
+  --line: #d1d1d1;
 
-  /* pastel chips — playful highlights, backgrounds only (never text) */
-  --chip-yellow: #ffff97;
-  --chip-green: #c4f3c4;
-  --chip-blue: #bde2f8;
-  --chip-coral: #ffd1ce;
-  --chip-beige: #e6e4dd;
+  /* soft tints — subtle highlights and chips, backgrounds only (never text) */
+  --chip-yellow: #ffe9bf;
+  --chip-green: #d7ead9;
+  --chip-blue: #d6e8f2;
+  --chip-coral: #f0dbe9; /* plum tint */
+  --chip-beige: #efece8;
 
-  /* sinqlo geometry: 12px controls/cards, 24px feature surfaces. Buttons are
-     soft rectangles, not pills — the shape is as much of the scheme as the hue. */
-  --radius-card: 12px;
+  /* Hinge geometry: pill buttons, generously rounded cards. */
+  --radius-card: 16px;
   --radius-card-lg: 24px;
-  --shadow-soft: 0 2px 8px rgb(35 31 32 / 0.06), 0 12px 32px rgb(35 31 32 / 0.08);
+  --shadow-soft: 0 1px 2px rgb(43 51 63 / 0.06), 0 8px 24px rgb(43 51 63 / 0.08);
 
   --spring-fast: 150ms cubic-bezier(0.32, 0.72, 0, 1);
   --spring: 250ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 [data-theme="dark"] {
-  --paper: #191715;
-  --ink: #f0efe9;
-  --surface: #211f1c;
-  --band: #1f1d1a;
-  --ink-soft: #a5a099;
-  /* On dark grounds the bright orange is already 7.3:1 — no darkening needed. */
-  --accent-ink: #ff832c;
-  --ink-muted: #b9b3aa;
-  --line: #38342f;
-  --chip-yellow: #4a4728;
-  --chip-green: #2b4530;
-  --chip-blue: #2b3d4a;
-  --chip-coral: #4a2f2d;
-  --chip-beige: #35322c;
-  --shadow-soft: 0 2px 8px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.35);
+  --paper: #14161a;
+  --ink: #eef0f3;
+  --surface: #1b1e24;
+  --band: #191c21;
+  --ink-soft: #a8adb6;
+  --ink-muted: #c3c8d0;
+  --line: #2f343c;
+  /* Plum inverts: the fill lightens and takes dark text; as type it lightens too. */
+  --accent: #c98fbd;
+  --accent-2: #d9a5cd;
+  --on-accent: #1a1116;
+  --accent-ink: #d9a5cd;
+  --sage: #6bbf8a;
+  --danger: #e8746a;
+  --chip-yellow: #3d3421;
+  --chip-green: #22362a;
+  --chip-blue: #1f2f3a;
+  --chip-coral: #33222e;
+  --chip-beige: #2a2723;
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.35);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #191715;
-    --ink: #f0efe9;
-    --surface: #211f1c;
-    --band: #1f1d1a;
-    --ink-soft: #a5a099;
-    --accent-ink: #ff832c;
-    --ink-muted: #b9b3aa;
-    --line: #38342f;
-    --chip-yellow: #4a4728;
-    --chip-green: #2b4530;
-    --chip-blue: #2b3d4a;
-    --chip-coral: #4a2f2d;
-    --chip-beige: #35322c;
-    --shadow-soft: 0 2px 8px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.35);
-  }
-}
+/*
+ * Deliberately NO `@media (prefers-color-scheme: dark)` block. Dark mode is a
+ * choice the visitor makes (persisted to localStorage and stamped onto
+ * <html data-theme>), not something the OS imposes on a first visit.
+ */
 
 /* Map tokens into Tailwind 4 utilities: bg-paper, text-ink, bg-band, rounded-card, … */
 @theme inline {
@@ -92,12 +84,12 @@
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
   --color-ink-muted: var(--ink-muted);
-  --color-accent-ink: var(--accent-ink);
   --color-surface: var(--surface);
   --color-band: var(--band);
   --color-line: var(--line);
   --color-accent: var(--accent);
   --color-accent-2: var(--accent-2);
+  --color-accent-ink: var(--accent-ink);
   --color-on-accent: var(--on-accent);
   --color-sage: var(--sage);
   --color-danger: var(--danger);

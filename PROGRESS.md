@@ -313,3 +313,44 @@ public URLs (a11y was 0.98 on /cities/bangalore before the heading fix).
 
 ### Blockers
 - none
+
+### Decisions (Hinge retheme + light default, 2026-07-24)
+Operator: "the theme should be like Hinge... not dark". Two separate problems.
+
+**1. The site was auto-darkening.** `tokens.css` carried a
+`@media (prefers-color-scheme: dark)` block, so any visitor whose OS is in dark
+mode got the dark theme with no way to choose otherwise — almost certainly the
+"dark" being reported. That media query is now **gone**. Light is the default for
+everyone; `<html data-theme="light">` ships in the layout, a head script restores
+an opted-into preference before first paint (no flash), and a `ThemeToggle` in
+both navs persists the choice to `localStorage`. Dark mode still fully exists
+(CLAUDE.md requires it) — it is now opt-in rather than OS-imposed.
+
+**2. Palette is now Hinge's**, sampled from hinge.co's own stylesheets rather
+than from memory: warm-white base `#fffefd`, slate ink `#2b333f` (not pure
+black), deep plum accent `#67295f`, secondaries warm yellow `#ffcc66` and soft
+blue `#66a8cc`, greys `#4d4d4d`/`#d1d1d1`.
+- **Plum carries white text at 10.2:1 and works as body text on paper at 10.2:1**,
+  so `--accent-ink` collapses to the same value as `--accent` in light mode. The
+  orange scheme needed them to differ; this one doesn't.
+- `--danger` darkened to `#c1352b` so white-on-danger reaches 5.5:1 (`#d9453c`
+  was 4.3:1 and failed).
+- Buttons are back to **pills** with a solid plum fill and no outline; cards get
+  a soft lift (16px/24px radii) instead of flat pastel blocks; sections alternate
+  white and a neutral `--band` rather than saturated pastels; the CTA band is a
+  single deep-plum block.
+- Dark theme inverts the plum (`#c98fbd` fill with dark label, `#d9a5cd` as type)
+  rather than reusing the light value, which would have been unreadable.
+
+**Contrast audit now asserts the theme actually applied** — it seeds
+`localStorage` and throws if `data-theme` doesn't match, so the dark pass can no
+longer silently test light twice (it was doing exactly that after the media query
+was removed).
+
+Verified: OS-dark + no stored choice renders `#fffefd` (light) — checked against
+the running container, not just the source. lint+typecheck+build green; contrast
+audit clean in both themes; Lighthouse perf 0.97-0.98 / a11y 1.00 / SEO 1.00 /
+best-practices 1.00; api e2e 43/43; web Playwright 4/4.
+
+### Blockers
+- none

@@ -56,8 +56,8 @@ export default async function ExplorePage({ searchParams }: Props) {
           <Link
             href={chipHref(undefined, budget)}
             className={cn(
-              "rounded-card border px-4 py-2 text-[14px] font-medium transition-colors",
-              !type ? "border-ink bg-ink text-paper" : "border-chip-beige bg-surface hover:border-ink",
+              "rounded-full border px-4 py-2 text-[14px] font-medium transition-colors",
+              !type ? "border-accent bg-accent text-on-accent" : "border-line bg-surface hover:border-accent",
             )}
           >
             Everything
@@ -67,10 +67,10 @@ export default async function ExplorePage({ searchParams }: Props) {
               key={eventType}
               href={chipHref(eventType, budget)}
               className={cn(
-                "rounded-card border px-4 py-2 text-[14px] font-medium transition-colors",
+                "rounded-full border px-4 py-2 text-[14px] font-medium transition-colors",
                 type === eventType
-                  ? "border-ink bg-ink text-paper"
-                  : "border-chip-beige bg-surface hover:border-ink",
+                  ? "border-accent bg-accent text-on-accent"
+                  : "border-line bg-surface hover:border-accent",
               )}
             >
               {EVENT_TYPE_LABELS[eventType]}
@@ -82,10 +82,10 @@ export default async function ExplorePage({ searchParams }: Props) {
               key={band.value}
               href={chipHref(type, budget === band.value ? undefined : band.value)}
               className={cn(
-                "rounded-card border px-3.5 py-2 text-[14px] font-semibold transition-colors",
+                "rounded-full border px-3.5 py-2 text-[14px] font-semibold transition-colors",
                 budget === band.value
-                  ? "border-ink bg-ink text-paper"
-                  : "border-chip-beige bg-surface hover:border-ink",
+                  ? "border-accent bg-accent text-on-accent"
+                  : "border-line bg-surface hover:border-accent",
               )}
             >
               {band.label}

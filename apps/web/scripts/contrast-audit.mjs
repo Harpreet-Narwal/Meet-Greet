@@ -4,9 +4,14 @@ const URLS = ['/', '/how-it-works', '/pricing', '/safety', '/explore'];
 let bad = 0;
 for (const scheme of ['light','dark']) {
   const ctx = await b.newContext({ viewport:{width:1280,height:900}, colorScheme:scheme, reducedMotion:'reduce' });
+  // The theme comes from <html data-theme>, not the OS setting, so opting into
+  // dark means seeding the same localStorage key the head script reads.
+  await ctx.addInitScript(t => { try { localStorage.setItem('mulaqat-theme', t); } catch {} }, scheme);
   const p = await ctx.newPage();
   for (const u of URLS) {
     await p.goto('http://127.0.0.1:3100'+u, {waitUntil:'networkidle'});
+    const applied = await p.evaluate(()=>document.documentElement.dataset.theme);
+    if (applied !== scheme) throw new Error(`theme did not apply: wanted ${scheme}, got ${applied} on ${u}`);
     await p.evaluate(()=>document.querySelectorAll('.reveal').forEach(e=>e.classList.add('revealed')));
     const res = await p.evaluate(() => {
       const lum = (r,g,b2) => { const f=c=>{c/=255; return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4)};

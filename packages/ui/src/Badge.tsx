@@ -3,13 +3,10 @@ import { cn } from "./cn";
 
 type Tone = "accent" | "spark" | "sage" | "neutral";
 
-/*
- * Flat pastel chips with an ink hairline (sinqlo's `.small-detail`), not
- * low-opacity tints of the accent. Ink on every pastel clears AA comfortably.
- */
+/* Soft tinted chips; ink on every tint clears AA comfortably in both themes. */
 const toneClasses: Record<Tone, string> = {
-  accent: "bg-chip-yellow text-ink",
-  spark: "bg-chip-coral text-ink",
+  accent: "bg-chip-coral text-ink", // plum tint — the brand chip
+  spark: "bg-chip-yellow text-ink",
   sage: "bg-chip-green text-ink",
   neutral: "bg-band text-ink",
 };
@@ -22,7 +19,7 @@ export function Badge({ tone = "neutral", className, ...props }: BadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-card border border-chip-beige px-2.5 py-1 text-[13px] font-medium",
+        "inline-flex items-center gap-1 rounded-full px-3 py-1 text-[13px] font-medium",
         toneClasses[tone],
         className,
       )}

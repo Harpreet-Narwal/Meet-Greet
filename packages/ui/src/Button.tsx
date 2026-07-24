@@ -5,23 +5,22 @@ type Variant = "primary" | "accent" | "secondary" | "ghost" | "danger" | "paper"
 type Size = "sm" | "md" | "lg";
 
 /*
- * Primary is a pastel-green button with an ink hairline, not an orange fill.
- * Orange is a punctuation colour in this scheme — reserved for the `accent`
- * variant and for focus rings — so the page reads as pastel-and-ink rather
- * than as one saturated hue repeated on every control.
+ * Hinge-style: solid plum pill, white label, no outline. The plum carries white
+ * text at 10.2:1, so unlike the previous orange it needs no ink-on-fill trick.
  */
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-chip-green text-ink border border-ink font-semibold hover:-translate-y-px active:translate-y-0 active:scale-[0.98]",
+    "bg-accent text-on-accent font-semibold shadow-soft hover:brightness-110 hover:-translate-y-px active:translate-y-0 active:scale-[0.98]",
+  // Kept as an alias so callers that asked for the accent fill still get it.
   accent:
-    "bg-accent text-on-accent border border-ink font-semibold hover:-translate-y-px active:translate-y-0 active:scale-[0.98]",
+    "bg-accent text-on-accent font-semibold shadow-soft hover:brightness-110 hover:-translate-y-px active:translate-y-0 active:scale-[0.98]",
   secondary:
-    "bg-surface text-ink border border-ink hover:-translate-y-px active:translate-y-0 active:scale-[0.98]",
+    "bg-surface text-ink border border-line hover:border-accent hover:-translate-y-px active:translate-y-0 active:scale-[0.98]",
   ghost: "bg-transparent text-ink hover:bg-ink/5 active:scale-[0.98]",
-  danger: "bg-danger text-white border border-ink hover:brightness-105 active:scale-[0.98]",
-  // For placement on ink- or accent-filled bands (the CTA block)
+  danger: "bg-danger text-white hover:brightness-110 active:scale-[0.98]",
+  // For placement on accent-filled bands (the CTA block)
   paper:
-    "bg-paper text-ink border border-ink font-semibold hover:-translate-y-px active:translate-y-0 active:scale-[0.98]",
+    "bg-paper text-ink font-semibold shadow-soft hover:brightness-[1.03] hover:-translate-y-px active:translate-y-0 active:scale-[0.98]",
 };
 
 const sizeClasses: Record<Size, string> = {
@@ -31,7 +30,7 @@ const sizeClasses: Record<Size, string> = {
 };
 
 const baseClasses =
-  "inline-flex items-center justify-center gap-2 rounded-card font-semibold " +
+  "inline-flex items-center justify-center gap-2 rounded-full font-semibold " +
   "transition-all duration-200 ease-out select-none " +
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent " +
   "disabled:opacity-50 disabled:pointer-events-none";

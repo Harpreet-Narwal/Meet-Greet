@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { ButtonLink, Logo } from "@mulaqat/ui";
 
+import { ThemeToggle } from "@/components/theme-toggle";
+
 const TABS = [
   { href: "/tonight", label: "Tonight" },
   { href: "/explore", label: "Explore" },
@@ -38,13 +40,16 @@ export function AppNav({ active }: { active?: "tonight" | "explore" | "people" |
             );
           })}
         </nav>
-        <ButtonLink
-          href="/you"
-          variant={active === "you" ? "primary" : "secondary"}
-          size="sm"
-        >
-          You
-        </ButtonLink>
+        <div className="flex shrink-0 items-center gap-2">
+          <ThemeToggle />
+          <ButtonLink
+            href="/you"
+            variant={active === "you" ? "primary" : "secondary"}
+            size="sm"
+          >
+            You
+          </ButtonLink>
+        </div>
       </div>
     </header>
   );

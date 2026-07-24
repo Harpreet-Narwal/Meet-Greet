@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { ButtonLink, Logo } from "@mulaqat/ui";
 
+import { ThemeToggle } from "@/components/theme-toggle";
+
 const LINKS = [
   { href: "/#why", label: "Why Mulaqat" },
   { href: "/how-it-works", label: "How it works" },
@@ -28,6 +30,7 @@ export function MarketingNav() {
           ))}
         </nav>
         <div className="flex shrink-0 items-center gap-2">
+          <ThemeToggle />
           <ButtonLink href="/login" variant="ghost" size="sm">
             Sign in
           </ButtonLink>

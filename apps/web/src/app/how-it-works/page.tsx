@@ -117,8 +117,8 @@ export default function HowItWorksPage() {
           ))}
         </div>
 
-        <div className="mt-16 rounded-card-lg bg-ink p-10 text-center">
-          <h2 className="text-2xl font-bold tracking-tight text-paper">
+        <div className="mt-16 rounded-card-lg bg-accent p-10 text-center">
+          <h2 className="text-2xl font-bold tracking-tight text-on-accent">
             Sounds like your kind of evening?
           </h2>
           <div className="mt-6">
