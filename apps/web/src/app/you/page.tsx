@@ -47,7 +47,7 @@ export default async function YouPage() {
 
   return (
     <div className="min-h-dvh">
-      <header className="nav-blur sticky top-0 z-50 border-b border-line/60">
+      <header className="nav-blur sticky top-0 z-50 border-b border-chip-beige">
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-3.5">
           <Link href="/" aria-label="Mulaqat home">
             <Logo size={26} />
@@ -109,7 +109,7 @@ export default async function YouPage() {
             <p className="font-semibold">No personality card yet.</p>
             <p className="mt-1 text-[15px] text-ink-soft">
               Five minutes, fifteen questions —{" "}
-              <Link href="/onboarding/quiz" className="font-semibold text-accent underline-offset-4 hover:underline">
+              <Link href="/onboarding/quiz" className="font-semibold text-accent-ink underline-offset-4 hover:underline">
                 take the quiz
               </Link>{" "}
               and we'll find your people.

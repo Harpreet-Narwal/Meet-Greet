@@ -46,7 +46,7 @@ export default async function CityPage({ params }: Params) {
 
   return (
     <div className="min-h-dvh">
-      <header className="nav-blur sticky top-0 z-50 border-b border-line/60">
+      <header className="nav-blur sticky top-0 z-50 border-b border-chip-beige">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-3.5">
           <Link href="/" aria-label="Mulaqat home">
             <Logo size={26} />

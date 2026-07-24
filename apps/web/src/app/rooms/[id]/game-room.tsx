@@ -132,7 +132,7 @@ export function GameRoom({ eventId }: { eventId: string }) {
                       )}
                     />
                   ))}
-                  <span className="ml-2 text-[13px] font-semibold text-accent">
+                  <span className="ml-2 text-[13px] font-semibold text-accent-ink">
                     {state.level === 3 ? "Going deep 🔥" : `Level ${state.level}`}
                   </span>
                 </div>
@@ -306,7 +306,7 @@ function VoteResult({ state }: { state: GameState }) {
           ))}
       </div>
       {state.kind === "two_truths" && result.lie ? (
-        <p className="mt-4 text-center text-[14px] font-semibold text-accent">
+        <p className="mt-4 text-center text-[14px] font-semibold text-accent-ink">
           The lie: {result.lie}
         </p>
       ) : null}

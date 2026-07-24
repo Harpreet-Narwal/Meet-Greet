@@ -89,7 +89,7 @@ export default function HowItWorksPage() {
       <MarketingNav />
       <main className="mx-auto w-full max-w-4xl px-6 py-16">
         <h1 className="text-[clamp(2.2rem,5vw,3.2rem)] font-bold leading-tight tracking-tight">
-          From quiz to<br /><span className="text-accent">&ldquo;same table next month?&rdquo;</span>
+          From quiz to<br /><span className="text-accent-ink">&ldquo;same table next month?&rdquo;</span>
         </h1>
         <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-ink-soft">
           Every part of Mulaqat is designed to remove the awkward parts of meeting new people
@@ -117,12 +117,12 @@ export default function HowItWorksPage() {
           ))}
         </div>
 
-        <div className="mt-16 rounded-card-lg bg-accent p-10 text-center">
-          <h2 className="text-2xl font-bold tracking-tight text-on-accent">
+        <div className="mt-16 rounded-card-lg bg-ink p-10 text-center">
+          <h2 className="text-2xl font-bold tracking-tight text-paper">
             Sounds like your kind of evening?
           </h2>
           <div className="mt-6">
-            <ButtonLink href="/explore" variant="paper" size="lg">
+            <ButtonLink href="/explore" size="lg">
               Find your table
             </ButtonLink>
           </div>

@@ -3,11 +3,15 @@ import { cn } from "./cn";
 
 type Tone = "accent" | "spark" | "sage" | "neutral";
 
+/*
+ * Flat pastel chips with an ink hairline (sinqlo's `.small-detail`), not
+ * low-opacity tints of the accent. Ink on every pastel clears AA comfortably.
+ */
 const toneClasses: Record<Tone, string> = {
-  accent: "bg-accent/10 text-accent",
-  spark: "bg-accent-2/15 text-[color-mix(in_srgb,var(--accent-2)_60%,var(--ink))]",
-  sage: "bg-sage/15 text-sage",
-  neutral: "bg-ink/5 text-ink-soft",
+  accent: "bg-chip-yellow text-ink",
+  spark: "bg-chip-coral text-ink",
+  sage: "bg-chip-green text-ink",
+  neutral: "bg-band text-ink",
 };
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
@@ -18,7 +22,7 @@ export function Badge({ tone = "neutral", className, ...props }: BadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-3 py-1 text-[13px] font-medium uppercase tracking-wide",
+        "inline-flex items-center gap-1 rounded-card border border-chip-beige px-2.5 py-1 text-[13px] font-medium",
         toneClasses[tone],
         className,
       )}

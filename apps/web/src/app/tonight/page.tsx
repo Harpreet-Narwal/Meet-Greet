@@ -68,7 +68,7 @@ export default async function TonightPage() {
             </h1>
             <p className="mt-2 text-[16px] font-medium">
               {formatEventDate(next.event.starts_at)} IST ·{" "}
-              <span className="text-accent">{daysUntil(next.event.starts_at)}</span>
+              <span className="text-accent-ink">{daysUntil(next.event.starts_at)}</span>
             </p>
             <p className="mt-3 max-w-md text-[15px] leading-relaxed text-ink-soft">
               {next.event.status === "revealed"

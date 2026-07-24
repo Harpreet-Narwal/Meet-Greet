@@ -101,7 +101,7 @@ export function ResultReveal() {
             <h1 className="mt-4 text-[30px] font-bold leading-tight tracking-tight">
               {firstName ? `${firstName}, you're a` : "You're a"}
               <br />
-              <span className="text-accent">{personality.archetype}</span>
+              <span className="text-accent-ink">{personality.archetype}</span>
             </h1>
 
             <div className="mt-7 flex flex-col gap-3 text-left">

@@ -22,7 +22,9 @@ export function EventCard({ event }: { event: PublicEvent }) {
           {almostFull ? <Badge tone="spark">{event.seats_left} seats left</Badge> : null}
           {event.seats_left === 0 ? <Badge tone="neutral">Waitlist open</Badge> : null}
         </div>
-        <h3 className="mt-4 text-lg font-bold leading-snug">{event.title}</h3>
+        {/* h2, not h3: on /explore and /cities/[city] the grid follows the h1
+            directly, and skipping a level trips the heading-order a11y audit. */}
+        <h2 className="mt-4 text-lg font-bold leading-snug">{event.title}</h2>
         <p className="mt-1.5 text-[14px] text-ink-soft">{formatEventDate(event.starts_at)} IST</p>
         {event.neighborhood_teaser ? (
           <p className="mt-2 flex-1 text-[14px] leading-relaxed text-ink-soft">

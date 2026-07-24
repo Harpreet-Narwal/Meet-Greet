@@ -13,7 +13,7 @@ body {
 
 ::selection {
   background: var(--accent);
-  color: var(--paper);
+  color: var(--on-accent); /* ink-on-orange: paper-on-orange is only 2.5:1 */
 }
 
 h1,

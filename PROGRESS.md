@@ -273,3 +273,43 @@
 
 ### Blockers
 - none
+
+### Decisions (palette application pass, 2026-07-24)
+Operator reported twice that the theme "still looks the same". Diagnosis: the
+tokens **were** already sinqlo's exact palette (verified against their live
+`themes/sinqlo/style.css` — `#f9f9f6` `#231f20` `#ff832c` `#ff847e` `#ffff97`
+`#c4f3c4` `#bde2f8` `#e6e4dd` all match). The problem was *distribution*, not hue:
+the retheme swapped hex values while keeping the old layout of colour — orange
+fill on every button and CTA band, pastels reduced to 8px dots — so it read as
+the old terracotta design. Copying sinqlo's hexes alone cannot look different,
+because their scheme is the same warm-orange-on-off-white family.
+
+- **Primary button is pastel green with an ink hairline, 12px radius** (sinqlo's
+  `.green-button`), not an orange pill. Orange moved to a new `accent` variant.
+  This is the single highest-leverage change — buttons appear on every page.
+- **Sections are flat pastel blocks** (`bg-chip-beige`, `bg-chip-green`) instead
+  of three near-identical off-whites; pricing tiers are white/yellow/green per
+  `.pricing-card:nth-child(n)`; CTA bands are ink with a green button.
+- **New `Mark` component** — marker-pen highlight behind headline words
+  (sinqlo `.ellipse-text span`). Uses `<mark>` so emphasis survives unstyled.
+- **Cards are flat**: beige hairline, no drop shadow — depth comes from the
+  colour block, not elevation.
+- **New `--accent-ink` token.** `#ff832c` as *text* on paper is 2.33:1 and fails
+  AA; it works only as a fill. Coloured type now uses `#a34600` (5.8:1) in light
+  and stays `#ff832c` in dark (7.3:1 on `--paper`). This was a real pre-existing
+  a11y bug introduced with the orange retheme, found by the new audit below.
+- **New `--ink-muted` token** for body copy on pastel fills: `--ink-soft` lands
+  at 4.4:1 on beige/green (fails). `#484344` is 7.6:1.
+- **`EventCard` heading is h2, not h3** — on /explore and /cities/[city] the grid
+  follows the h1 directly, so h3 tripped the heading-order audit.
+- **New `pnpm --filter @mulaqat/web audit:contrast`** — walks every text node on
+  the public pages in both colour schemes, resolves Tailwind's
+  `color-mix(in oklab,…)` output, and fails on any pair under AA. It caught 7 real
+  contrast defects this pass; keeping it as a standing gate.
+
+Verified: lint+typecheck+build green; contrast audit clean (light + dark);
+Lighthouse perf 0.98 / a11y 1.00 / SEO 1.00 / best-practices 1.00 on all three
+public URLs (a11y was 0.98 on /cities/bangalore before the heading fix).
+
+### Blockers
+- none

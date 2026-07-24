@@ -96,7 +96,7 @@ export default async function EventPage({ params }: Params) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <header className="nav-blur sticky top-0 z-50 border-b border-line/60">
+      <header className="nav-blur sticky top-0 z-50 border-b border-chip-beige">
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-3.5">
           <Link href="/" aria-label="Mulaqat home">
             <Logo size={26} />
@@ -138,7 +138,7 @@ export default async function EventPage({ params }: Params) {
             </>
           ) : (
             <>
-              <p className="text-[13px] font-semibold uppercase tracking-wide text-accent">
+              <p className="text-[13px] font-semibold uppercase tracking-wide text-accent-ink">
                 Venue revealed 24 hours before
               </p>
               <p className="mt-1 text-lg font-bold">

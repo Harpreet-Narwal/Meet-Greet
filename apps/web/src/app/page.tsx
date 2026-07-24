@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Badge, ButtonLink, Card } from "@mulaqat/ui";
+import { Badge, ButtonLink, Card, Mark } from "@mulaqat/ui";
 
 import { MarketingFooter } from "@/components/marketing-footer";
 import { MarketingNav } from "@/components/marketing-nav";
@@ -100,7 +100,7 @@ export default function LandingPage() {
             </Badge>
             <h1 className="text-[clamp(2.6rem,6.5vw,4.5rem)] font-bold leading-[1.02] tracking-[-0.03em]">
               the table for{" "}
-              <span className="text-accent">six strangers</span>
+              <Mark tone="yellow">six strangers</Mark>
             </h1>
             <p className="mt-4 text-[clamp(1.4rem,3vw,2rem)] font-bold leading-tight tracking-tight">
               more real friends.
@@ -150,7 +150,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── Pain points ("Why Mulaqat") ──────────────────────── */}
-        <section id="why" className="border-y border-line bg-band scroll-mt-20">
+        <section id="why" className="border-y border-chip-beige bg-chip-beige scroll-mt-20">
           <div className="mx-auto w-full max-w-6xl px-6 py-24">
             <Reveal>
               <h2 className="max-w-2xl text-[clamp(1.8rem,3.5vw,2.5rem)] font-bold leading-tight tracking-tight">
@@ -178,8 +178,8 @@ export default function LandingPage() {
           <Reveal>
             <span className="text-5xl" aria-hidden>🪑</span>
             <h2 className="mt-5 text-[clamp(1.9rem,4vw,2.8rem)] font-bold leading-tight tracking-tight">
-              get a great table{" "}
-              <span className="text-accent">while your phone stays in your pocket.</span>
+              get a great table while your phone stays{" "}
+              <Mark tone="green">in your pocket.</Mark>
             </h2>
             <p className="mx-auto mt-5 max-w-lg text-[16px] leading-relaxed text-ink-soft">
               Mulaqat handles the matching, the venue, the ice-breakers and the follow-up —
@@ -194,14 +194,16 @@ export default function LandingPage() {
         </section>
 
         {/* ── Formats showcase ─────────────────────────────────── */}
-        <section className="border-y border-line bg-band">
+        <section className="border-y border-chip-beige bg-chip-green">
           <div className="mx-auto w-full max-w-6xl px-6 py-24">
             <Reveal>
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <h2 className="text-[clamp(1.8rem,3.5vw,2.5rem)] font-bold tracking-tight">
                   More than dinner.
                 </h2>
-                <p className="max-w-xs text-[15px] text-ink-soft">
+                {/* ink/75 rather than ink-soft: ink-soft on pastel green is 4.5:1
+                    exactly, too close to the AA floor to ship. */}
+                <p className="max-w-xs text-[15px] text-ink-muted">
                   Different nights, different speeds — same six-people magic.
                 </p>
               </div>
@@ -262,7 +264,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── Feature blocks: at the table / after the table ───── */}
-        <section className="border-y border-line bg-band">
+        <section className="border-y border-chip-beige bg-chip-beige">
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-20 px-6 py-24">
             <div className="grid items-center gap-10 lg:grid-cols-2">
               <Reveal>
@@ -270,7 +272,7 @@ export default function LandingPage() {
                 <h2 className="text-[clamp(1.7rem,3vw,2.2rem)] font-bold leading-tight tracking-tight">
                   Games that do the talking until you do.
                 </h2>
-                <p className="mt-4 max-w-md text-[15px] leading-relaxed text-ink-soft">
+                <p className="mt-4 max-w-md text-[15px] leading-relaxed text-ink-muted">
                   Every table gets a synced deck on your phones: ice-breakers that go exactly as
                   deep as the table votes, spicy-but-safe hot takes, desi trivia, and everyone&apos;s
                   two truths and a lie — collected at booking, revealed at dinner.
@@ -314,7 +316,7 @@ export default function LandingPage() {
                 <h2 className="text-[clamp(1.7rem,3vw,2.2rem)] font-bold leading-tight tracking-tight">
                   Keep the good ones. Quietly.
                 </h2>
-                <p className="mt-4 max-w-md text-[15px] leading-relaxed text-ink-soft">
+                <p className="mt-4 max-w-md text-[15px] leading-relaxed text-ink-muted">
                   Connect with anyone from your table — mutual connects open a chat, and the
                   table gets a 7-day group chat for round two. Feeling something more? Send a
                   Spark. They&apos;ll only ever know if they Spark you back.
@@ -354,7 +356,7 @@ export default function LandingPage() {
               <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-ink-soft">
                 Meeting strangers should feel exciting, not risky. Safety is the foundation —
                 and it is <span className="font-semibold text-ink">never a paid feature</span>.{" "}
-                <Link href="/safety" className="font-semibold text-accent underline-offset-4 hover:underline">
+                <Link href="/safety" className="font-semibold text-accent-ink underline-offset-4 hover:underline">
                   Read how →
                 </Link>
               </p>
@@ -381,7 +383,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── Pricing teaser ───────────────────────────────────── */}
-        <section className="border-y border-line bg-band">
+        <section className="border-y border-chip-beige bg-paper">
           <div className="mx-auto w-full max-w-6xl px-6 py-24">
             <Reveal>
               <h2 className="text-center text-[clamp(1.8rem,3.5vw,2.5rem)] font-bold tracking-tight">
@@ -395,6 +397,7 @@ export default function LandingPage() {
                   price: "₹0",
                   cadence: "forever",
                   points: ["Book any event at full price", "3 Connects per event", "Your personality card"],
+                  tone: "surface" as const,
                   highlight: false,
                 },
                 {
@@ -402,6 +405,7 @@ export default function LandingPage() {
                   price: formatINR(499),
                   cadence: "per month",
                   points: ["Unlimited Connects", "See who Sparked you (mutuals first)", "Priority seats on sold-out tables"],
+                  tone: "yellow" as const,
                   highlight: true,
                 },
                 {
@@ -409,21 +413,19 @@ export default function LandingPage() {
                   price: formatINR(1499),
                   cadence: "per month",
                   points: ["Guaranteed weekly seat", "Premium venues", "Table-composition preferences"],
+                  tone: "green" as const,
                   highlight: false,
                 },
               ].map((plan, index) => (
                 <Reveal key={plan.tier} delay={index * 100}>
-                  <Card
-                    large
-                    className={`flex h-full flex-col p-8 ${plan.highlight ? "border-accent/60 bg-accent/[0.04]" : ""}`}
-                  >
+                  <Card large tone={plan.tone} className="flex h-full flex-col p-8">
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-bold">{plan.tier}</h3>
-                      {plan.highlight ? <Badge tone="accent">Popular</Badge> : null}
+                      {plan.highlight ? <Badge tone="spark">Popular</Badge> : null}
                     </div>
                     <p className="mt-3 text-3xl font-bold tracking-tight">
                       {plan.price}
-                      <span className="text-[14px] font-normal text-ink-soft"> {plan.cadence}</span>
+                      <span className="text-[14px] font-normal text-ink-muted"> {plan.cadence}</span>
                     </p>
                     <ul className="mt-5 flex flex-1 flex-col gap-2.5">
                       {plan.points.map((point) => (
@@ -456,7 +458,7 @@ export default function LandingPage() {
             {FAQS.map((faq) => (
               <details
                 key={faq.q}
-                className="group rounded-card-lg border border-line bg-surface shadow-soft"
+                className="group rounded-card border border-chip-beige bg-surface"
               >
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-[16px] font-bold [&::-webkit-details-marker]:hidden">
                   {faq.q}
@@ -474,17 +476,20 @@ export default function LandingPage() {
         </section>
 
         {/* ── CTA band ─────────────────────────────────────────── */}
-        <section className="bg-accent">
+        {/* Ink band, green button — the one high-contrast moment on the page.
+            `bg-ink`/`text-paper` invert together in dark mode, so it stays a
+            contrast band rather than becoming a light-on-light dead zone. */}
+        <section className="bg-ink">
           <div className="mx-auto w-full max-w-6xl px-6 py-20 text-center sm:py-24">
             <Reveal>
-              <h2 className="text-[clamp(2rem,4.5vw,3rem)] font-bold tracking-tight text-on-accent">
+              <h2 className="text-[clamp(2rem,4.5vw,3rem)] font-bold tracking-tight text-paper">
                 Your Wednesday table awaits.
               </h2>
-              <p className="mt-4 text-lg text-on-accent/75">
+              <p className="mt-4 text-lg text-paper/75">
                 Chai&apos;s on them if you&apos;re late.
               </p>
               <div className="mt-9">
-                <ButtonLink href="/explore" variant="paper" size="lg">
+                <ButtonLink href="/explore" size="lg">
                   Find your table
                 </ButtonLink>
               </div>

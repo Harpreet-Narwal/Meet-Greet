@@ -117,7 +117,7 @@ export function TableReveal({ eventId }: { eventId: string }) {
                     <h1 className="mt-4 text-2xl font-bold tracking-tight">
                       Venue unlocks in
                     </h1>
-                    <p className="mt-2 font-mono text-3xl font-bold text-accent" data-testid="countdown">
+                    <p className="mt-2 font-mono text-3xl font-bold text-accent-ink" data-testid="countdown">
                       {countdown}
                     </p>
                     <p className="mt-4 text-[15px] text-ink-soft">
@@ -147,7 +147,7 @@ export function TableReveal({ eventId }: { eventId: string }) {
                         href={`https://maps.google.com/?q=${table.venue?.lat},${table.venue?.lng}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[14px] font-semibold text-accent underline-offset-4 hover:underline"
+                        className="text-[14px] font-semibold text-accent-ink underline-offset-4 hover:underline"
                       >
                         Directions →
                       </a>

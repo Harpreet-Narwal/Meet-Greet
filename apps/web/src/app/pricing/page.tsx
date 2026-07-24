@@ -71,7 +71,7 @@ export default function PricingPage() {
       <MarketingNav />
       <main className="mx-auto w-full max-w-5xl px-6 py-16">
         <h1 className="text-[clamp(2.2rem,5vw,3.2rem)] font-bold leading-tight tracking-tight">
-          Simple prices,<br /><span className="text-accent">honest ones.</span>
+          Simple prices,<br /><span className="text-accent-ink">honest ones.</span>
         </h1>
         <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-ink-soft">
           Booking fees cover curation and your host — food and drinks go straight to the

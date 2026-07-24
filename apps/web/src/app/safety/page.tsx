@@ -48,7 +48,7 @@ export default function SafetyPage() {
       <MarketingNav />
       <main className="mx-auto w-full max-w-4xl px-6 py-16">
         <h1 className="text-[clamp(2.2rem,5vw,3.2rem)] font-bold leading-tight tracking-tight">
-          Excitement is the point.<br /><span className="text-accent">Risk isn&apos;t.</span>
+          Excitement is the point.<br /><span className="text-accent-ink">Risk isn&apos;t.</span>
         </h1>
         <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-ink-soft">
           Meeting strangers only works when everyone feels safe doing it. This is the
@@ -86,7 +86,7 @@ export default function SafetyPage() {
           <h2 className="text-lg font-bold">Something didn&apos;t feel right?</h2>
           <p className="mt-2 max-w-lg text-[15px] leading-relaxed text-ink-soft">
             Tell us — every report is read by a human and acted on. Write to{" "}
-            <a href="mailto:safety@mulaqat.app" className="font-semibold text-accent underline-offset-4 hover:underline">
+            <a href="mailto:safety@mulaqat.app" className="font-semibold text-accent-ink underline-offset-4 hover:underline">
               safety@mulaqat.app
             </a>{" "}
             or use the report button anywhere in the app.
