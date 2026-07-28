@@ -1,14 +1,35 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Instrument_Serif, JetBrains_Mono, Newsreader } from "next/font/google";
 
 import { BRAND_NAME, BRAND_NAME_DISPLAY } from "@mulaqat/types";
 
 import "./globals.css";
 
-const inter = Inter({
+/*
+ * Three faces, three jobs (docs/design-system.md §4). Self-hosted by next/font —
+ * no CDN request, no layout shift. Display carries the headlines and their
+ * italic counter-voice; body sets all reading text; mono handles every number
+ * the product shows — ₹399, "2 seats left", T-24:00:00, Table 03.
+ */
+const display = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--font-instrument-serif",
+});
+
+const body = Newsreader({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--font-newsreader",
+});
+
+const mono = JetBrains_Mono({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-inter",
+  variable: "--font-jetbrains-mono",
 });
 
 const description =
@@ -38,7 +59,7 @@ export const metadata: Metadata = {
 // Light is the default regardless of OS setting, so this is a single colour
 // rather than a prefers-color-scheme pair.
 export const viewport: Viewport = {
-  themeColor: "#fffefd",
+  themeColor: "#ede5d9",
 };
 
 const organizationJsonLd = {
@@ -54,7 +75,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     // suppressHydrationWarning: the head script stamps `js`/`data-theme` on
     // <html> pre-hydration by design
-    <html lang="en" className={inter.variable} data-theme="light" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${display.variable} ${body.variable} ${mono.variable}`}
+      data-theme="light"
+      suppressHydrationWarning
+    >
       <head>
         {/* Gate hidden-until-reveal styles on JS actually running (no-JS users see
             everything), and restore an opted-into dark theme before first paint.

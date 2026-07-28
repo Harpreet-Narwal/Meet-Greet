@@ -1,5 +1,62 @@
 # Mulaqat — Progress
 
+## "Quiet Editorial" retheme   [DONE — 2026-07-25, operator-directed]
+
+Reference: normalisboring.es (operator-supplied), studied and measured rather than copied.
+Full spec now lives in `docs/design-system.md` — that file supersedes the design section of
+`IMPLEMENTATION_PLAN.md` §8 and `plan-1-social-dining-app.md` §7. Supersedes the Hinge plum
+scheme below.
+
+- **Tokens** (`packages/ui/src/tokens.css`): warm beige ground `#ede5d9`, warm near-black ink
+  `#16120d`, clay `#b95440`, haldi `#c9a03f` (Spark only), neem `#5a6a4a`, plus a type/space
+  scale. Radius → 0, shadows → none. **Token names deliberately unchanged**, so the ~30 pages
+  nobody touched inherited the new language instead of breaking.
+- **Type**: three faces, three jobs — Instrument Serif (display + italic), Newsreader (body),
+  JetBrains Mono (labels, prices, countdowns, seat counts). All via `next/font`, CLS 0.
+- **Homepage** rebuilt: type-only hero with the mixed-face headline (roman caps + serif italic),
+  standfirst, marquee, 01–04 sequence, events as a typographic **index** (not photo cards —
+  crawlable text, no image LCP cost, distinctive), statement, Spark note, FAQ, CTA.
+- Marketing nav/footer, Button/Card/Badge squared; logo SVGs + OG cards recoloured (they were
+  still on the *orange* palette, stale through two rethemes).
+
+### Decisions
+- Three deliberate departures from the reference, each recorded in `docs/design-system.md` §2:
+  no blocking preloader (it would wreck the LCP/SEO gates we chose Next.js for); no fluid
+  `html { font-size: 1.04vw }` root (breaks browser zoom and user font-size — every token is
+  its own `clamp()` instead); body text floors at 16px (the reference runs ~11px).
+- Editorial language governs marketing surfaces; the app shell (booking, game room) adapts it
+  but keeps real touch targets and caps type at `--fs-h3`. A 9rem headline above a payment
+  button is hostile.
+- `Card` deliberately sets no padding: `cn` is plain clsx with no tailwind-merge, so a default
+  `p-*` would collide with the padding its 24 callers already pass (and Tailwind's source
+  order, not ours, would pick the winner). `large` is now visually inert, kept for compat.
+
+### Fixed along the way
+- **`Reveal` never fired** (site-wide, would have shipped as a blank page): the mask was moved
+  to `clip-path`, and Chromium clips an element's IntersectionObserver rect by its own
+  clip-path — so the observed node's intersection was permanently empty, the callback fired
+  once at ratio 0 and never again. The mask now lives on an inner `.reveal-inner`.
+- **Hero no longer depends on hydration**: it carries the LCP element, so it animates via CSS
+  (`.rise`) instead of the JS `Reveal`. Previously a hydration hiccup meant an invisible hero.
+- `Reveal` now also reveals elements already *above* the viewport, so landing mid-page (anchor
+  link, restored scroll) no longer leaves everything overhead permanently invisible.
+- Removed `<div>`-inside-`<h2>` (invalid nesting the parser rewrites, breaking hydration).
+- `contrast-audit.mjs` took a hardcoded `:3100`; a stale server from an old session silently
+  audited the wrong build and reported 758 phantom failures. Now `AUDIT_BASE_URL`-overridable.
+
+### Verified
+- `lint` + `typecheck` + unit tests green across all 4 workspaces.
+- Contrast audit: **all text pairs pass AA**, light and dark, across `/`, `/how-it-works`,
+  `/pricing`, `/safety`, `/explore`.
+- Lighthouse (`/`, `/cities/bangalore`, `/events/[slug]`): **SEO 1.00, A11y 1.00,
+  Best-practices 1.00, Performance 0.94–0.95, CLS 0**. Gates (SEO ≥ 0.95, Perf ≥ 0.90) met.
+  Perf is ~0.03 below the previous single-font build — the cost of three families; still
+  clear of the gate, worth revisiting if it drifts.
+- Screenshots captured desktop light/dark + mobile.
+
+### Blockers
+- none. Changes are uncommitted on `main` — no commit was requested.
+
 ## Homepage redesign + retheme   [DONE — 2026-07-19, operator-directed]
 - Palette rethemed per operator direction (reference: sinqlo.com scheme): warm off-white #f9f9f6,
   ink #231f20, ONE vivid orange accent #ff832c, coral spark #ff847e, pastel chips (yellow/green/

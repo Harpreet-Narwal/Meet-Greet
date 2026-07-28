@@ -7,13 +7,16 @@
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-weight: 300;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
   background: var(--accent);
-  color: var(--on-accent); /* ink-on-orange: paper-on-orange is only 2.5:1 */
+  color: var(--on-accent);
 }
 
 h1,
@@ -26,18 +29,192 @@ p {
   text-wrap: pretty;
 }
 
-/* ── Scroll reveal (progressive enhancement: hidden state needs html.js) ── */
-html.js .reveal {
-  opacity: 0;
-  transform: translateY(18px);
-  transition:
-    opacity 0.7s ease,
-    transform 0.7s cubic-bezier(0.32, 0.72, 0, 1);
+/* ──────────────────────────────────────────────────────────────────────────
+ * Editorial primitives (docs/design-system.md).
+ * ────────────────────────────────────────────────────────────────────────── */
+
+/* Uppercase mono micro-label. Tracking is mandatory — uppercase without it
+   reads as broken. Used for eyebrows, meta, prices, seat counts, dates. */
+.label {
+  font-family: var(--font-jetbrains-mono), ui-monospace, Menlo, monospace;
+  font-size: var(--fs-label);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
 }
 
-html.js .reveal.revealed {
+/* The display voice: roman caps, negative leading, tight tracking. One phrase
+   per headline switches to `em` — lowercase serif italic — and carries the
+   human half of the sentence. Use it once per view; it is punctuation. */
+.display {
+  font-family: var(--font-instrument-serif), Georgia, serif;
+  font-weight: 400;
+  line-height: var(--lh-display);
+  letter-spacing: var(--track-display);
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.display em {
+  font-style: italic;
+  text-transform: lowercase;
+}
+
+.measure {
+  max-width: var(--measure);
+}
+
+/* ── Load-in mask, for ABOVE-THE-FOLD content only.
+ *
+ * Deliberately a CSS animation rather than the JS `Reveal` component: the hero
+ * carries the LCP element, so it must never depend on React hydration to become
+ * visible. `both` fill means it always lands revealed even if the animation is
+ * interrupted, and the `html.js` gate keeps no-JS visitors at the final state. ── */
+html.js .rise {
+  animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 105% 0);
+    transform: translateY(0.35em);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 -20% 0);
+    transform: none;
+  }
+}
+
+/* ── Scroll reveal: mask upward, for BELOW-the-fold sections (progressive
+      enhancement — the hidden state is gated on html.js so no-JS visitors
+      see everything). ── */
+/* The mask sits on `.reveal-inner`, never on `.reveal` itself — Chromium clips
+   an element's IntersectionObserver rect by its own clip-path, so masking the
+   observed node would stop it ever intersecting. See components/reveal.tsx. */
+html.js .reveal .reveal-inner {
+  opacity: 0;
+  clip-path: inset(0 0 105% 0);
+  transform: translateY(0.35em);
+  transition:
+    opacity 0.5s ease,
+    clip-path 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.js .reveal.revealed .reveal-inner {
   opacity: 1;
+  clip-path: inset(0 0 -20% 0);
   transform: none;
+}
+
+/* ── Event index: the listing is a typographic index, not a grid of photo
+      cards. Real crawlable text, instant paint, and it scales to 40 events
+      without becoming a wall of stock photography. ── */
+.index-row {
+  position: relative;
+  isolation: isolate;
+  border-top: 1px solid var(--line);
+}
+
+.index-row:last-of-type {
+  border-bottom: 1px solid var(--line);
+}
+
+.index-row::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(var(--gutter) * -0.35);
+  z-index: -1;
+  background: var(--band);
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.index-row:hover::before,
+.index-row:focus-visible::before {
+  opacity: 1;
+}
+
+.index-row .index-name {
+  display: inline-block;
+  position: relative;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.index-row .index-name::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.15em;
+  width: 100%;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.index-row:hover .index-name {
+  transform: translateX(0.4rem);
+}
+
+.index-row:hover .index-name::after {
+  transform: scaleX(1);
+}
+
+.index-row[aria-disabled="true"] {
+  opacity: 0.55;
+}
+
+.index-row[aria-disabled="true"]:hover .index-name {
+  transform: none;
+}
+
+.index-row[aria-disabled="true"]:hover .index-name::after {
+  transform: scaleX(0);
+}
+
+/* ── Marquee: padding (not gap) keeps every item the same width so the
+      -50% translate loops seamlessly. ── */
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  border-block: 1px solid var(--line);
+}
+
+.marquee-track {
+  display: inline-flex;
+  animation: marquee-slide 42s linear infinite;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+.marquee-track > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5rem;
+  padding-inline-end: 2.5rem;
+  font-family: var(--font-instrument-serif), Georgia, serif;
+  font-size: var(--fs-h3);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.marquee-track > span::after {
+  content: "·";
+  color: var(--accent);
+}
+
+@keyframes marquee-slide {
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 /* ── Hero table scene ── */
@@ -109,12 +286,12 @@ html.js .table-scene .you-glow {
 .table-chip {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 999px;
-  box-shadow: var(--shadow-soft);
   color: var(--ink-soft);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-family: var(--font-jetbrains-mono), ui-monospace, Menlo, monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
   padding: 6px 12px;
   white-space: nowrap;
 }
@@ -125,19 +302,25 @@ html.js .table-chip {
   animation: seat-in 0.6s ease forwards;
 }
 
-/* ── Frosted nav ── */
+/* ── Nav ── */
 .nav-blur {
-  background: color-mix(in srgb, var(--paper) 82%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--paper) 84%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.js .reveal,
+  html.js .reveal .reveal-inner,
+  html.js .rise,
   html.js .table-scene .seat,
   html.js .table-chip {
     opacity: 1;
+    clip-path: none;
     transform: none;
+    animation: none;
+  }
+
+  .marquee-track {
     animation: none;
   }
 }

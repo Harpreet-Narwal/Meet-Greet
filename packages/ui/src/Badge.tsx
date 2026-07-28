@@ -19,7 +19,9 @@ export function Badge({ tone = "neutral", className, ...props }: BadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-3 py-1 text-[13px] font-medium",
+        // Square mono chip — reads as a filed fact, not a marketing pill.
+        "inline-flex items-center gap-1.5 px-2.5 py-1",
+        "font-mono uppercase tracking-[0.16em] text-label font-medium tabular-nums",
         toneClasses[tone],
         className,
       )}

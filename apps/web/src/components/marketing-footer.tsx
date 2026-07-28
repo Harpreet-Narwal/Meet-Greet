@@ -4,11 +4,11 @@ import { LogoMark } from "@mulaqat/ui";
 
 const COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
   {
-    title: "Product",
+    title: "Tables",
     links: [
       { href: "/explore", label: "Explore events" },
       { href: "/how-it-works", label: "How it works" },
-      { href: "/pricing", label: "Pricing" },
+      { href: "/pricing", label: "Membership" },
       { href: "/safety", label: "Safety" },
     ],
   },
@@ -24,37 +24,44 @@ const COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
   {
     title: "Cities",
     links: [
-      { href: "/cities/bangalore", label: "Bengaluru" },
-      { href: "/cities/mumbai", label: "Mumbai (up next)" },
+      { href: "/cities/bangalore", label: "Bengaluru — live" },
+      { href: "/cities/mumbai", label: "Mumbai — soon" },
     ],
   },
 ];
 
+/*
+ * Editorial footer: the email is the loudest thing here, set in the display
+ * face. Everything else stays quiet mono.
+ */
 export function MarketingFooter() {
   return (
-    <footer className="border-t border-line bg-band">
-      <div className="mx-auto w-full max-w-6xl px-6 py-14">
+    <footer className="border-t border-line">
+      <div className="w-full px-[var(--gutter)] py-[var(--section-sm)]">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
+          <div className="flex flex-col items-start">
             <span className="inline-flex items-center gap-2.5">
-              <LogoMark size={26} className="text-ink" />
-              <span className="text-lg font-bold lowercase tracking-tight">mulaqat</span>
+              <LogoMark size={20} className="text-ink" />
+              <span className="label !text-ink">Mulaqat</span>
             </span>
-            <p className="mt-3 max-w-[24ch] text-[14px] leading-relaxed text-ink-soft">
-              Dinner with six strangers, chosen for you. Good tables, better company.
-            </p>
+            <span className="label mt-8">Get in touch</span>
+            <a
+              href="mailto:hello@mulaqat.app"
+              className="mt-1 font-display text-h3 transition-colors hover:text-accent-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              hello@mulaqat.app
+            </a>
           </div>
+
           {COLUMNS.map((column) => (
             <nav key={column.title} aria-label={column.title}>
-              <h2 className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft">
-                {column.title}
-              </h2>
-              <ul className="mt-3 flex flex-col gap-2.5">
+              <h2 className="label">{column.title}</h2>
+              <ul className="mt-4 flex flex-col gap-2.5">
                 {column.links.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-[15px] font-medium text-ink transition-colors hover:text-accent-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                      className="text-ink-soft transition-colors hover:text-accent-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                     >
                       {link.label}
                     </Link>
@@ -64,14 +71,10 @@ export function MarketingFooter() {
             </nav>
           ))}
         </div>
-        <div className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6 text-[13px] text-ink-soft">
-          <span>© {new Date().getFullYear()} mulaqat — made with chai in Bengaluru</span>
-          <a
-            href="mailto:hello@mulaqat.app"
-            className="font-medium hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          >
-            hello@mulaqat.app
-          </a>
+
+        <div className="label mt-[var(--section-sm)] flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6">
+          <span>Mulaqat ©{new Date().getFullYear()} — made with chai in Bengaluru</span>
+          <span>Privacy · Terms · Safety</span>
         </div>
       </div>
     </footer>

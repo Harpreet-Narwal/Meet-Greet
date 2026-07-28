@@ -14,21 +14,32 @@ const toneClasses: Record<Tone, string> = {
 };
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  /** Larger radius for hero/feature cards. */
+  /**
+   * Previously selected the larger corner radius. Under the Quiet Editorial
+   * scheme every block is square, so this no longer changes anything visually.
+   * Kept so the 20-odd existing callers keep compiling; safe to drop when they
+   * are next touched.
+   */
   large?: boolean;
-  /** Background fill. Pastel tones carry `text-ink` and stay AA at body sizes. */
+  /** Background fill. Tinted tones carry `text-ink` and stay AA at body sizes. */
   tone?: Tone;
 }
 
-export function Card({ large = false, tone = "surface", className, ...props }: CardProps) {
+export function Card({ large: _large = false, tone = "surface", className, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        // Hairline plus a soft lift — Hinge's cards sit slightly above the page
-        // rather than reading as flat colour blocks.
-        "border border-line/70 text-ink shadow-soft",
+        // Quiet Editorial: a square block sitting ON the paper — a hairline and
+        // a flat fill, no radius and no lift. Separation comes from space first,
+        // the rule second.
+        //
+        // Padding is deliberately NOT set here: `cn` is plain clsx with no
+        // tailwind-merge, so a default `p-*` would collide with the padding
+        // callers already pass (and Tailwind's source order, not ours, would
+        // pick the winner). One caller also wants zero padding for a full-bleed
+        // image.
+        "border border-line text-ink",
         toneClasses[tone],
-        large ? "rounded-card-lg" : "rounded-card",
         className,
       )}
       {...props}

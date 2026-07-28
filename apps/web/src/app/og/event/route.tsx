@@ -7,11 +7,11 @@ export const runtime = "edge";
  * Dynamic OG image for event pages (plan §8). 1200×630. Brand hex inlined —
  * satori can't read CSS custom properties (documented exception in PROGRESS.md).
  */
-const PAPER = "#f9f9f6";
-const INK = "#231f20";
-const INK_SOFT = "#6c6766";
-const ORANGE = "#ff832c";
-const CORAL = "#ff847e";
+const PAPER = "#ede5d9";
+const INK = "#16120d";
+const INK_SOFT = "#6e6459";
+const CLAY = "#b95440";
+const HALDI = "#c9a03f";
 
 const TYPE_LABEL: Record<string, string> = {
   dinner: "Dinner for Six",
@@ -42,7 +42,7 @@ function mark(size: number) {
           width: size * 0.34,
           height: size * 0.34,
           borderRadius: 9999,
-          background: ORANGE,
+          background: CLAY,
         }}
       />
       {positions.map((p, i) => (
@@ -55,7 +55,7 @@ function mark(size: number) {
             width: dot * 2,
             height: dot * 2,
             borderRadius: 9999,
-            background: p.you ? CORAL : INK,
+            background: p.you ? HALDI : INK,
           }}
         />
       ))}
@@ -84,7 +84,7 @@ export function GET(request: NextRequest): ImageResponse {
       >
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", flex: 1 }}>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", fontSize: 30, color: ORANGE, fontWeight: 700, letterSpacing: 1 }}>
+            <div style={{ display: "flex", fontSize: 30, color: CLAY, fontWeight: 700, letterSpacing: 1 }}>
               {(TYPE_LABEL[type] ?? "Mulaqat").toUpperCase()}
             </div>
             <div style={{ display: "flex", fontSize: 68, fontWeight: 700, marginTop: 20, letterSpacing: -2, lineHeight: 1.05, maxWidth: 760 }}>

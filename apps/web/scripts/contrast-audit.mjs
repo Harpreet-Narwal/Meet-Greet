@@ -1,5 +1,9 @@
 import { chromium } from '@playwright/test';
 const b = await chromium.launch();
+// Override when the app is served somewhere else (a second local build, CI).
+// Hardcoding this once meant a stale server on the default port silently
+// audited the wrong build.
+const BASE = process.env.AUDIT_BASE_URL ?? 'http://127.0.0.1:3100';
 const URLS = ['/', '/how-it-works', '/pricing', '/safety', '/explore'];
 let bad = 0;
 for (const scheme of ['light','dark']) {
@@ -9,7 +13,7 @@ for (const scheme of ['light','dark']) {
   await ctx.addInitScript(t => { try { localStorage.setItem('mulaqat-theme', t); } catch {} }, scheme);
   const p = await ctx.newPage();
   for (const u of URLS) {
-    await p.goto('http://127.0.0.1:3100'+u, {waitUntil:'networkidle'});
+    await p.goto(BASE+u, {waitUntil:'networkidle'});
     const applied = await p.evaluate(()=>document.documentElement.dataset.theme);
     if (applied !== scheme) throw new Error(`theme did not apply: wanted ${scheme}, got ${applied} on ${u}`);
     await p.evaluate(()=>document.querySelectorAll('.reveal').forEach(e=>e.classList.add('revealed')));

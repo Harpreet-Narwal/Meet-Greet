@@ -1,75 +1,85 @@
 /*
- * Mulaqat design tokens — single source of truth for color, radius, shadow, motion.
- * Palette rethemed 2026-07-24 per operator direction to a Hinge-style scheme,
- * sampled from hinge.co's own stylesheets: warm-white base (#fffefd), slate ink
- * (#2b333f) rather than pure black, deep plum accent (#67295f), with warm yellow
- * (#ffcc66) and soft blue (#66a8cc) as secondaries. Components never use raw hex
- * — only these vars or the Tailwind utilities mapped in @theme.
+ * Mulaqat design tokens — single source of truth for colour, type, space, motion.
+ *
+ * Rethemed 2026-07-24 to "Quiet Editorial" per operator direction, reference
+ * normalisboring.es (studied, not copied — see docs/design-system.md). What that
+ * reference actually is: warm beige ground, extreme display/body type contrast,
+ * negative leading, mixed-face headlines (roman caps + ultralight serif italic),
+ * and space instead of cards. Supersedes the Hinge plum scheme.
+ *
+ * Token NAMES are deliberately unchanged from the previous scheme so every page
+ * that already consumes them inherits the new look rather than breaking.
+ *
+ * Components never use raw hex — only these vars or the Tailwind utilities
+ * mapped in @theme below.
  *
  * Light is the DEFAULT and is not tied to the OS setting: <html data-theme>
  * decides, and the layout stamps "light" unless the visitor has opted into dark.
  *
- * Contrast notes (AA): plum #67295f carries white text at 10.2:1 and also works
- * as body text on paper at 10.2:1 — unlike the previous orange, which was a
- * fill-only colour. --ink-soft #4d4d4d is 8.4:1 on paper.
+ * Contrast (AA, measured on --paper #EDE5D9):
+ *   --ink        15.1:1    --ink-soft   7.5:1    --ink-muted 4.6:1
+ *   --accent-ink  5.4:1    --sage       4.6:1    white on --accent 5.3:1
+ * --accent (#B95440) is 4.2:1 on paper: a FILL and large-display colour only,
+ * never small body text. Use --accent-ink when the clay must set type.
  */
 
 :root,
 [data-theme="light"] {
-  --paper: #fffefd;
-  --ink: #2b333f; /* Hinge's slate — softer and warmer than #000 */
-  --accent: #67295f; /* deep plum — primary actions, the brand */
-  --accent-2: #9c3f77; /* lighter plum — sparks, celebration, "you" */
-  --sage: #2f7d46; /* success, verified (5.1:1 on paper) */
-  --danger: #c1352b; /* darkened for AA: white on it is 5.5:1 */
+  --paper: #ede5d9; /* warm beige ground */
+  --ink: #16120d; /* warm near-black */
+  --accent: #b95440; /* clay — fills, rules, hover, large display */
+  --accent-2: #c9a03f; /* haldi — RESERVED for the mutual-Spark moment */
+  --sage: #5a6a4a; /* verified / success (darkened for AA as text) */
+  --danger: #9e3b30;
 
   /* Text on accent fills, and the accent used AS text. */
-  --on-accent: #ffffff;
-  --accent-ink: #67295f;
+  --on-accent: #ffffff; /* 5.3:1 on clay; paper-on-clay is only 4.2 */
+  --accent-ink: #9e4632; /* darkened clay, safe for body-size type */
 
-  --surface: #ffffff;
-  --band: #f6f4f2; /* alternating section background */
-  --ink-soft: #4d4d4d;
-  --ink-muted: #414954; /* body copy on tinted fills */
-  --line: #d1d1d1;
+  --surface: #e7ded0; /* a warmer block, not a lifted card */
+  --band: #e3d9c9; /* alternating section background */
+  --ink-soft: #4a423a;
+  --ink-muted: #6e6459; /* meta, captions */
+  --line: #c9bfb0; /* hairline rules */
 
-  /* soft tints — subtle highlights and chips, backgrounds only (never text) */
-  --chip-yellow: #ffe9bf;
-  --chip-green: #d7ead9;
-  --chip-blue: #d6e8f2;
-  --chip-coral: #f0dbe9; /* plum tint */
-  --chip-beige: #efece8;
+  /* soft tints — chips and fills, backgrounds only (never text) */
+  --chip-yellow: #e8d9b4;
+  --chip-green: #d6dcc8;
+  --chip-blue: #cfdae1;
+  --chip-coral: #e8d2c6;
+  --chip-beige: #e3d9c9;
 
-  /* Hinge geometry: pill buttons, generously rounded cards. */
-  --radius-card: 16px;
-  --radius-card-lg: 24px;
-  --shadow-soft: 0 1px 2px rgb(43 51 63 / 0.06), 0 8px 24px rgb(43 51 63 / 0.08);
+  /* Editorial geometry: square. Content sits ON the paper, it does not float. */
+  --radius-card: 0px;
+  --radius-card-lg: 0px;
+  --shadow-soft: none;
+  --radius-media: 0.75rem; /* media is the only thing that rounds */
 
-  --spring-fast: 150ms cubic-bezier(0.32, 0.72, 0, 1);
-  --spring: 250ms cubic-bezier(0.32, 0.72, 0, 1);
+  --spring-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --spring: 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 [data-theme="dark"] {
-  --paper: #14161a;
-  --ink: #eef0f3;
-  --surface: #1b1e24;
-  --band: #191c21;
-  --ink-soft: #a8adb6;
-  --ink-muted: #c3c8d0;
-  --line: #2f343c;
-  /* Plum inverts: the fill lightens and takes dark text; as type it lightens too. */
-  --accent: #c98fbd;
-  --accent-2: #d9a5cd;
-  --on-accent: #1a1116;
-  --accent-ink: #d9a5cd;
-  --sage: #6bbf8a;
-  --danger: #e8746a;
-  --chip-yellow: #3d3421;
-  --chip-green: #22362a;
-  --chip-blue: #1f2f3a;
-  --chip-coral: #33222e;
-  --chip-beige: #2a2723;
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.35);
+  --paper: #15120e;
+  --ink: #ede5d9;
+  --surface: #1f1a15;
+  --band: #1f1a15;
+  --ink-soft: #b3a899;
+  --ink-muted: #8a8073;
+  --line: #3a332b;
+  /* Clay lifts on a dark ground so it keeps working as both fill and type. */
+  --accent: #d2694f;
+  --accent-ink: #de8067;
+  --accent-2: #d9ac50;
+  --on-accent: #15120e;
+  --sage: #a6b396;
+  --danger: #c4574a;
+  --chip-yellow: #352d1b;
+  --chip-green: #232a1e;
+  --chip-blue: #1e2830;
+  --chip-coral: #33241c;
+  --chip-beige: #262019;
+  --shadow-soft: none;
 }
 
 /*
@@ -78,7 +88,36 @@
  * <html data-theme>), not something the OS imposes on a first visit.
  */
 
-/* Map tokens into Tailwind 4 utilities: bg-paper, text-ink, bg-band, rounded-card, … */
+/* ──────────────────────────────────────────────────────────────────────────
+ * Type & space scale.
+ *
+ * Every size is its own clamp() rather than the reference's fluid root
+ * (`html { font-size: 1.0417vw }`) — overriding the root font-size breaks
+ * browser zoom and a reader's own font-size preference. Display type scales
+ * hard with the viewport; reading text barely moves and never drops below 16px.
+ * ────────────────────────────────────────────────────────────────────────── */
+:root {
+  --fs-display-xl: clamp(2.9rem, 9.5vw, 11rem); /* hero only, once per page */
+  --fs-display: clamp(2.2rem, 6.2vw, 7rem);
+  --fs-h2: clamp(1.75rem, 3.4vw, 3.6rem);
+  --fs-h3: clamp(1.15rem, 1.7vw, 1.9rem);
+  --fs-lead: clamp(1.1rem, 1.35vw, 1.5rem);
+  --fs-body: clamp(1rem, 1.05vw, 1.15rem); /* 16px floor */
+  --fs-small: clamp(0.875rem, 0.85vw, 0.95rem);
+  --fs-label: clamp(0.68rem, 0.7vw, 0.8rem);
+
+  --lh-display: 0.88; /* negative leading — the reference's signature */
+  --lh-body: 1.65;
+  --track-label: 0.16em;
+  --track-display: -0.02em;
+
+  --gutter: clamp(1.25rem, 3.2vw, 3.5rem);
+  --section: clamp(5rem, 12vw, 12rem);
+  --section-sm: clamp(3rem, 6vw, 6rem);
+  --measure: 62ch;
+}
+
+/* Map tokens into Tailwind 4 utilities: bg-paper, text-ink, font-display, … */
 @theme inline {
   --color-paper: var(--paper);
   --color-ink: var(--ink);
@@ -101,9 +140,22 @@
 
   --radius-card: var(--radius-card);
   --radius-card-lg: var(--radius-card-lg);
+  --radius-media: var(--radius-media);
   --shadow-soft: var(--shadow-soft);
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Three faces, three jobs — display (Instrument Serif), body (Newsreader),
+     micro/data (JetBrains Mono, for prices, countdowns, seats, table numbers). */
+  --font-display: var(--font-instrument-serif), Georgia, serif;
+  --font-sans: var(--font-newsreader), Georgia, serif;
+  --font-body: var(--font-newsreader), Georgia, serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, Menlo, monospace;
+
+  --text-display-xl: var(--fs-display-xl);
+  --text-display: var(--fs-display);
+  --text-h2: var(--fs-h2);
+  --text-h3: var(--fs-h3);
+  --text-lead: var(--fs-lead);
+  --text-label: var(--fs-label);
 }
 
 @media (prefers-reduced-motion: reduce) {
