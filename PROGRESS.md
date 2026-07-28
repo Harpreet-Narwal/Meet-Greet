@@ -48,6 +48,34 @@ on the operator's repo URL.
 - Ran the API e2e suite from the host rather than the container — the `api` service has no
   volume mounts, so its source is baked into the image and edits need a rebuild to land.
 
+### BLOCKER — Lighthouse performance on `/` in CI (gate NOT lowered)
+
+`ci-web` is now green through the Playwright specs and fails only on the Lighthouse
+assertion for the **homepage**: `categories.performance` **0.62–0.69** against the 0.90
+minimum. `/cities/bangalore` and `/events/[slug]` both pass, and SEO is 1.00 everywhere.
+
+Per the working agreement the threshold was left alone. Two rounds of real fixes landed
+and neither moved the CI number:
+
+1. `Reveal` client component → server component, reveal reimplemented as a pure CSS scroll
+   timeline; hero `h1` no longer gated behind an entrance animation (it is the LCP element).
+2. `glow-breathe` bounded to 3 iterations instead of `infinite`; below-fold sections given
+   `content-visibility: auto`.
+
+Locally (production build) those took Speed Index 2.9s → 1.1s, main-thread work 3.5s → 1.1s,
+TBT 960ms → 10ms, **performance 0.95**. On the CI runner TBT stays ~1,030ms and LCP ~3.5s.
+
+Diagnosis: a throttled 2-core GitHub runner, where the React framework chunks alone account
+for ~900ms of script evaluation. The score also drifts run to run (0.69 → 0.66 → 0.62) across
+substantially different code, so the signal is noisy. This is the homepage's weight against
+that hardware, not a specific regression.
+
+Options, none taken because they are the operator's call:
+- Cut real homepage weight — drop to two webfonts, remove the `TableScene`, reduce hydration.
+- Raise `numberOfRuns` and assert on the median to damp the variance.
+- Scope the perf assertion per-URL, keeping 0.90 on the city/event pages and setting an
+  explicit, justified number for `/`. **This is a gate change and needs sign-off.**
+
 ### Blockers / known papercuts
 - `docker-compose.yml` mounts `./apps/web` but not `./packages`, so **any `packages/ui`
   edit needs `docker compose up -d --build web`** to show up — easy to misread as "my change
