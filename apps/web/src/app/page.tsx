@@ -190,7 +190,7 @@ export default function LandingPage() {
         </div>
 
         {/* ── How an evening works ─────────────────────────────── */}
-        <section className="px-[var(--gutter)] py-[var(--section)]">
+        <section className="defer-render px-[var(--gutter)] py-[var(--section)]">
           <Reveal>
             <span className="label">How an evening works</span>
           </Reveal>
@@ -219,7 +219,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── The table itself ─────────────────────────────────── */}
-        <section className="px-[var(--gutter)] pb-[var(--section)]">
+        <section className="defer-render px-[var(--gutter)] pb-[var(--section)]">
           <Reveal>
             <div className="mx-auto max-w-md">
               <TableScene />
@@ -232,7 +232,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── Formats index ────────────────────────────────────── */}
-        <section className="px-[var(--gutter)] py-[var(--section)]">
+        <section className="defer-render px-[var(--gutter)] py-[var(--section)]">
           <div className="flex flex-wrap items-baseline justify-between gap-4">
             <Reveal>
               <h2 className="display text-h2">
@@ -310,7 +310,7 @@ export default function LandingPage() {
         </div>
 
         {/* ── FAQ ──────────────────────────────────────────────── */}
-        <section className="px-[var(--gutter)] py-[var(--section)]">
+        <section className="defer-render px-[var(--gutter)] py-[var(--section)]">
           <Reveal>
             <h2 className="display text-h2">
               Fair <em>questions</em>
