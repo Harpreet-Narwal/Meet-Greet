@@ -1,0 +1,29 @@
+# CI overlay for the ci-web e2e job.
+#
+# Usage: docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d
+#
+# The base compose file runs web from the `dev` target with ./apps/web
+# bind-mounted, which means `next dev` is watching the workspace for the whole
+# test run. Any file churn on the runner triggers Fast Refresh, and a rebuild
+# landing mid-navigation silently drops the client-side redirect after login —
+# POST /api/auth/verify returns 200 and the browser just stays on /login. That
+# made the Playwright job flaky rather than failing outright (specs would pass
+# on retry).
+#
+# Building the `runner` target instead removes the watcher entirely. No build
+# args are needed: NEXT_PUBLIC_API_URL and the websocket URLs already fall back
+# to localhost:4000, which is where the runner's port mapping puts the api.
+#
+# Deliberately NOT reusing docker-compose.prod.yml — that also pins the api to
+# NODE_ENV=production, which would re-arm the OTP rate limiter that ci-web has
+# to bypass (see API_NODE_ENV in .github/workflows/ci-web.yml).
+name: mulaqat
+services:
+  web:
+    build: { context: ., dockerfile: apps/web/Dockerfile, target: runner }
+    # `!reset`, not `[]` — Compose MERGES list keys across files, so an empty
+    # list leaves the base file's bind mounts in place. They would then shadow
+    # the standalone build copied into the runner image and break the container.
+    volumes: !reset []
+    environment:
+      NODE_ENV: production

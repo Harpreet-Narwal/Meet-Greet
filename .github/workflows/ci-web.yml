@@ -56,14 +56,12 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      # Install BEFORE booting the stack. The web container runs `next dev` with
-      # ./apps/web bind-mounted, so anything that touches the workspace once it
-      # is up triggers Fast Refresh — and a rebuild landing mid-navigation drops
-      # the client-side redirect after login (the API returns 200, the browser
-      # just never leaves /login). Letting the install settle first keeps the
-      # watcher quiet for the duration of the run.
       - run: pnpm install --frozen-lockfile
       - name: Boot the stack
+        # docker-compose.ci.yml builds web from the production `runner` target
+        # instead of `dev`, so `next dev` is not watching the workspace while the
+        # specs run — see that file for why the HMR rebuilds broke login.
+        #
         # API_NODE_ENV=test turns on RateLimitGuard's documented test bypass for
         # the api container only. Every Playwright spec signs a fresh user in,
         # and with CI retries that clears the 10/min OTP cap from the runner's
@@ -73,7 +71,7 @@ jobs:
           API_NODE_ENV: test
         run: |
           cp .env.example .env
-          docker compose up -d --build postgres redis api ai web
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build postgres redis api ai web
       - name: Wait for health + seed
         run: |
           for i in $(seq 1 60); do curl -sf http://localhost:4000/health && break; sleep 3; done
