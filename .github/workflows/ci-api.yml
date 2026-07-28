@@ -84,7 +84,19 @@ jobs:
         run: |
           pnpm --filter @mulaqat/api db:deploy
           pnpm --filter @mulaqat/api db:seed
-      - name: E2E tests (real Postgres + Redis)
+      # matching.e2e-spec deliberately points AI_URL at the REAL service so the
+      # matching engine runs for real rather than against a stub. Without it the
+      # /match call 503s and four specs fail. Matching is pure deterministic math
+      # over Postgres — no LLM, no vector store — so DATABASE_URL is all it needs,
+      # and --network host lets it reach the postgres service container and
+      # publish :8000 back to the runner.
+      - name: Build + start the ai service (for the matching e2e)
+        run: |
+          docker build -t mulaqat-ai:ci services/ai
+          docker run -d --name mulaqat-ai --network host -e DATABASE_URL="$DATABASE_URL" mulaqat-ai:ci
+          for i in $(seq 1 60); do curl -sf http://localhost:8000/health >/dev/null && break; sleep 2; done
+          curl -sf http://localhost:8000/health || { docker logs mulaqat-ai; exit 1; }
+      - name: E2E tests (real Postgres + Redis + ai)
         run: pnpm --filter @mulaqat/api test:e2e
 
   docker:
