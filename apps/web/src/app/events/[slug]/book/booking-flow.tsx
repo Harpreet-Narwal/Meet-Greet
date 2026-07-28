@@ -35,7 +35,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-IN", {
 
 export function BookingFlow({ event }: { event: EventInput }) {
   const router = useRouter();
-  const [step, setStep] = useState<"review" | "two_truths" | "done">("review");
+  const [step, setStep] = useState<"review" | "checkout" | "two_truths" | "done">("review");
   const [booking, setBooking] = useState<BookingResult | null>(null);
   const [truth1, setTruth1] = useState("");
   const [truth2, setTruth2] = useState("");
@@ -57,7 +57,29 @@ export function BookingFlow({ event }: { event: EventInput }) {
       return;
     }
     setBooking(result.data);
-    setStep(result.data.status === "waitlisted" ? "done" : "two_truths");
+    // A paid seat comes back as pending_payment and is only held for 15 minutes,
+    // so the next stop is checkout — not the table games.
+    setStep(
+      result.data.status === "waitlisted"
+        ? "done"
+        : result.data.status === "pending_payment"
+          ? "checkout"
+          : "two_truths",
+    );
+  }
+
+  async function pay() {
+    if (!booking) return;
+    setBusy(true);
+    setError(null);
+    const result = await postJson<BookingResult>(`/api/bff/bookings/${booking.id}/pay`, {});
+    setBusy(false);
+    if (!result.ok || !result.data) {
+      setError(result.message ?? "The payment didn't go through — your seat is still held.");
+      return;
+    }
+    setBooking(result.data);
+    setStep("two_truths");
   }
 
   async function submitTruths(eventForm: React.FormEvent) {
@@ -113,6 +135,48 @@ export function BookingFlow({ event }: { event: EventInput }) {
             </Button>
             <p className="mt-4 text-[13px] text-ink-soft">
               Cancel more than 48 hours before and the full amount comes back as credit.
+            </p>
+          </>
+        ) : null}
+
+        {step === "checkout" ? (
+          <>
+            <p className="label mt-6">Checkout · seat held for 15 minutes</p>
+            <h1 className="mt-3 text-h1">Pay to lock the seat.</h1>
+            <p className="measure mt-3 text-ink-soft">
+              Your seat at {event.title} is held but not yours yet. Nothing is charged for the
+              food — that goes straight to the restaurant on the night.
+            </p>
+
+            <dl className="mt-7 border-t border-line">
+              <div className="flex items-baseline justify-between border-b border-line py-3.5">
+                <dt className="text-ink-soft">Seat · booking fee</dt>
+                <dd className="font-mono tabular-nums">{formatINR(event.price_inr)}</dd>
+              </div>
+              <div className="flex items-baseline justify-between border-b border-line py-3.5">
+                <dt className="text-ink-soft">Food &amp; drinks</dt>
+                <dd className="label">Pay at the venue</dd>
+              </div>
+              <div className="flex items-baseline justify-between py-3.5">
+                <dt>Due now</dt>
+                <dd className="font-mono text-h3 tabular-nums">{formatINR(event.price_inr)}</dd>
+              </div>
+            </dl>
+
+            <Button
+              className="mt-7 w-full"
+              size="lg"
+              disabled={busy}
+              onClick={pay}
+              data-testid="pay-booking"
+            >
+              {busy ? "Talking to the bank…" : `Pay ${formatINR(event.price_inr)}`}
+            </Button>
+            <p className="label mt-4">
+              Dev build · mock provider — no real money moves
+            </p>
+            <p className="mt-3 text-small text-ink-soft">
+              Leave this page and the seat is released back to the table after 15 minutes.
             </p>
           </>
         ) : null}

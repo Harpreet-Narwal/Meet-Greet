@@ -4,7 +4,7 @@ import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { Button, Card, LogoMark } from "@mulaqat/ui";
+import { Button, ButtonLink, Card, LogoMark } from "@mulaqat/ui";
 
 import { getJson, postJson } from "@/lib/client";
 
@@ -156,9 +156,9 @@ export function Debrief({ eventId }: { eventId: string }) {
                   </Card>
                 ))}
               </div>
-              <Button className="mt-8 w-full" variant="ghost" onClick={() => router.push("/people")}>
+              <ButtonLink className="mt-8 w-full" variant="ghost" href="/people">
                 Done — see my people
-              </Button>
+              </ButtonLink>
             </div>
           )}
           {error ? <p role="alert" className="mt-4 text-center text-[14px] text-danger">{error}</p> : null}
@@ -190,14 +190,9 @@ export function Debrief({ eventId }: { eventId: string }) {
                 <p className="mt-2 text-lg opacity-90">
                   You and {mutualSpark.first_name} both felt it. A chat just opened.
                 </p>
-                <Button
-                  variant="paper"
-                  size="lg"
-                  className="mt-7"
-                  onClick={() => router.push("/people")}
-                >
+                <ButtonLink variant="paper" size="lg" className="mt-7" href="/people">
                   Say hi
-                </Button>
+                </ButtonLink>
               </motion.div>
             </motion.div>
           ) : null}

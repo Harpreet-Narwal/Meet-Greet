@@ -4,7 +4,7 @@ import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { Button, Card, LogoMark, cn } from "@mulaqat/ui";
+import { Button, ButtonLink, Card, LogoMark, cn } from "@mulaqat/ui";
 
 import { getJson } from "@/lib/client";
 import { useGameSocket, type GameState } from "@/lib/use-game-socket";
@@ -48,9 +48,9 @@ export function GameRoom({ eventId }: { eventId: string }) {
         <div>
           <LogoMark size={40} className="mx-auto text-ink" />
           <p className="mt-4 font-medium text-ink-soft">{loadError}</p>
-          <Button className="mt-6" variant="secondary" onClick={() => router.push(`/tables/${eventId}`)}>
+          <ButtonLink className="mt-6" variant="secondary" href={`/tables/${eventId}`}>
             Back to your table
-          </Button>
+          </ButtonLink>
         </div>
       </main>
     );

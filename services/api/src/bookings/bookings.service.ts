@@ -7,6 +7,7 @@ import {
 } from "@nestjs/common";
 import type { Booking, Event, Prisma } from "@prisma/client";
 
+import { env } from "../config/env";
 import { PrismaService } from "../prisma/prisma.service";
 import { getPaymentProvider } from "../payments/payment-provider";
 import {
@@ -157,6 +158,76 @@ export class BookingsService {
       where: { id: bookingId },
       include: { event: true },
     });
+  }
+
+  /**
+   * Settle a mock checkout: the dev-build equivalent of the customer completing
+   * payment at the gateway. Guarded to the mock provider so this can never be
+   * used to mark a real order paid, and scoped to the caller's own booking.
+   */
+  async payMock(userId: string, bookingId: string): Promise<BookingView> {
+    if (env.PAYMENT_PROVIDER !== "mock") {
+      throw new BadRequestException("checkout settlement is only available on the mock provider");
+    }
+    const booking = await this.prisma.booking.findFirst({
+      where: { id: bookingId, userId },
+      include: { event: true },
+    });
+    if (!booking) throw new NotFoundException("booking not found");
+    if (booking.status === "confirmed" || booking.status === "checked_in") {
+      return this.toView(booking);
+    }
+    if (booking.status !== "pending_payment") {
+      throw new BadRequestException("this booking is not awaiting payment");
+    }
+    await this.prisma.payment.updateMany({
+      where: { bookingId, status: "created" },
+      data: { status: "paid" },
+    });
+    const confirmed = await this.prisma.booking.update({
+      where: { id: bookingId },
+      data: { status: "confirmed" },
+      include: { event: true },
+    });
+    await this.ensureTableChat(userId, confirmed.eventId);
+    return this.toView(confirmed);
+  }
+
+  /**
+   * Dev affordance: put a paid guest into their table's group chat straight
+   * away, so the Chats surface has something real in it before an event has
+   * actually run. In production this chat opens after the night (T+2h debrief)
+   * — hence the mock-provider guard on the only caller.
+   */
+  private async ensureTableChat(userId: string, eventId: string): Promise<void> {
+    const existing = await this.prisma.chat.findFirst({
+      where: { eventId, kind: "table_group" },
+    });
+    const chat =
+      existing ??
+      (await this.prisma.chat.create({
+        data: {
+          kind: "table_group",
+          eventId,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+      }));
+    const member = await this.prisma.chatMember.findUnique({
+      where: { chatId_userId: { chatId: chat.id, userId } },
+    });
+    if (member) return;
+    await this.prisma.chatMember.create({ data: { chatId: chat.id, userId } });
+    const messageCount = await this.prisma.message.count({ where: { chatId: chat.id } });
+    if (messageCount === 0) {
+      await this.prisma.message.create({
+        data: {
+          chatId: chat.id,
+          senderId: userId,
+          kind: "text",
+          body: "Seat's booked — see you at the table.",
+        },
+      });
+    }
   }
 
   /** Provider webhook (real providers). Mock flows never need it but it works. */

@@ -65,7 +65,7 @@ describe("events & booking flow (e2e)", () => {
     }
   });
 
-  it("books the chai table: confirmed instantly on the mock provider", async () => {
+  it("books the chai table: held pending payment, confirmed only after checkout", async () => {
     const list = await request(app.getHttpServer())
       .get("/v1/events?city=bangalore&type=chai")
       .expect(200);
@@ -76,11 +76,19 @@ describe("events & booking flow (e2e)", () => {
       .post(`/v1/events/${event.id}/bookings`)
       .set("Authorization", `Bearer ${token}`)
       .expect(201);
-    expect(booking.body.status).toBe("confirmed");
+    // A paid seat is HELD, not sold: the paywall is the whole point.
+    expect(booking.body.status).toBe("pending_payment");
     bookingId = booking.body.id;
 
+    // The held seat still comes out of inventory, so nobody can oversell it.
     const detail = await request(app.getHttpServer()).get(`/v1/events/${event.slug}`).expect(200);
     expect(detail.body.seats_left).toBe(seatsBefore - 1);
+
+    const paid = await request(app.getHttpServer())
+      .post(`/v1/bookings/${bookingId}/pay`)
+      .set("Authorization", `Bearer ${token}`)
+      .expect(201);
+    expect(paid.body.status).toBe("confirmed");
   });
 
   it("rejects a double booking of the same table", async () => {

@@ -4,7 +4,7 @@ import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { Badge, Button, Card, LogoMark } from "@mulaqat/ui";
+import { Badge, Button, ButtonLink, Card, LogoMark } from "@mulaqat/ui";
 
 import { getJson, postJson } from "@/lib/client";
 
@@ -195,14 +195,14 @@ export function TableReveal({ eventId }: { eventId: string }) {
                     <Badge tone="sage">Checked in</Badge>
                     <span className="text-[15px] text-ink-soft">You&apos;re in. Let the games begin.</span>
                   </Card>
-                  <Button
+                  <ButtonLink
                     size="lg"
                     className="w-full"
-                    onClick={() => router.push(`/rooms/${eventId}`)}
+                    href={`/rooms/${eventId}`}
                     data-testid="to-room"
                   >
-                    Open the game room 🎲
-                  </Button>
+                    Open the game room
+                  </ButtonLink>
                 </div>
               ) : (
                 <Button size="lg" className="w-full" disabled={checking} onClick={checkIn} data-testid="checkin-btn">

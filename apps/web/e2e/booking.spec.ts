@@ -31,7 +31,14 @@ test("book a table end-to-end with mock payments", async ({ page }) => {
   await expect(confirm).toBeEnabled();
   await confirm.click();
 
-  // Mock provider auto-confirms → two truths step
+  // Paid seats now stop at checkout — the seat is held, not sold, until this
+  // settles. The chai table is ₹99, so this step always appears; awaiting it
+  // (rather than probing isVisible) also waits out the booking round-trip.
+  const payButton = page.getByTestId("pay-booking");
+  await expect(payButton).toBeVisible();
+  await payButton.click();
+
+  // Payment settled → two truths step
   await page.getByTestId("truth-1").fill("I've cycled Nandi Hills before sunrise");
   await page.getByTestId("truth-2").fill("I own forty board games");
   await page.getByTestId("lie").fill("I've never burnt Maggi");

@@ -50,6 +50,9 @@ export default async function TonightPage() {
   const bookedEventIds = new Set(data.upcoming.map((booking) => booking.event.id));
   const recommendations = (events ?? []).filter((event) => !bookedEventIds.has(event.id)).slice(0, 6);
 
+  const hasStarted = next ? new Date(next.event.starts_at).getTime() <= Date.now() : false;
+  const isRevealed = next ? ["revealed", "live", "completed"].includes(next.event.status) : false;
+
   return (
     <div className="min-h-dvh">
       <AppNav active="tonight" />
@@ -77,11 +80,30 @@ export default async function TonightPage() {
                   ? `${next.event.neighborhood_teaser} — exact venue drops 24 hours before.`
                   : "Venue drops 24 hours before. Keep the evening free."}
             </p>
-            <div className="mt-6">
-              <ButtonLink href={`/events/${next.event.slug}`} size="md">
+            {/* The evening's actual next step, not just a marketing page. Once the
+                table is revealed you need directions and check-in; once it has
+                started, the games are the point. */}
+            <div className="mt-6 flex flex-wrap gap-3">
+              {hasStarted ? (
+                <ButtonLink href={`/rooms/${next.event.id}`} size="lg" data-testid="tonight-room">
+                  Enter the game room
+                </ButtonLink>
+              ) : null}
+              <ButtonLink
+                href={`/tables/${next.event.id}`}
+                size={hasStarted ? "md" : "lg"}
+                variant={hasStarted ? "secondary" : "primary"}
+                data-testid="tonight-table"
+              >
+                {isRevealed ? "Your table & check-in" : "Your table"}
+              </ButtonLink>
+              <ButtonLink href={`/events/${next.event.slug}`} variant="secondary" size="md">
                 Event details
               </ButtonLink>
             </div>
+            {hasStarted ? (
+              <p className="label mt-4 !text-sage">This table is happening now</p>
+            ) : null}
           </Card>
         ) : (
           <Card large className="p-8" data-testid="no-booking">

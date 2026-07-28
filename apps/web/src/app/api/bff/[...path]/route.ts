@@ -22,6 +22,7 @@ const ALLOWED_PATTERNS = [
   new RegExp(`^events/${UUID}/ratings$`),
   new RegExp(`^events/${UUID}/connections$`),
   new RegExp(`^bookings/${UUID}$`),
+  new RegExp(`^bookings/${UUID}/pay$`),
   new RegExp(`^bookings/${UUID}/two-truths$`),
   /^me\/connections$/,
   /^chats$/,

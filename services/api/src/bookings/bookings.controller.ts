@@ -20,7 +20,7 @@ export class BookingsController {
   constructor(private readonly bookings: BookingsService) {}
 
   @Post("events/:id/bookings")
-  @ApiOperation({ summary: "Book a seat (full table → waitlist). Mock payments auto-confirm." })
+  @ApiOperation({ summary: "Book a seat (full table → waitlist). Paid seats start pending_payment." })
   book(@CurrentUser() user: AuthenticatedUser, @Param("id") eventId: string) {
     return this.bookings.book(user.id, eventId);
   }
@@ -39,6 +39,12 @@ export class BookingsController {
     @Body(new ZodValidationPipe(TwoTruthsSchema)) body: TwoTruthsDto,
   ) {
     return this.bookings.submitTwoTruths(user.id, bookingId, body);
+  }
+
+  @Post("bookings/:id/pay")
+  @ApiOperation({ summary: "Settle a mock checkout (dev build) — confirms the seat" })
+  pay(@CurrentUser() user: AuthenticatedUser, @Param("id") bookingId: string) {
+    return this.bookings.payMock(user.id, bookingId);
   }
 
   @Delete("bookings/:id")

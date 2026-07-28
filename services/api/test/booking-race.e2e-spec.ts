@@ -63,7 +63,7 @@ describe("booking oversell race (e2e)", () => {
     await app.close();
   });
 
-  it("books 10 people into 6 seats concurrently — exactly 6 confirmed, 4 waitlisted, zero oversell", async () => {
+  it("books 10 people into 6 seats concurrently — exactly 6 hold seats, 4 waitlisted, zero oversell", async () => {
     const responses = await Promise.all(
       tokens.map((token) =>
         request(app.getHttpServer())
@@ -76,7 +76,9 @@ describe("booking oversell race (e2e)", () => {
       expect(response.status).toBe(201);
       return response.body.status as string;
     });
-    expect(statuses.filter((status) => status === "confirmed")).toHaveLength(CAPACITY);
+    // Paid seats are HELD (pending_payment) until checkout settles them; the
+    // invariant under test is that only CAPACITY people ever hold a seat.
+    expect(statuses.filter((status) => status === "pending_payment")).toHaveLength(CAPACITY);
     expect(statuses.filter((status) => status === "waitlisted")).toHaveLength(
       CONTENDERS - CAPACITY,
     );
@@ -89,7 +91,7 @@ describe("booking oversell race (e2e)", () => {
 
   it("cancellation frees the seat and promotes the oldest waitlisted booking", async () => {
     const confirmed = await prisma.booking.findFirst({
-      where: { eventId, status: "confirmed" },
+      where: { eventId, status: { in: ["pending_payment", "confirmed"] } },
       orderBy: { createdAt: "asc" },
     });
     const oldestWaitlisted = await prisma.booking.findFirst({
@@ -110,7 +112,8 @@ describe("booking oversell race (e2e)", () => {
     const promoted = await prisma.booking.findUniqueOrThrow({
       where: { id: oldestWaitlisted!.id },
     });
-    expect(promoted.status).toBe("confirmed"); // mock provider auto-paid
+    // Promotion hands over the held seat; the promoted guest still has to pay.
+    expect(promoted.status).toBe("pending_payment");
 
     const seatHolders = await prisma.booking.count({
       where: { eventId, status: { in: ["pending_payment", "confirmed", "checked_in"] } },
@@ -120,9 +123,10 @@ describe("booking oversell race (e2e)", () => {
 
   it("expires unpaid pending bookings and promotes from the waitlist", async () => {
     const victim = await prisma.booking.findFirst({
-      where: { eventId, status: "confirmed" },
+      where: { eventId, status: { in: ["pending_payment", "confirmed"] } },
       orderBy: { createdAt: "desc" },
     });
+    expect(victim).toBeTruthy();
     // Simulate a booking stuck unpaid for 20 minutes
     await prisma.$executeRaw`
       UPDATE bookings SET status = 'pending_payment', updated_at = now() - interval '20 minutes'
