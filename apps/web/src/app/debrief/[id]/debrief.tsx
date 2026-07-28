@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { Button, ButtonLink, Card, LogoMark } from "@mulaqat/ui";
 
+import { BackLink } from "@/components/back-link";
 import { getJson, postJson } from "@/lib/client";
 
 interface Tablemate {
@@ -75,7 +76,10 @@ export function Debrief({ eventId }: { eventId: string }) {
   if (error && !data) {
     return (
       <main className="min-h-dvh grid place-items-center px-6">
-        <p role="alert" className="font-medium text-danger">{error}</p>
+        <div className="text-center">
+          <p role="alert" className="text-danger">{error}</p>
+          <BackLink href="/tonight" label="Tonight" className="mt-6" />
+        </div>
       </main>
     );
   }
@@ -91,6 +95,7 @@ export function Debrief({ eventId }: { eventId: string }) {
     <MotionConfig reducedMotion="user">
       <main className="min-h-dvh px-6 py-12">
         <div className="mx-auto w-full max-w-md">
+          <BackLink href="/tonight" label="Tonight" className="mb-6" />
           {step === "rate" ? (
             <Card large className="p-8 text-center" data-testid="rate-step">
               <LogoMark size={34} className="mx-auto text-ink" />

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { Button, ButtonLink, Card, LogoMark, cn } from "@mulaqat/ui";
 
+import { BackLink } from "@/components/back-link";
 import { getJson } from "@/lib/client";
 import { useGameSocket, type GameState } from "@/lib/use-game-socket";
 
@@ -75,7 +76,7 @@ export function GameRoom({ eventId }: { eventId: string }) {
     <MotionConfig reducedMotion="user">
       <main className="min-h-dvh flex flex-col px-6 py-6">
         <header className="mx-auto flex w-full max-w-xl items-center justify-between">
-          <LogoMark size={24} className="text-ink" />
+          <BackLink href={`/tables/${eventId}`} label="Your table" />
           <div className="flex items-center gap-2 text-[13px] text-ink-soft">
             <span
               className={cn("size-2 rounded-full", connected ? "bg-sage" : "bg-danger")}

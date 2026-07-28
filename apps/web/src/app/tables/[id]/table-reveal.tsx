@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { Badge, Button, ButtonLink, Card, LogoMark } from "@mulaqat/ui";
 
+import { BackLink } from "@/components/back-link";
 import { getJson, postJson } from "@/lib/client";
 
 interface Seat {
@@ -85,7 +86,10 @@ export function TableReveal({ eventId }: { eventId: string }) {
   if (error && !table) {
     return (
       <main className="min-h-dvh grid place-items-center px-6">
-        <p role="alert" className="font-medium text-danger">{error}</p>
+        <div className="text-center">
+          <p role="alert" className="text-danger">{error}</p>
+          <BackLink href="/tonight" label="Tonight" className="mt-6" />
+        </div>
       </main>
     );
   }
@@ -101,6 +105,7 @@ export function TableReveal({ eventId }: { eventId: string }) {
     <MotionConfig reducedMotion="user">
       <main className="min-h-dvh px-6 py-12">
         <div className="mx-auto w-full max-w-lg">
+          <BackLink href="/tonight" label="Tonight" className="mb-6" />
           {/* Venue card — locked (countdown) → flip → revealed */}
           <div style={{ perspective: 1400 }}>
             <AnimatePresence mode="wait">

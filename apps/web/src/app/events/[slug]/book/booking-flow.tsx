@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { Badge, Button, ButtonLink, Card, LogoMark } from "@mulaqat/ui";
 
+import { BackLink } from "@/components/back-link";
 import { postJson } from "@/lib/client";
 import { formatINR } from "@/lib/format";
 
@@ -102,6 +103,7 @@ export function BookingFlow({ event }: { event: EventInput }) {
   return (
     <main className="min-h-dvh flex items-center justify-center px-6 py-16">
       <Card large className="w-full max-w-md p-8 sm:p-10">
+        <BackLink href={`/events/${event.slug}`} label="Back to the table" className="mb-6" />
         <LogoMark size={34} className="text-ink" />
 
         {step === "review" ? (
