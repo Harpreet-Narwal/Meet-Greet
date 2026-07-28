@@ -1,5 +1,49 @@
 # Mulaqat — Progress
 
+## Ship to GitHub + app-shell retheme + CI repair   [DONE — 2026-07-28]
+
+Pushed to `origin/main` (github.com/Harpreet-Narwal/Meet-Greet) — this closes the last
+open M0 item ("push to GitHub → confirm the workflows go green"), which had been blocked
+on the operator's repo URL.
+
+- **App shell** now speaks the editorial language, not just the marketing pages. Events are
+  one `EventRow` index component (replacing `EventCard`) across /explore, /tonight and
+  /cities/[city]; `AppNav` matches `MarketingNav`; filter chips squared; headings on the
+  display scale. The row leads with the **date**, not a sequence number — these lists are
+  chronological, and a position number would encode nothing and renumber on every filter.
+- **Fixed `ci-api`, red on every push since 2026-07-19.** `prisma migrate diff
+  --from-migrations` replays migrations into whatever it is given as the shadow database,
+  and the drift-check step handed it `$DATABASE_URL`. The main CI database therefore came
+  out populated but with no migration history, and "Migrate + seed" aborted with P3005.
+  It now gets a dedicated `mulaqat_shadow` database. Reproduced locally first: pointing the
+  drift check at an empty database leaves 24 tables in it.
+- **Fixed a second failure the first one was hiding.** With P3005 gone the e2e step finally
+  ran, and `matching.e2e-spec` failed 4/6. `test/setup-env.ts` never set `NODE_ENV`; Jest
+  only defaults it when UNSET, and both the docker image and CI export it already — so
+  `RateLimitGuard`'s `NODE_ENV === "test"` bypass never fired and the spec's 30 single-IP
+  logins collected 429s from guest 11 against the 10/min OTP cap.
+
+### Verification
+- api e2e **43/43** (was 39/43) · web e2e **4/4** · lint/typecheck/build/unit green
+- Contrast audit: AA on all text pairs, both themes
+- Lighthouse: `/`, `/cities/bangalore`, `/events/[slug]` → SEO **1.00**, perf **0.95–0.96**,
+  a11y **1.00**, best-practices **1.00**
+
+### Decisions
+- `EventCard` → `EventRow` is a rename, not a parallel component: keeping a card variant
+  around would have invited the two patterns to drift.
+- Ran the API e2e suite from the host rather than the container — the `api` service has no
+  volume mounts, so its source is baked into the image and edits need a rebuild to land.
+
+### Blockers / known papercuts
+- `docker-compose.yml` mounts `./apps/web` but not `./packages`, so **any `packages/ui`
+  edit needs `docker compose up -d --build web`** to show up — easy to misread as "my change
+  did nothing". Adding `./packages:/app/packages` risks shadowing the pnpm workspace symlinks
+  in the container; wants testing before it's changed.
+- Seeded event dates are relative to seed time, so the fixtures age out — `/explore` quietly
+  loses events and `booking.spec.ts` (which clicks a "Chai & Chill" link) fails until you
+  re-seed. Re-seeding also leaves the ISR cache stale for up to `revalidate`; restart web.
+
 ## "Quiet Editorial" retheme   [DONE — 2026-07-25, operator-directed]
 
 Reference: normalisboring.es (operator-supplied), studied and measured rather than copied.
