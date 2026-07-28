@@ -22,6 +22,19 @@ on the operator's repo URL.
   only defaults it when UNSET, and both the docker image and CI export it already — so
   `RateLimitGuard`'s `NODE_ENV === "test"` bypass never fired and the spec's 30 single-IP
   logins collected 429s from guest 11 against the 10/min OTP cap.
+- **Fixed a third: `ci-api` never started the `ai` service.** `matching.e2e-spec` overrides
+  `AI_URL` to the real service on purpose ("so the matching engine runs for real"), but the
+  job only had postgres and redis, so `/match` returned 503. Matching is pure deterministic
+  math over Postgres — no LLM, no vector store — so the job now builds the ai image and runs
+  it with `--network host` and nothing but `DATABASE_URL`. **ci-api is green for the first
+  time since 2026-07-19.**
+- **Fixed `ci-web`, red since at least 2026-07-24 — the same rate limiter, other side.** The
+  Playwright specs each sign a fresh user in and CI retries double that, so the suite cleared
+  the 10/min OTP cap from the runner's single IP; tokens came back undefined and specs failed
+  on the symptom (`reading 'split'`) rather than the cause. The api service now reads
+  `NODE_ENV: ${API_NODE_ENV:-development}`, and only ci-web sets `API_NODE_ENV=test`.
+  Verified both ways locally: default → `development`, 11th verify 429s; with the flag →
+  `test`, 14/14 return 200. **Rate limiting stays on everywhere except CI.**
 
 ### Verification
 - api e2e **43/43** (was 39/43) · web e2e **4/4** · lint/typecheck/build/unit green

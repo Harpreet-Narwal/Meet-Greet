@@ -16,6 +16,12 @@ services:
     build: { context: ., dockerfile: services/api/Dockerfile, target: dev }
     ports: ["4000:4000"]
     env_file: .env
+    # `environment` overrides env_file. Defaults to the .env value, so local dev
+    # is unchanged; CI sets API_NODE_ENV=test to enable RateLimitGuard's
+    # documented test bypass — the Playwright suite signs in far more than the
+    # 10-per-minute OTP cap allows from a single runner IP.
+    environment:
+      NODE_ENV: ${API_NODE_ENV:-development}
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }

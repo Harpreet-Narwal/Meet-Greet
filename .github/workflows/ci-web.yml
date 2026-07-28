@@ -57,6 +57,13 @@ jobs:
           node-version: 22
           cache: pnpm
       - name: Boot the stack
+        # API_NODE_ENV=test turns on RateLimitGuard's documented test bypass for
+        # the api container only. Every Playwright spec signs a fresh user in,
+        # and with CI retries that clears the 10/min OTP cap from the runner's
+        # single IP — the tokens come back undefined and the specs fail on the
+        # symptom rather than the cause.
+        env:
+          API_NODE_ENV: test
         run: |
           cp .env.example .env
           docker compose up -d --build postgres redis api ai web
