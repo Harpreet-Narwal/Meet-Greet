@@ -108,16 +108,17 @@ export default function LandingPage() {
 
       <main>
         {/* ── Hero: type only ──────────────────────────────────────
-             Animated with CSS (`.rise`), not the JS Reveal component — the
-             headline is the LCP element and must paint without hydration. */}
+             The h1 is the LCP element, so it carries NO entrance animation:
+             anything starting at opacity 0 defers LCP until the animation ends,
+             which measured 3.5s on CI hardware. The quieter elements around it
+             still rise in — the movement reads the same, and LCP lands with
+             first paint. */}
         <header className="flex min-h-[86svh] flex-col justify-end px-[var(--gutter)] pb-[var(--section-sm)] pt-24">
           <p className="label rise">Bengaluru — now seating</p>
           <h1 className="display mt-8 text-display-xl">
-            <span className="rise block">Tables that</span>
-            <span className="rise block" style={{ animationDelay: "90ms" }}>
-              turn strangers
-            </span>
-            <span className="rise block" style={{ animationDelay: "180ms" }}>
+            <span className="block">Tables that</span>
+            <span className="block">turn strangers</span>
+            <span className="block">
               into <em>your people</em>
             </span>
           </h1>

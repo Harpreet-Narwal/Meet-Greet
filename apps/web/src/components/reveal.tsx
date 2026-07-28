@@ -1,6 +1,4 @@
-"use client";
-
-import { useEffect, useRef, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { cn } from "@mulaqat/ui";
 
@@ -12,51 +10,23 @@ interface RevealProps {
 }
 
 /**
- * Mask-up on first scroll into view. Progressive enhancement: the hidden state
- * only applies under `html.js` (set in layout), so the page is fully readable
- * without JavaScript; reduced-motion users skip it entirely.
+ * Mask-up as the element scrolls into view.
  *
- * The animated properties live on an INNER element on purpose. Chromium clips
- * an element's IntersectionObserver rect by its own `clip-path`, so putting the
- * mask on the observed node makes its intersection permanently empty — the
- * callback fires once at ratio 0 and never again, and nothing ever reveals.
- * The observed wrapper therefore stays unclipped.
+ * Deliberately a SERVER component with no JavaScript at all. It used to be a
+ * client component that mounted an IntersectionObserver per instance; the
+ * homepage alone renders ~30 of them, and hydrating that many client boundaries
+ * cost 960ms of total blocking time on CI hardware and dragged the Lighthouse
+ * performance score to 0.69 against a 0.90 gate.
+ *
+ * The reveal is now pure CSS, driven by a scroll timeline (`animation-timeline:
+ * view()`), so it costs nothing on the main thread. Browsers without support —
+ * and readers who ask for reduced motion — simply get the content, already
+ * visible, which is the correct fallback either way. See globals.css.
  */
 export function Reveal({ children, delay = 0, className }: RevealProps) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      el.classList.add("revealed");
-      return;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          // Reveal when scrolled into view — or immediately if the element is
-          // already ABOVE the viewport. Without the second case, landing
-          // mid-page (an anchor link, or a restored scroll position) leaves
-          // everything overhead permanently invisible once the reader scrolls up.
-          if (entry.isIntersecting || entry.boundingClientRect.top < 0) {
-            el.classList.add("revealed");
-            observer.disconnect();
-          }
-        }
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <div ref={ref} className={cn("reveal", className)}>
-      <div
-        className="reveal-inner"
-        style={delay ? { transitionDelay: `${delay}ms` } : undefined}
-      >
+    <div className={cn("reveal", className)}>
+      <div className="reveal-inner" style={delay ? { animationDelay: `${delay}ms` } : undefined}>
         {children}
       </div>
     </div>

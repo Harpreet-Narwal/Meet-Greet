@@ -89,26 +89,24 @@ html.js .rise {
   }
 }
 
-/* ── Scroll reveal: mask upward, for BELOW-the-fold sections (progressive
-      enhancement — the hidden state is gated on html.js so no-JS visitors
-      see everything). ── */
-/* The mask sits on `.reveal-inner`, never on `.reveal` itself — Chromium clips
-   an element's IntersectionObserver rect by its own clip-path, so masking the
-   observed node would stop it ever intersecting. See components/reveal.tsx. */
-html.js .reveal .reveal-inner {
-  opacity: 0;
-  clip-path: inset(0 0 105% 0);
-  transform: translateY(0.35em);
-  transition:
-    opacity 0.5s ease,
-    clip-path 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-html.js .reveal.revealed .reveal-inner {
-  opacity: 1;
-  clip-path: inset(0 0 -20% 0);
-  transform: none;
+/* ── Scroll reveal, for BELOW-the-fold sections.
+ *
+ * Pure CSS on a scroll timeline: no IntersectionObserver, no client component,
+ * nothing on the main thread. `Reveal` is a server component now (see
+ * components/reveal.tsx) — the per-instance observers it used to mount cost
+ * 960ms TBT on CI hardware.
+ *
+ * The default state is VISIBLE. Only browsers that support scroll-driven
+ * animations opt into the hidden start, so no-JS readers, reduced-motion
+ * readers and unsupporting browsers all just get the content. ── */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal .reveal-inner {
+      animation: rise 1ms linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+  }
 }
 
 /* ── Event index: the listing is a typographic index, not a grid of photo
