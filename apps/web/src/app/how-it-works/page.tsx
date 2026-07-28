@@ -88,8 +88,8 @@ export default function HowItWorksPage() {
       />
       <MarketingNav />
       <main className="mx-auto w-full max-w-4xl px-6 py-16">
-        <h1 className="text-[clamp(2.2rem,5vw,3.2rem)] font-bold leading-tight tracking-tight">
-          From quiz to<br /><span className="text-accent-ink">&ldquo;same table next month?&rdquo;</span>
+        <h1 className="text-h1">
+          From quiz to<br /><em>&ldquo;same table next month?&rdquo;</em>
         </h1>
         <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-ink-soft">
           Every part of Mulaqat is designed to remove the awkward parts of meeting new people
@@ -100,15 +100,15 @@ export default function HowItWorksPage() {
           {JOURNEY.map((phase) => (
             <section key={phase.phase}>
               <div className="flex items-center gap-3">
-                <span className={`h-2.5 w-12 rounded-full ${phase.chip}`} aria-hidden />
-                <h2 className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                <span className="h-px w-10 bg-line" aria-hidden />
+                <h2 className="label">
                   {phase.phase}
                 </h2>
               </div>
               <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {phase.steps.map((step) => (
                   <Card key={step.title} large className="h-full p-6">
-                    <h3 className="text-[17px] font-bold leading-snug">{step.title}</h3>
+                    <h3 className="text-h3">{step.title}</h3>
                     <p className="mt-2 text-[14px] leading-relaxed text-ink-soft">{step.body}</p>
                   </Card>
                 ))}
@@ -118,7 +118,7 @@ export default function HowItWorksPage() {
         </div>
 
         <div className="mt-16 rounded-card-lg bg-accent p-10 text-center">
-          <h2 className="text-2xl font-bold tracking-tight text-on-accent">
+          <h2 className="text-h2 text-on-accent">
             Sounds like your kind of evening?
           </h2>
           <div className="mt-6">

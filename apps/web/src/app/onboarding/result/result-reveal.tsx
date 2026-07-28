@@ -76,7 +76,7 @@ export function ResultReveal() {
   return (
     <MotionConfig reducedMotion="user">
     <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-14">
-      <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
+      <p className="text-[13px] font-medium uppercase tracking-[0.14em] text-ink-soft">
         Your table personality
       </p>
 
@@ -98,7 +98,7 @@ export function ResultReveal() {
             <span className="text-[64px] leading-none" aria-hidden>
               {personality.archetype_emoji}
             </span>
-            <h1 className="mt-4 text-[30px] font-bold leading-tight tracking-tight">
+            <h1 className="mt-4 text-h1">
               {firstName ? `${firstName}, you're a` : "You're a"}
               <br />
               <span className="text-accent-ink">{personality.archetype}</span>
@@ -109,7 +109,7 @@ export function ResultReveal() {
                 const value = personality.traits[key];
                 return (
                   <div key={key}>
-                    <div className="flex justify-between text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+                    <div className="flex justify-between text-[11px] font-medium uppercase tracking-wide text-ink-soft">
                       <span>{low}</span>
                       <span>{high}</span>
                     </div>

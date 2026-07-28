@@ -94,7 +94,7 @@ export function Debrief({ eventId }: { eventId: string }) {
           {step === "rate" ? (
             <Card large className="p-8 text-center" data-testid="rate-step">
               <LogoMark size={34} className="mx-auto text-ink" />
-              <h1 className="mt-6 text-2xl font-bold tracking-tight">How was the night?</h1>
+              <h1 className="mt-6 text-h1">How was the night?</h1>
               <p className="mt-2 text-[15px] text-ink-soft">
                 Private — it just helps us seat you better next time.
               </p>
@@ -117,7 +117,7 @@ export function Debrief({ eventId }: { eventId: string }) {
             </Card>
           ) : (
             <div data-testid="connect-step">
-              <h1 className="text-2xl font-bold tracking-tight">Keep the good ones.</h1>
+              <h1 className="text-h1">Keep the good ones.</h1>
               <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">
                 Connect to stay friends. {data.i_am_open_to_dating ? "Spark if it was something more — they'll only know if they Spark you back." : "Turn on 'open to dating' in your profile to Spark."}
               </p>
@@ -126,7 +126,7 @@ export function Debrief({ eventId }: { eventId: string }) {
                   <Card key={mate.user_id} className="flex items-center gap-4 p-4">
                     <span className="text-3xl" aria-hidden>{mate.archetype_emoji ?? "🙂"}</span>
                     <div className="flex-1">
-                      <p className="font-semibold">{mate.first_name}</p>
+                      <p className="font-medium">{mate.first_name}</p>
                       {mate.archetype ? (
                         <p className="text-[13px] text-ink-soft">{mate.archetype}</p>
                       ) : null}
@@ -186,7 +186,7 @@ export function Debrief({ eventId }: { eventId: string }) {
                 className="text-center text-paper"
               >
                 <span className="text-6xl" aria-hidden>✨</span>
-                <h2 className="mt-4 text-3xl font-bold tracking-tight">It&apos;s a Spark!</h2>
+                <h2 className="mt-4 text-h2">It&apos;s a Spark!</h2>
                 <p className="mt-2 text-lg opacity-90">
                   You and {mutualSpark.first_name} both felt it. A chat just opened.
                 </p>

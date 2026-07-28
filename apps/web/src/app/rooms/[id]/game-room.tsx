@@ -89,7 +89,7 @@ export function GameRoom({ eventId }: { eventId: string }) {
           {/* Lobby: pick a game */}
           {state.phase === "lobby" ? (
             <div data-testid="lobby">
-              <h1 className="text-center text-2xl font-bold tracking-tight">Pick your first game.</h1>
+              <h1 className="text-center text-h1">Pick your first game.</h1>
               <div className="mt-8 grid grid-cols-2 gap-3">
                 {GAMES.map((game) => (
                   <button
@@ -99,7 +99,7 @@ export function GameRoom({ eventId }: { eventId: string }) {
                     data-testid={`start-${game.kind}`}
                   >
                     <span className="text-3xl" aria-hidden>{game.emoji}</span>
-                    <span className="text-[15px] font-semibold">{game.label}</span>
+                    <span className="text-[15px] font-medium">{game.label}</span>
                   </button>
                 ))}
               </div>
@@ -110,7 +110,7 @@ export function GameRoom({ eventId }: { eventId: string }) {
           {state.phase === "ended" ? (
             <div className="text-center" data-testid="game-ended">
               <span className="text-5xl" aria-hidden>🎉</span>
-              <h1 className="mt-4 text-2xl font-bold tracking-tight">That&apos;s a wrap on this deck.</h1>
+              <h1 className="mt-4 text-h1">That&apos;s a wrap on this deck.</h1>
               <Button className="mt-6" onClick={() => emit("game:start", { deck_kind: "hot_takes" })}>
                 Play something else
               </Button>
@@ -132,7 +132,7 @@ export function GameRoom({ eventId }: { eventId: string }) {
                       )}
                     />
                   ))}
-                  <span className="ml-2 text-[13px] font-semibold text-accent-ink">
+                  <span className="ml-2 text-[13px] font-medium text-accent-ink">
                     {state.level === 3 ? "Going deep 🔥" : `Level ${state.level}`}
                   </span>
                 </div>
@@ -147,7 +147,7 @@ export function GameRoom({ eventId }: { eventId: string }) {
                   transition={spring}
                 >
                   <Card large className="px-7 py-12 text-center" data-testid="game-card">
-                    <p className="text-[22px] font-bold leading-snug tracking-tight sm:text-[26px]">
+                    <p className="text-[22px] font-medium leading-snug tracking-tight sm:text-[26px]">
                       {card.text}
                     </p>
                   </Card>
@@ -267,7 +267,7 @@ function VoteResult({ state }: { state: GameState }) {
   if (state.kind === "trivia") {
     return (
       <Card className="p-5 text-center">
-        <p className="text-[15px] font-semibold">
+        <p className="text-[15px] font-medium">
           {result.winner ? `${nameFor(result.winner)} got it! 🎉` : "Nobody nailed it."}
         </p>
         <p className="mt-1 text-[14px] text-ink-soft">Answer: {result.lie ?? state.cards[state.cardIndex]?.answer}</p>
@@ -306,7 +306,7 @@ function VoteResult({ state }: { state: GameState }) {
           ))}
       </div>
       {state.kind === "two_truths" && result.lie ? (
-        <p className="mt-4 text-center text-[14px] font-semibold text-accent-ink">
+        <p className="mt-4 text-center text-[14px] font-medium text-accent-ink">
           The lie: {result.lie}
         </p>
       ) : null}

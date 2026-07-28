@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { Badge, ButtonLink, Card, Logo } from "@mulaqat/ui";
+import { Badge, ButtonLink, LogoMark } from "@mulaqat/ui";
 import { BRAND_NAME_DISPLAY } from "@mulaqat/types";
 
 import { MarketingFooter } from "@/components/marketing-footer";
@@ -97,9 +97,14 @@ export default async function EventPage({ params }: Params) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <header className="nav-blur sticky top-0 z-50 border-b border-chip-beige">
-        <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-3.5">
-          <Link href="/" aria-label="Mulaqat home">
-            <Logo size={26} />
+        <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-4">
+          <Link
+            href="/"
+            aria-label="Mulaqat home"
+            className="flex items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+          >
+            <LogoMark size={20} className="text-ink" />
+            <span className="label !text-ink">Mulaqat</span>
           </Link>
           <ButtonLink href="/explore" variant="ghost" size="sm">
             All tables
@@ -113,35 +118,34 @@ export default async function EventPage({ params }: Params) {
           {event.women_only ? <Badge tone="sage">Women only</Badge> : null}
           {event.seats_left === 0 && !isPast ? <Badge tone="neutral">Waitlist open</Badge> : null}
         </div>
-        <h1 className="mt-5 text-[clamp(2rem,5vw,2.75rem)] font-bold leading-tight tracking-tight">
+        <h1 className="mt-5 text-h1">
           {event.title}
         </h1>
-        <p className="mt-3 text-[17px] font-medium">
-          {formatEventDate(event.starts_at)} IST
-          <span className="text-ink-soft"> · {event.duration_min} min</span>
+        <p className="label mt-4">
+          {formatEventDate(event.starts_at)} IST · {event.duration_min} min
         </p>
 
-        <p className="mt-6 max-w-xl text-[16px] leading-relaxed text-ink-soft">
+        <p className="measure mt-6 text-ink-soft">
           {event.description}
         </p>
 
-        <Card large className="mt-8 p-6">
+        <div className="mt-10 border-t border-line pt-6">
           {event.venue ? (
             <>
-              <p className="text-[13px] font-semibold uppercase tracking-wide text-sage">
+              <p className="label !text-sage">
                 Venue revealed
               </p>
-              <p className="mt-1 text-lg font-bold">{event.venue.name}</p>
+              <p className="mt-2 text-h3">{event.venue.name}</p>
               <p className="mt-0.5 text-[15px] text-ink-soft">
                 {event.venue.address}, {event.venue.neighborhood}
               </p>
             </>
           ) : (
             <>
-              <p className="text-[13px] font-semibold uppercase tracking-wide text-accent-ink">
+              <p className="label !text-accent-ink">
                 Venue revealed 24 hours before
               </p>
-              <p className="mt-1 text-lg font-bold">
+              <p className="mt-2 text-h3">
                 {event.neighborhood_teaser ?? "Somewhere worth the auto ride"}
               </p>
               <p className="mt-0.5 text-[15px] text-ink-soft">
@@ -149,7 +153,7 @@ export default async function EventPage({ params }: Params) {
               </p>
             </>
           )}
-        </Card>
+        </div>
 
         {!isPast ? (
           <div className="mt-8 flex flex-wrap items-center gap-4">

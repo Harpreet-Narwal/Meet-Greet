@@ -71,14 +71,14 @@ export function LoginFlow() {
     <main className="min-h-dvh flex items-center justify-center px-6 py-16">
       <Card large className="w-full max-w-md p-8 sm:p-10">
         <LogoMark size={36} className="text-ink" />
-        <h1 className="mt-6 text-[28px] font-bold tracking-tight">Pull up a chair.</h1>
+        <h1 className="mt-6 text-h1">Pull up a chair.</h1>
         <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">
           Sign in with your phone — no passwords, no fuss.
         </p>
 
         {step === "phone" ? (
           <form onSubmit={requestCode} className="mt-8 flex flex-col gap-4">
-            <label className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft" htmlFor="phone">
+            <label className="text-[13px] font-medium uppercase tracking-wide text-ink-soft" htmlFor="phone">
               Phone number
             </label>
             <input
@@ -99,7 +99,7 @@ export function LoginFlow() {
           </form>
         ) : (
           <form onSubmit={verifyCode} className="mt-8 flex flex-col gap-4">
-            <label className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft" htmlFor="code">
+            <label className="text-[13px] font-medium uppercase tracking-wide text-ink-soft" htmlFor="code">
               The 6-digit code we sent to {phone}
             </label>
             <input
@@ -132,7 +132,7 @@ export function LoginFlow() {
             </button>
             {process.env.NODE_ENV !== "production" ? (
               <p className="text-[13px] text-ink-soft">
-                Dev build: <span className="font-mono font-semibold">000000</span> always works.
+                Dev build: <span className="font-mono font-medium">000000</span> always works.
               </p>
             ) : null}
           </form>

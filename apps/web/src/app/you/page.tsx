@@ -75,7 +75,7 @@ export default async function YouPage() {
             </div>
           )}
           <div>
-            <h1 className="text-[28px] font-bold tracking-tight" data-testid="profile-name">
+            <h1 className="text-h1" data-testid="profile-name">
               {displayName}
             </h1>
             <p className="mt-0.5 text-[14px] text-ink-soft">
@@ -93,10 +93,10 @@ export default async function YouPage() {
               {personality.archetype_emoji}
             </span>
             <div>
-              <p className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft">
+              <p className="text-[13px] font-medium uppercase tracking-wide text-ink-soft">
                 Table personality
               </p>
-              <p className="text-xl font-bold">{personality.archetype}</p>
+              <p className="text-xl font-medium">{personality.archetype}</p>
               {personality.humor_styles.length > 0 ? (
                 <p className="mt-1 text-[14px] text-ink-soft">
                   Laughs at: {personality.humor_styles.join(", ")}
@@ -106,10 +106,10 @@ export default async function YouPage() {
           </Card>
         ) : (
           <Card large className="mt-10 p-7">
-            <p className="font-semibold">No personality card yet.</p>
+            <p className="font-medium">No personality card yet.</p>
             <p className="mt-1 text-[15px] text-ink-soft">
               Five minutes, fifteen questions —{" "}
-              <Link href="/onboarding/quiz" className="font-semibold text-accent-ink underline-offset-4 hover:underline">
+              <Link href="/onboarding/quiz" className="font-medium text-accent-ink underline-offset-4 hover:underline">
                 take the quiz
               </Link>{" "}
               and we'll find your people.
@@ -119,7 +119,7 @@ export default async function YouPage() {
 
         {user.interests.length > 0 ? (
           <section className="mt-10">
-            <h2 className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft">
+            <h2 className="label">
               Can talk for an hour about
             </h2>
             <div className="mt-3 flex flex-wrap gap-2">

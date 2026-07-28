@@ -61,7 +61,7 @@ export function PhotoUpload() {
     <main className="min-h-dvh flex items-center justify-center px-6 py-16">
       <Card large className="w-full max-w-md p-8 text-center sm:p-10">
         <LogoMark size={36} className="mx-auto text-ink" />
-        <h1 className="mt-6 text-[28px] font-bold tracking-tight">Put a face to the name.</h1>
+        <h1 className="mt-6 text-h1">Put a face to the name.</h1>
         <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">
           A clear selfie keeps every table real — it's how we verify that everyone is who
           they say they are. Only your table sees it.

@@ -81,7 +81,7 @@ export function ChatView({ chatId }: { chatId: string }) {
           ←
         </Link>
         <LogoMark size={22} className="text-ink" />
-        <span className="text-[15px] font-semibold">Chat</span>
+        <span className="text-[15px] font-medium">Chat</span>
       </header>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-6" data-testid="messages">
@@ -97,7 +97,7 @@ export function ChatView({ chatId }: { chatId: string }) {
                   )}
                 >
                   {!mine ? (
-                    <span className="mb-0.5 block text-[11px] font-semibold text-ink-soft">
+                    <span className="mb-0.5 block text-[11px] font-medium text-ink-soft">
                       {m.sender_name}
                     </span>
                   ) : null}

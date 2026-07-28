@@ -170,7 +170,7 @@ export function QuizFlow() {
       <main className="min-h-dvh flex items-center justify-center px-6 py-16">
         <Card large className="w-full max-w-md p-8 sm:p-10">
           <LogoMark size={36} className="text-ink" />
-          <h1 className="mt-6 text-[28px] font-bold tracking-tight">
+          <h1 className="mt-6 text-h1">
             Five minutes. Fifteen questions. Zero wrong answers.
           </h1>
           <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
@@ -179,7 +179,7 @@ export function QuizFlow() {
           </p>
           {needsName ? (
             <form onSubmit={saveName} className="mt-8 flex flex-col gap-4">
-              <label className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft" htmlFor="first-name">
+              <label className="text-[13px] font-medium uppercase tracking-wide text-ink-soft" htmlFor="first-name">
                 First things first — what do we call you?
               </label>
               <input
@@ -221,7 +221,7 @@ export function QuizFlow() {
     <main className="min-h-dvh flex flex-col px-6 pb-12 pt-6">
       {/* progress */}
       <div className="mx-auto w-full max-w-xl">
-        <div className="flex items-center justify-between text-[13px] font-semibold text-ink-soft">
+        <div className="flex items-center justify-between text-[13px] font-medium text-ink-soft">
           <LogoMark size={22} className="text-ink" />
           <span data-testid="quiz-progress">
             {Math.min(index + 1, questions.length)} / {questions.length}
@@ -248,7 +248,7 @@ export function QuizFlow() {
               className="w-full py-10"
               data-testid={`question-${question.ord}`}
             >
-              <h2 className="text-[24px] font-bold leading-snug tracking-tight sm:text-[28px]">
+              <h2 className="text-h2 sm:text-[28px]">
                 {question.text}
               </h2>
               {question.subtext ? (

@@ -114,10 +114,10 @@ export function TableReveal({ eventId }: { eventId: string }) {
                 >
                   <Card large className="p-8 text-center" data-testid="locked-card">
                     <span className="text-4xl" aria-hidden>🔒</span>
-                    <h1 className="mt-4 text-2xl font-bold tracking-tight">
+                    <h1 className="mt-4 text-h1">
                       Venue unlocks in
                     </h1>
-                    <p className="mt-2 font-mono text-3xl font-bold text-accent-ink" data-testid="countdown">
+                    <p className="mt-2 font-mono text-3xl font-medium text-accent-ink" data-testid="countdown">
                       {countdown}
                     </p>
                     <p className="mt-4 text-[15px] text-ink-soft">
@@ -136,7 +136,7 @@ export function TableReveal({ eventId }: { eventId: string }) {
                   <Card large className="overflow-hidden" data-testid="venue-card">
                     <div className="bg-accent px-8 py-6 text-on-accent">
                       <Badge tone="spark" className="mb-3 bg-paper/25">Table {table.table_number}</Badge>
-                      <h1 className="text-2xl font-bold tracking-tight">{table.venue?.name}</h1>
+                      <h1 className="text-h1">{table.venue?.name}</h1>
                       <p className="mt-1 text-[15px] opacity-90">
                         {table.venue?.address}, {table.venue?.neighborhood}
                       </p>
@@ -147,7 +147,7 @@ export function TableReveal({ eventId }: { eventId: string }) {
                         href={`https://maps.google.com/?q=${table.venue?.lat},${table.venue?.lng}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[14px] font-semibold text-accent-ink underline-offset-4 hover:underline"
+                        className="text-[14px] font-medium text-accent-ink underline-offset-4 hover:underline"
                       >
                         Directions →
                       </a>
@@ -160,7 +160,7 @@ export function TableReveal({ eventId }: { eventId: string }) {
 
           {/* Table teaser — silhouettes fill in as people check in */}
           <section className="mt-10">
-            <h2 className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft">
+            <h2 className="label">
               Your table of {table.seats.length}
             </h2>
             <div className="mt-4 grid grid-cols-3 gap-3" data-testid="table-teaser">
@@ -175,7 +175,7 @@ export function TableReveal({ eventId }: { eventId: string }) {
                   <span className="text-3xl" aria-hidden>
                     {seat.checked_in ? (seat.archetype_emoji ?? "🙂") : "👤"}
                   </span>
-                  <span className="text-[13px] font-semibold leading-tight">
+                  <span className="text-[13px] font-medium leading-tight">
                     {seat.is_you ? "You" : (seat.first_name ?? "Arriving…")}
                   </span>
                   {seat.fun_fact ? (

@@ -70,8 +70,8 @@ export default function PricingPage() {
     <div className="min-h-dvh">
       <MarketingNav />
       <main className="mx-auto w-full max-w-5xl px-6 py-16">
-        <h1 className="text-[clamp(2.2rem,5vw,3.2rem)] font-bold leading-tight tracking-tight">
-          Simple prices,<br /><span className="text-accent-ink">honest ones.</span>
+        <h1 className="text-h1">
+          Simple prices,<br /><em>honest ones.</em>
         </h1>
         <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-ink-soft">
           Booking fees cover curation and your host — food and drinks go straight to the
@@ -80,14 +80,14 @@ export default function PricingPage() {
 
         {/* per-event prices */}
         <section className="mt-12">
-          <h2 className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft">
+          <h2 className="label">
             Per event
           </h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {EVENTS.map((event) => (
               <Card key={event.name} className="p-5">
-                <p className="text-2xl font-bold tracking-tight">{event.price}</p>
-                <h3 className="mt-1 font-bold">{event.name}</h3>
+                <p className="text-2xl font-medium tracking-tight">{event.price}</p>
+                <h3 className="mt-1">{event.name}</h3>
                 <p className="mt-0.5 text-[13px] text-ink-soft">{event.note}</p>
               </Card>
             ))}
@@ -100,7 +100,7 @@ export default function PricingPage() {
 
         {/* membership */}
         <section className="mt-16">
-          <h2 className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft">
+          <h2 className="label">
             Membership
           </h2>
           <div className="mt-4 grid gap-5 lg:grid-cols-3">
@@ -111,10 +111,10 @@ export default function PricingPage() {
                 className={`flex h-full flex-col p-8 ${plan.highlight ? "border-accent/60 bg-accent/[0.04]" : ""}`}
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold">{plan.tier}</h3>
+                  <h3 className="text-h3">{plan.tier}</h3>
                   {plan.highlight ? <Badge tone="accent">Popular</Badge> : null}
                 </div>
-                <p className="mt-3 text-3xl font-bold tracking-tight">
+                <p className="mt-3 text-3xl font-medium tracking-tight">
                   {plan.price}
                   <span className="block text-[13px] font-normal text-ink-soft">{plan.cadence}</span>
                 </p>

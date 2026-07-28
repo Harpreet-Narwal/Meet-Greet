@@ -19,10 +19,76 @@ body {
   color: var(--on-accent);
 }
 
+/*
+ * Weight discipline — the single biggest thing separating "premium" from
+ * "funky" here. A serif set at 600/700 reads chunky and bookish, and when every
+ * level is bold there is no hierarchy left to read. Headings therefore use the
+ * display face (Instrument Serif, one weight by design) and get their emphasis
+ * from SIZE and SPACE, never from weight. Body copy stays at 300–400.
+ *
+ * Any `font-bold` / `font-semibold` landing on a heading is overridden here on
+ * purpose: it is nearly always a leftover from the previous scheme.
+ */
 h1,
 h2,
-h3 {
+h3,
+h4 {
+  font-family: var(--font-instrument-serif), Georgia, serif;
+  font-weight: 400;
+  line-height: var(--lh-heading);
+  letter-spacing: -0.012em;
   text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--fs-h1);
+}
+h2 {
+  font-size: var(--fs-h2);
+}
+h3 {
+  font-size: var(--fs-h3);
+}
+h4 {
+  font-size: var(--fs-h4);
+}
+
+/* Sentence case is the default voice. Uppercase is reserved for mono
+   micro-labels and the single display moment in the hero — used anywhere else
+   it just shouts. */
+h1:not(.display):not(.label),
+h2:not(.display):not(.label),
+h3:not(.display):not(.label),
+h4:not(.display):not(.label) {
+  text-transform: none;
+}
+
+/* A heading can legitimately BE an eyebrow (section labels are often h2 for
+   outline reasons). `.label` owns the whole voice in that case — it must not
+   inherit the display family or size from the heading rules above. */
+h1.label,
+h2.label,
+h3.label,
+h4.label {
+  font-family: var(--font-jetbrains-mono), ui-monospace, Menlo, monospace;
+  font-size: var(--fs-label);
+  line-height: 1.4;
+  letter-spacing: var(--track-label);
+}
+
+/* The counter-voice: one phrase per headline in serif italic. This replaces
+   what used to be a saturated clay second line — colour at display size is the
+   loudest thing on a page, and it read as decoration rather than emphasis. */
+h1 em,
+h2 em,
+h3 em {
+  font-style: italic;
+  color: inherit;
+}
+
+strong,
+b {
+  font-weight: 600;
 }
 
 p {

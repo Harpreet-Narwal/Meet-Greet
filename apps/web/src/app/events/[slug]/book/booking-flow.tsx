@@ -84,7 +84,7 @@ export function BookingFlow({ event }: { event: EventInput }) {
 
         {step === "review" ? (
           <>
-            <h1 className="mt-6 text-[26px] font-bold leading-tight tracking-tight">
+            <h1 className="mt-6 text-h1">
               {event.title}
             </h1>
             <p className="mt-2 text-[15px] text-ink-soft">
@@ -92,7 +92,7 @@ export function BookingFlow({ event }: { event: EventInput }) {
             </p>
             <div className="mt-6 flex items-center justify-between rounded-card border border-line bg-paper px-5 py-4">
               <span className="text-[15px] font-medium">One seat at the table</span>
-              <span className="text-[17px] font-bold">
+              <span className="text-[17px] font-medium">
                 {event.price_inr === 0 ? "Free" : formatINR(event.price_inr)}
               </span>
             </div>
@@ -122,14 +122,14 @@ export function BookingFlow({ event }: { event: EventInput }) {
             <Badge tone="sage" className="self-start">
               Seat locked
             </Badge>
-            <h1 className="text-[24px] font-bold leading-tight tracking-tight">
+            <h1 className="text-h1">
               Two truths and a lie, please.
             </h1>
             <p className="text-[14px] leading-relaxed text-ink-soft">
               The table guesses your lie over dinner — the single best ice-breaker we know.
               Make the truths unbelievable and the lie boring.
             </p>
-            <label className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft" htmlFor="truth-1">
+            <label className="text-[13px] font-medium uppercase tracking-wide text-ink-soft" htmlFor="truth-1">
               Truth one
             </label>
             <input id="truth-1" required minLength={3} maxLength={140} value={truth1}
@@ -137,7 +137,7 @@ export function BookingFlow({ event }: { event: EventInput }) {
               placeholder="I've run a half marathon in Ladakh"
               className="h-12 rounded-card border border-line bg-paper px-4 text-[15px] outline-none focus-visible:border-accent"
               data-testid="truth-1" />
-            <label className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft" htmlFor="truth-2">
+            <label className="text-[13px] font-medium uppercase tracking-wide text-ink-soft" htmlFor="truth-2">
               Truth two
             </label>
             <input id="truth-2" required minLength={3} maxLength={140} value={truth2}
@@ -145,7 +145,7 @@ export function BookingFlow({ event }: { event: EventInput }) {
               placeholder="I make a genuinely great biryani"
               className="h-12 rounded-card border border-line bg-paper px-4 text-[15px] outline-none focus-visible:border-accent"
               data-testid="truth-2" />
-            <label className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft" htmlFor="lie">
+            <label className="text-[13px] font-medium uppercase tracking-wide text-ink-soft" htmlFor="lie">
               The lie
             </label>
             <input id="lie" required minLength={3} maxLength={140} value={lie}
@@ -167,7 +167,7 @@ export function BookingFlow({ event }: { event: EventInput }) {
             {booking?.status === "waitlisted" ? (
               <>
                 <Badge tone="neutral">On the waitlist</Badge>
-                <h1 className="mt-4 text-[26px] font-bold leading-tight tracking-tight">
+                <h1 className="mt-4 text-h1">
                   You&apos;re in line.
                 </h1>
                 <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
@@ -178,7 +178,7 @@ export function BookingFlow({ event }: { event: EventInput }) {
             ) : (
               <>
                 <Badge tone="sage">Confirmed</Badge>
-                <h1 className="mt-4 text-[26px] font-bold leading-tight tracking-tight">
+                <h1 className="mt-4 text-h1">
                   Your table awaits.
                 </h1>
                 <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">

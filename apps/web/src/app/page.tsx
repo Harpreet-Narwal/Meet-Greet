@@ -113,7 +113,10 @@ export default function LandingPage() {
              which measured 3.5s on CI hardware. The quieter elements around it
              still rise in — the movement reads the same, and LCP lands with
              first paint. */}
-        <header className="flex min-h-[86svh] flex-col justify-end px-[var(--gutter)] pb-[var(--section-sm)] pt-24">
+        {/* Centred, not bottom-aligned. Pinning a 112px headline to the bottom of
+            86svh left a screen-height of dead space above it, which reads as a
+            layout bug rather than as composure. */}
+        <header className="flex min-h-[76svh] flex-col justify-center px-[var(--gutter)] pb-[var(--section-sm)] pt-28">
           <p className="label rise">Bengaluru — now seating</p>
           <h1 className="display mt-8 text-display-xl">
             <span className="block">Tables that</span>

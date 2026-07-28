@@ -47,8 +47,8 @@ export default function SafetyPage() {
     <div className="min-h-dvh">
       <MarketingNav />
       <main className="mx-auto w-full max-w-4xl px-6 py-16">
-        <h1 className="text-[clamp(2.2rem,5vw,3.2rem)] font-bold leading-tight tracking-tight">
-          Excitement is the point.<br /><span className="text-accent-ink">Risk isn&apos;t.</span>
+        <h1 className="text-h1">
+          Excitement is the point.<br /><em>Risk isn&apos;t.</em>
         </h1>
         <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-ink-soft">
           Meeting strangers only works when everyone feels safe doing it. This is the
@@ -59,14 +59,14 @@ export default function SafetyPage() {
           {PILLARS.map((pillar) => (
             <Card key={pillar.title} large className="p-7">
               <span className={`inline-block size-8 rounded-full ${pillar.chip}`} aria-hidden />
-              <h2 className="mt-4 text-xl font-bold">{pillar.title}</h2>
+              <h2 className="mt-4 text-h2">{pillar.title}</h2>
               <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">{pillar.body}</p>
             </Card>
           ))}
         </div>
 
         <section className="mt-14">
-          <h2 className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft">
+          <h2 className="label">
             In your pocket, every event
           </h2>
           <div className="mt-4 grid gap-x-10 gap-y-6 sm:grid-cols-2">
@@ -74,7 +74,7 @@ export default function SafetyPage() {
               <div key={tool.title} className="flex gap-3.5">
                 <span className="mt-1.5 size-2.5 shrink-0 rounded-full bg-sage" aria-hidden />
                 <div>
-                  <h3 className="font-bold">{tool.title}</h3>
+                  <h3 className="">{tool.title}</h3>
                   <p className="mt-1 text-[15px] leading-relaxed text-ink-soft">{tool.body}</p>
                 </div>
               </div>
@@ -83,10 +83,10 @@ export default function SafetyPage() {
         </section>
 
         <div className="mt-16 rounded-card-lg border border-line bg-surface p-8 shadow-soft">
-          <h2 className="text-lg font-bold">Something didn&apos;t feel right?</h2>
+          <h2 className="text-h2">Something didn&apos;t feel right?</h2>
           <p className="mt-2 max-w-lg text-[15px] leading-relaxed text-ink-soft">
             Tell us — every report is read by a human and acted on. Write to{" "}
-            <a href="mailto:safety@mulaqat.app" className="font-semibold text-accent-ink underline-offset-4 hover:underline">
+            <a href="mailto:safety@mulaqat.app" className="font-medium text-accent-ink underline-offset-4 hover:underline">
               safety@mulaqat.app
             </a>{" "}
             or use the report button anywhere in the app.

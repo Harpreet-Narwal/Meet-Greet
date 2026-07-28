@@ -43,11 +43,11 @@ export default async function PeoplePage() {
       <AppNav active="people" />
 
       <main className="mx-auto w-full max-w-2xl px-6 py-10">
-        <h1 className="text-[clamp(1.8rem,4vw,2.4rem)] font-bold tracking-tight">Your people.</h1>
+        <h1 className="text-h1">Your people.</h1>
 
         {/* Chats */}
         <section className="mt-8">
-          <h2 className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft">Chats</h2>
+          <h2 className="label">Chats</h2>
           {chats.data && chats.data.length > 0 ? (
             <div className="mt-3 flex flex-col gap-2">
               {chats.data.map((chat) => (
@@ -61,7 +61,7 @@ export default async function PeoplePage() {
                       {chat.is_spark ? "✨" : "🍽️"}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold">{chat.title}</p>
+                      <p className="font-medium">{chat.title}</p>
                       <p className="truncate text-[13px] text-ink-soft">
                         {chat.last_message ?? "Say the first hello"}
                       </p>
@@ -81,7 +81,7 @@ export default async function PeoplePage() {
         {/* Mutual connections */}
         {mutuals.length > 0 ? (
           <section className="mt-10">
-            <h2 className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft">Connected</h2>
+            <h2 className="label">Connected</h2>
             <div className="mt-3 flex flex-wrap gap-2">
               {mutuals.map((c) => (
                 <Badge key={c.id} tone={c.kind === "spark" ? "spark" : "sage"}>
@@ -95,7 +95,7 @@ export default async function PeoplePage() {
         {/* My pending outgoing — never reveals who reached toward me */}
         {pending.length > 0 ? (
           <section className="mt-8">
-            <h2 className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft">
+            <h2 className="label">
               You reached out
             </h2>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -113,7 +113,7 @@ export default async function PeoplePage() {
 
         {mutuals.length === 0 && pending.length === 0 && (!chats.data || chats.data.length === 0) ? (
           <Card large className="mt-8 p-7">
-            <p className="font-semibold">Your table is one dinner away.</p>
+            <p className="font-medium">Your table is one dinner away.</p>
             <p className="mt-1 text-[15px] text-ink-soft">
               The people you meet at events show up here — to stay friends, or maybe more.
             </p>
