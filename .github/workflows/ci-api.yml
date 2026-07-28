@@ -59,13 +59,20 @@ jobs:
         run: |
           pnpm --filter @mulaqat/api db:generate
           pnpm --filter @mulaqat/api db:validate
+      # `migrate diff --from-migrations` REPLAYS every migration into whatever
+      # database it is handed as the shadow. Handing it $DATABASE_URL therefore
+      # leaves the main database with a populated schema but no migration
+      # history, and the later `migrate deploy` aborts with P3005. Give it a
+      # throwaway database of its own instead.
+      - name: Create shadow database for the drift check
+        run: PGPASSWORD=mulaqat psql -h localhost -U mulaqat -d mulaqat -c 'CREATE DATABASE mulaqat_shadow;'
       - name: Migration drift check (schema ⇄ migrations)
         working-directory: services/api
         run: |
           pnpm exec prisma migrate diff \
             --from-migrations prisma/migrations \
             --to-schema-datamodel prisma/schema.prisma \
-            --shadow-database-url "$DATABASE_URL" \
+            --shadow-database-url "postgresql://mulaqat:mulaqat@localhost:5432/mulaqat_shadow" \
             --exit-code
       - name: Lint
         run: pnpm --filter @mulaqat/api lint
