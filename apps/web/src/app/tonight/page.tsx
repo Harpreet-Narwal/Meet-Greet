@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Badge, ButtonLink, Card } from "@mulaqat/ui";
 
 import { AppNav } from "@/components/app-nav";
-import { EventCard } from "@/components/event-card";
+import { EventRow } from "@/components/event-row";
 import { apiFetch } from "@/lib/api";
 import {
   EVENT_TYPE_LABELS,
@@ -63,7 +63,7 @@ export default async function TonightPage() {
                 {next.status === "waitlisted" ? "Waitlisted" : "Confirmed"}
               </Badge>
             </div>
-            <h1 className="mt-4 text-[clamp(1.7rem,4vw,2.4rem)] font-bold leading-tight tracking-tight">
+            <h1 className="display mt-4 text-h2">
               {next.event.title}
             </h1>
             <p className="mt-2 text-[16px] font-medium">
@@ -85,7 +85,7 @@ export default async function TonightPage() {
           </Card>
         ) : (
           <Card large className="p-8" data-testid="no-booking">
-            <h1 className="text-[clamp(1.7rem,4vw,2.2rem)] font-bold leading-tight tracking-tight">
+            <h1 className="display text-h2">
               No table yet — let&apos;s fix that.
             </h1>
             <p className="mt-3 max-w-md text-[15px] leading-relaxed text-ink-soft">
@@ -102,12 +102,12 @@ export default async function TonightPage() {
 
         {recommendations.length > 0 ? (
           <section className="mt-14">
-            <h2 className="text-xl font-bold tracking-tight">
+            <h2 className="display text-h3">
               {next ? "While you wait…" : "This week in Bengaluru"}
             </h2>
-            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-6">
               {recommendations.map((event) => (
-                <EventCard key={event.id} event={event} />
+                <EventRow key={event.id} event={event} />
               ))}
             </div>
           </section>

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { ButtonLink, Logo } from "@mulaqat/ui";
 
-import { EventCard } from "@/components/event-card";
+import { EventRow } from "@/components/event-row";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { publicApi, type PublicCity, type PublicEvent } from "@/lib/public-api";
 
@@ -58,7 +58,7 @@ export default async function CityPage({ params }: Params) {
       </header>
 
       <main className="mx-auto w-full max-w-5xl px-6 py-14">
-        <h1 className="text-[clamp(2rem,5vw,3rem)] font-bold tracking-tight">
+        <h1 className="display text-display">
           Meet new people in {match.name}.
         </h1>
         <p className="mt-4 max-w-xl text-[17px] leading-relaxed text-ink-soft">
@@ -68,9 +68,9 @@ export default async function CityPage({ params }: Params) {
         </p>
 
         {match.is_live && events && events.length > 0 ? (
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-12">
             {events.map((event) => (
-              <EventCard key={event.id} event={event} />
+              <EventRow key={event.id} event={event} />
             ))}
           </div>
         ) : match.is_live ? (

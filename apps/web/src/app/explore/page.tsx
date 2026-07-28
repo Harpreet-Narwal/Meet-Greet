@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ButtonLink, cn } from "@mulaqat/ui";
 
 import { AppNav } from "@/components/app-nav";
-import { EventCard } from "@/components/event-card";
+import { EventRow } from "@/components/event-row";
 import { EVENT_TYPE_LABELS, publicApi, type PublicEvent } from "@/lib/public-api";
 
 export const revalidate = 120;
@@ -47,7 +47,7 @@ export default async function ExplorePage({ searchParams }: Props) {
       <AppNav active="explore" />
 
       <main className="mx-auto w-full max-w-5xl px-6 py-12">
-        <h1 className="text-[clamp(1.9rem,4.5vw,2.6rem)] font-bold tracking-tight">
+        <h1 className="display text-h2">
           This week&apos;s tables.
         </h1>
 
@@ -56,8 +56,8 @@ export default async function ExplorePage({ searchParams }: Props) {
           <Link
             href={chipHref(undefined, budget)}
             className={cn(
-              "rounded-full border px-4 py-2 text-[14px] font-medium transition-colors",
-              !type ? "border-accent bg-accent text-on-accent" : "border-line bg-surface hover:border-accent",
+              "label border px-4 py-2.5 transition-colors",
+              !type ? "border-ink bg-ink !text-paper" : "border-line hover:border-ink hover:!text-ink",
             )}
           >
             Everything
@@ -67,10 +67,10 @@ export default async function ExplorePage({ searchParams }: Props) {
               key={eventType}
               href={chipHref(eventType, budget)}
               className={cn(
-                "rounded-full border px-4 py-2 text-[14px] font-medium transition-colors",
+                "label border px-4 py-2.5 transition-colors",
                 type === eventType
-                  ? "border-accent bg-accent text-on-accent"
-                  : "border-line bg-surface hover:border-accent",
+                  ? "border-ink bg-ink !text-paper"
+                  : "border-line hover:border-ink hover:!text-ink",
               )}
             >
               {EVENT_TYPE_LABELS[eventType]}
@@ -82,10 +82,10 @@ export default async function ExplorePage({ searchParams }: Props) {
               key={band.value}
               href={chipHref(type, budget === band.value ? undefined : band.value)}
               className={cn(
-                "rounded-full border px-3.5 py-2 text-[14px] font-semibold transition-colors",
+                "label border px-3.5 py-2.5 transition-colors",
                 budget === band.value
-                  ? "border-accent bg-accent text-on-accent"
-                  : "border-line bg-surface hover:border-accent",
+                  ? "border-ink bg-ink !text-paper"
+                  : "border-line hover:border-ink hover:!text-ink",
               )}
             >
               {band.label}
@@ -94,14 +94,14 @@ export default async function ExplorePage({ searchParams }: Props) {
         </div>
 
         {events && events.length > 0 ? (
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-testid="event-grid">
+          <div className="mt-10" data-testid="event-grid">
             {events.map((event) => (
-              <EventCard key={event.id} event={event} />
+              <EventRow key={event.id} event={event} />
             ))}
           </div>
         ) : (
           <div className="mt-14 max-w-md">
-            <p className="text-lg font-bold">Nothing matches that combination — yet.</p>
+            <p className="display text-h3">Nothing matches that combination — yet.</p>
             <p className="mt-2 text-[15px] text-ink-soft">
               Try widening the filters, or check back tomorrow. New tables drop through the week.
             </p>
