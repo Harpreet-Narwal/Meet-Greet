@@ -19,9 +19,15 @@ const display = Instrument_Serif({
   variable: "--font-instrument-serif",
 });
 
+/*
+ * Normal only — no italic. Every `<em>` in the product resolves to the DISPLAY
+ * face (the serif-italic counter-voice in headings), so the Newsreader italic
+ * file was downloaded and preloaded on every page without ever being rendered.
+ * That is one of five preloads competing with the LCP element for bandwidth.
+ */
 const body = Newsreader({
   subsets: ["latin"],
-  style: ["normal", "italic"],
+  style: ["normal"],
   display: "swap",
   variable: "--font-newsreader",
 });
