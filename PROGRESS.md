@@ -1,5 +1,44 @@
 # Mulaqat — Progress
 
+## Production readiness   [2026-08-08]
+
+**All five workflows are green.** `ci-web` was the last red one; it now passes at
+**perf 0.96 / SEO 1.00 / a11y 1.00 / best-practices 1.00** (median of 3) on the homepage.
+
+### Closed this session
+- **The Lighthouse blocker is resolved, and the 0.90 threshold was never touched.** Two real
+  fixes plus one measurement fix. The unused Newsreader italic face was being downloaded and
+  preloaded on every page (every `<em>` resolves to the *display* face) — dropping it took
+  LCP 3.3s → 2.2s. Then: `numberOfRuns: 1` was the actual defect. TBT on a shared 2-core
+  runner measured 960 / 1030 / 480 / 1820 ms across four runs of *different* code — a 3.8×
+  spread that swamped any real signal, and one run scored *lower* despite the large LCP win.
+  Three runs asserted on the median now measures the page instead of the runner (TBT on the
+  median run: 90ms).
+- **Security headers** — the app had none. CSP, HSTS (prod only), X-Frame-Options DENY,
+  nosniff, Referrer-Policy, Permissions-Policy (camera only, for selfie verification), and
+  `poweredByHeader: false`. Verified: zero CSP violations across the public pages, fonts and
+  hydration unaffected, Lighthouse best-practices 1.00 with `csp-xss` passing.
+
+### Known limits, deliberately not papered over
+- **CSP still allows `'unsafe-inline'` for scripts in production.** Tightening it needs a
+  nonce middleware threaded through the app router; styles will always need it while Next
+  injects inline `<style>` and next/font emits inline `@font-face`.
+- **Providers are mock.** `PAYMENT_PROVIDER=mock` and `OTP_PROVIDER=mock`. Both interfaces
+  are real and provider-shaped — the paywall now holds a seat at `pending_payment` and
+  settles on a webhook exactly as Razorpay would — but no real keys are wired, per CLAUDE.md.
+  Going live is an env swap plus implementing `RazorpayProvider.createOrder` and the msg91 or
+  Twilio branch in `otp.service.ts`; both currently throw a clear "not wired yet".
+- **ECS deploy is a no-op without AWS secrets.** `release.yml` builds and pushes images to
+  GHCR on every push to main (green), then skips the `aws ecs update-service` step with a
+  logged message when the AWS secrets are absent. `ci-terraform` has never run — it is
+  path-filtered and no terraform has changed.
+- **Not built, by design (IMPLEMENTATION_PLAN §12):** native apps, real push notifications,
+  Hindi translation, DigiLocker ID verification, the B2B portal, ML-learned matching weights.
+
+### What a real launch still needs from the operator
+Razorpay + SMS keys, AWS credentials and a domain, then `terraform apply` for dev and prod.
+Everything above that line is code and is done.
+
 ## Ship to GitHub + app-shell retheme + CI repair   [DONE — 2026-07-28]
 
 Pushed to `origin/main` (github.com/Harpreet-Narwal/Meet-Greet) — this closes the last
