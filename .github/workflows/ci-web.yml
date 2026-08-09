@@ -77,6 +77,15 @@ jobs:
           for i in $(seq 1 60); do curl -sf http://localhost:4000/health && break; sleep 3; done
           for i in $(seq 1 60); do curl -sf http://localhost:3000/health && break; sleep 3; done
           docker compose exec -T api sh -c "pnpm --filter @mulaqat/api db:deploy && pnpm --filter @mulaqat/api db:seed"
+      # The checked-in client is what `apps/web` type-checks against, so when it
+      # drifts, web compiles against an API that no longer exists. It had gone
+      # 1091 lines stale before anyone noticed, because regenerating it was a
+      # documented habit with nothing enforcing it. The api is already up here.
+      - name: API client is in sync with the live OpenAPI document
+        run: |
+          pnpm gen:client
+          git diff --exit-code -- packages/types/src/api.gen.d.ts \
+            || { echo "::error::packages/types is stale — run 'pnpm gen:client' and commit the result."; exit 1; }
       - name: Install Playwright chromium
         run: pnpm --filter @mulaqat/web exec playwright install --with-deps chromium
       - name: Onboarding + booking flows (Playwright)
