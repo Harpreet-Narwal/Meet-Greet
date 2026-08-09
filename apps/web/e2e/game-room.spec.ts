@@ -142,4 +142,15 @@ test("two guests play icebreaker + hot-takes; state survives refresh", async ({ 
 
   await ctxA.close();
   await ctxB.close();
+
+  // Clean up after ourselves. This spec publishes a real event, and without
+  // this every run leaves another "Game-room test …" row sitting in /explore
+  // and on the city pages forever — eight of them had accumulated in the dev
+  // database before anyone noticed. Cancelling drops it from the public
+  // listings while leaving the bookings and game state intact for debugging.
+  await api(`/v1/admin/events/${eventId}`, {
+    token: admin.token,
+    method: "PATCH",
+    body: { status: "cancelled" },
+  });
 });

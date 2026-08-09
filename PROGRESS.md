@@ -36,6 +36,14 @@ nothing consumed it and it was breaking the pipeline:
 If the deployment ever moves to Graviton, restore arm64 with **native** runners — a matrix
 over `ubuntu-24.04` / `ubuntu-24.04-arm` with a manifest merge — never with emulation.
 
+### Fixed — the e2e suite was littering the dev database
+
+`game-room.spec` publishes a real event per run and never cleaned up, so every run left
+another "Game-room test …" row in `/explore` and on the city pages. Eight had piled up.
+The spec now cancels its event in a final step — cancelling drops it from public listings
+while leaving the bookings and game state intact for debugging. Verified: a full run now
+goes from 0 published test events to 0.
+
 ### Known limits, deliberately not papered over
 - **CSP still allows `'unsafe-inline'` for scripts in production.** Tightening it needs a
   nonce middleware threaded through the app router; styles will always need it while Next
@@ -140,6 +148,8 @@ Options, none taken because they are the operator's call:
 - Seeded event dates are relative to seed time, so the fixtures age out — `/explore` quietly
   loses events and `booking.spec.ts` (which clicks a "Chai & Chill" link) fails until you
   re-seed. Re-seeding also leaves the ISR cache stale for up to `revalidate`; restart web.
+  (`db:seed` itself IS idempotent — stable slugs, dates rebased to now — so re-running it
+  is safe and does not duplicate rows.)
 
 ## "Quiet Editorial" retheme   [DONE — 2026-07-25, operator-directed]
 
