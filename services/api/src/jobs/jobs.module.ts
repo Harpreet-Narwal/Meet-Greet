@@ -6,6 +6,8 @@ import { BookingsService } from "../bookings/bookings.service";
 import { ChatModule } from "../chat/chat.module";
 import { ChatService } from "../chat/chat.service";
 import { env } from "../config/env";
+import { MailModule } from "../mail/mail.module";
+import { RemindersService } from "../mail/reminders.service";
 import { MatchingModule } from "../matching/matching.module";
 import { MatchingService } from "../matching/matching.service";
 import { RevealService } from "../matching/reveal.service";
@@ -30,6 +32,7 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
     private readonly matching: MatchingService,
     private readonly chat: ChatService,
     private readonly prisma: PrismaService,
+    private readonly reminders: RemindersService,
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -42,6 +45,9 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
     // rating-nudge (T+2h): opens the 7-day table group chat; chat-expiry: daily
     await this.queue.upsertJobScheduler("rating-nudge", { every: 600_000 });
     await this.queue.upsertJobScheduler("chat-expiry", { every: 24 * 3600_000 });
+    // T-2h table reminder. Every 5 min so the mail lands close to two hours out
+    // rather than up to an hour early.
+    await this.queue.upsertJobScheduler("table-reminder", { every: 300_000 });
     this.worker = new Worker(
       QUEUE,
       async (job) => {
@@ -69,6 +75,8 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
               await this.chat.ensureTableGroupChat(event.id, table.id);
             }
           }
+        } else if (job.name === "table-reminder") {
+          await this.reminders.sendDueReminders();
         } else if (job.name === "chat-expiry") {
           await this.chat.expireGroupChats();
         }
@@ -88,7 +96,7 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
 }
 
 @Module({
-  imports: [BookingsModule, MatchingModule, ChatModule],
+  imports: [BookingsModule, MatchingModule, ChatModule, MailModule],
   providers: [JobsService],
 })
 export class JobsModule {}

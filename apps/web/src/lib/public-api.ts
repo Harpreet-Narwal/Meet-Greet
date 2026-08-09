@@ -13,6 +13,7 @@ export interface PublicEvent {
   price_inr: number;
   budget_band: "budget" | "moderate" | "premium";
   women_only: boolean;
+  men_only: boolean;
   status: string;
   city_slug: string;
   neighborhood_teaser: string | null;

@@ -4,6 +4,9 @@ export const UpdateMeSchema = z
   .object({
     full_name: z.string().min(2).max(80),
     first_name: z.string().min(1).max(40),
+    // Optional — phone is the identity. This exists so booking confirmations and
+    // the T-2h table reminder have somewhere to go; without it those are no-ops.
+    email: z.string().email().max(120),
     dob: z.coerce.date().refine(
       (d) => {
         const age = (Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000);

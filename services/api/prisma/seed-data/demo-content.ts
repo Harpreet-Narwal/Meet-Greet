@@ -99,6 +99,7 @@ export interface SeedEvent {
   capacity: number;
   budgetBand: "budget" | "moderate" | "premium";
   womenOnly: boolean;
+  menOnly: boolean;
   status: "published" | "completed";
   neighborhoodTeaser: string;
   tables: number;
@@ -119,6 +120,7 @@ export const events: SeedEvent[] = [
     capacity: 12,
     budgetBand: "premium",
     womenOnly: false,
+    menOnly: false,
     status: "published",
     neighborhoodTeaser: "Somewhere leafy in Indiranagar with cocktails worth the auto ride",
     tables: 2,
@@ -137,6 +139,7 @@ export const events: SeedEvent[] = [
     capacity: 18,
     budgetBand: "premium",
     womenOnly: false,
+    menOnly: false,
     status: "published",
     neighborhoodTeaser: "Central, buzzing, and famous for its filter-coffee cocktails",
     tables: 3,
@@ -155,6 +158,7 @@ export const events: SeedEvent[] = [
     capacity: 6,
     budgetBand: "moderate",
     womenOnly: true,
+    menOnly: false,
     status: "published",
     neighborhoodTeaser: "A cosy Koramangala café that takes its coffee very seriously",
     tables: 1,
@@ -173,6 +177,7 @@ export const events: SeedEvent[] = [
     capacity: 30,
     budgetBand: "budget",
     womenOnly: false,
+    menOnly: false,
     status: "published",
     neighborhoodTeaser: "Bandstand side of the park, where the morning light hits right",
     tables: 5,
@@ -191,9 +196,29 @@ export const events: SeedEvent[] = [
     capacity: 18,
     budgetBand: "moderate",
     womenOnly: false,
+    menOnly: false,
     status: "published",
     neighborhoodTeaser: "HSR's favourite den of dice and questionable strategy",
     tables: 3,
+  },
+  {
+    slug: "men-only-dinner-indiranagar-w1",
+    title: "Men-only Table — Indiranagar",
+    description:
+      "Six men, one long dinner, and the kind of conversation that doesn't usually happen over a work lunch. Same matching, same host, same rules.",
+    type: "dinner",
+    venueSlug: "toit-indiranagar",
+    daysFromNow: 6,
+    hour: 20,
+    durationMin: 150,
+    priceInr: 399,
+    capacity: 12,
+    budgetBand: "moderate",
+    womenOnly: false,
+    menOnly: true,
+    status: "published",
+    neighborhoodTeaser: "A leafy Indiranagar table with cocktails worth the auto ride",
+    tables: 2,
   },
   {
     slug: "chai-and-chill-dyu-w1",
@@ -209,6 +234,7 @@ export const events: SeedEvent[] = [
     capacity: 12,
     budgetBand: "budget",
     womenOnly: false,
+    menOnly: false,
     status: "published",
     neighborhoodTeaser: "A 100-year-old Kerala house hiding in Koramangala",
     tables: 2,
@@ -226,6 +252,7 @@ export const events: SeedEvent[] = [
     capacity: 12,
     budgetBand: "premium",
     womenOnly: false,
+    menOnly: false,
     status: "completed",
     neighborhoodTeaser: "Somewhere leafy in Indiranagar",
     tables: 2,
@@ -243,6 +270,7 @@ export const events: SeedEvent[] = [
     capacity: 12,
     budgetBand: "budget",
     womenOnly: false,
+    menOnly: false,
     status: "completed",
     neighborhoodTeaser: "A cosy Koramangala café",
     tables: 2,

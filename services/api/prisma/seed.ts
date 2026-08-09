@@ -147,6 +147,7 @@ async function main(): Promise<void> {
         capacity: event.capacity,
         budgetBand: event.budgetBand,
         womenOnly: event.womenOnly,
+        menOnly: event.menOnly,
         hostId: hostRow?.id,
         status: event.status,
         neighborhoodTeaser: event.neighborhoodTeaser,

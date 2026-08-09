@@ -69,8 +69,8 @@ export class BookingsService {
   async book(userId: string, eventId: string): Promise<BookingView> {
     const created = await this.prisma.$transaction(
       async (tx) => {
-        const rows = await tx.$queryRaw<{ id: string; capacity: number; status: string; starts_at: Date; price_inr: number; women_only: boolean }[]>`
-          SELECT id, capacity, status, starts_at, price_inr, women_only
+        const rows = await tx.$queryRaw<{ id: string; capacity: number; status: string; starts_at: Date; price_inr: number; women_only: boolean; men_only: boolean }[]>`
+          SELECT id, capacity, status, starts_at, price_inr, women_only, men_only
           FROM events WHERE id = ${eventId}::uuid FOR UPDATE`;
         const event = rows[0];
         if (!event) throw new NotFoundException("no such event");
@@ -80,10 +80,22 @@ export class BookingsService {
         if (event.starts_at.getTime() < Date.now()) {
           throw new BadRequestException("that evening has already happened");
         }
-        if (event.women_only) {
+        // Gender-restricted tables. Note the null case: gender is optional on
+        // the user record, and an unset gender must be told to go set it rather
+        // than be given the flat "this is a women-only table" refusal — that
+        // reads as "you are the wrong gender" to someone who simply never
+        // answered.
+        if (event.women_only || event.men_only) {
           const user = await tx.user.findUnique({ where: { id: userId } });
-          if (user?.gender !== "woman") {
-            throw new BadRequestException("this is a women-only table");
+          const wanted = event.women_only ? "woman" : "man";
+          const label = event.women_only ? "women-only" : "men-only";
+          if (!user?.gender || user.gender === "prefer_not") {
+            throw new BadRequestException(
+              `add your gender to your profile to book a ${label} table`,
+            );
+          }
+          if (user.gender !== wanted) {
+            throw new BadRequestException(`this is a ${label} table`);
           }
         }
 

@@ -20,6 +20,7 @@ export interface PublicEvent {
   price_inr: number;
   budget_band: Event["budgetBand"];
   women_only: boolean;
+  men_only: boolean;
   status: Event["status"];
   city_slug: string;
   neighborhood_teaser: string | null;
@@ -57,6 +58,7 @@ export class EventsService {
       price_inr: event.priceInr,
       budget_band: event.budgetBand,
       women_only: event.womenOnly,
+      men_only: event.menOnly,
       status: event.status,
       city_slug: event.city.slug,
       neighborhood_teaser: event.neighborhoodTeaser,
@@ -141,6 +143,7 @@ export class EventsService {
         capacity: dto.capacity,
         budgetBand: dto.budget_band,
         womenOnly: dto.women_only,
+        menOnly: dto.men_only,
         neighborhoodTeaser: dto.neighborhood_teaser,
         status: "published",
         tables: {
@@ -168,6 +171,7 @@ export class EventsService {
         capacity: dto.capacity,
         budgetBand: dto.budget_band,
         womenOnly: dto.women_only,
+        menOnly: dto.men_only,
         neighborhoodTeaser: dto.neighborhood_teaser,
         status: dto.status,
       },

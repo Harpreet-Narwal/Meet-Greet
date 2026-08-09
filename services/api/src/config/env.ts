@@ -12,6 +12,13 @@ const EnvSchema = z.object({
     .string()
     .default("postgresql://mulaqat:mulaqat@localhost:5432/mulaqat"),
   REDIS_URL: z.string().default("redis://localhost:6379"),
+  // Mail. Dev points at Mailhog (docker-compose, inbox on :8025); production
+  // swaps the host for a real relay. Unset SMTP_HOST simply disables sending.
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().default(1025),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
+  MAIL_FROM: z.string().default("Mulaqat <hello@mulaqat.app>"),
   AI_URL: z.string().url().default("http://localhost:8000"),
   INTERNAL_API_TOKEN: z.string().default("dev-internal-token-change-me"),
   AUTH_SECRET: z.string().default("dev-auth-secret-change-me"),

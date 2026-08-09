@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 
 import { Button, ButtonLink, Card, LogoMark } from "@mulaqat/ui";
 
+import { AvatarCropper } from "@/components/avatar-cropper";
 import { BackLink } from "@/components/back-link";
 import { postJson } from "@/lib/client";
 
@@ -13,14 +14,25 @@ export function PhotoUpload() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [cropping, setCropping] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function onPick(event: React.ChangeEvent<HTMLInputElement>) {
     const picked = event.target.files?.[0] ?? null;
-    setFile(picked);
     setError(null);
-    if (picked) setPreview(URL.createObjectURL(picked));
+    // Crop before anything else: a phone selfie is 3–12MP and rarely square,
+    // and the avatar renders in a circle. Uploading the raw file meant whatever
+    // the camera happened to frame.
+    if (picked) setCropping(picked);
+    // Let the same file be re-picked after a cancel.
+    event.target.value = "";
+  }
+
+  function onCropped(cropped: File) {
+    setCropping(null);
+    setFile(cropped);
+    setPreview(URL.createObjectURL(cropped));
   }
 
   async function upload() {
@@ -69,6 +81,15 @@ export function PhotoUpload() {
           they say they are. Only your table sees it.
         </p>
 
+        {cropping ? (
+          <div className="mt-8">
+            <AvatarCropper
+              file={cropping}
+              onCancel={() => setCropping(null)}
+              onDone={onCropped}
+            />
+          </div>
+        ) : (
         <div className="mt-8 flex flex-col items-center gap-5">
           <button
             type="button"
@@ -96,10 +117,20 @@ export function PhotoUpload() {
           <Button size="lg" disabled={!file || busy} onClick={upload} data-testid="upload-photo">
             {busy ? "Uploading…" : "Use this one"}
           </Button>
+          {preview ? (
+            <button
+              type="button"
+              onClick={() => file && setCropping(file)}
+              className="label underline-offset-4 hover:!text-ink hover:underline"
+            >
+              Adjust the crop
+            </button>
+          ) : null}
           <ButtonLink href="/you" variant="ghost" size="sm">
-            I'll do this later
+            I&apos;ll do this later
           </ButtonLink>
         </div>
+        )}
 
         {error ? (
           <p role="alert" className="mt-4 text-[14px] font-medium text-danger">

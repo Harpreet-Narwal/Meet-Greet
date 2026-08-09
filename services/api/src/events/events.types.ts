@@ -29,6 +29,7 @@ export const AdminEventSchema = z.object({
   capacity: z.number().int().min(6).max(120),
   budget_band: z.enum(["budget", "moderate", "premium"]),
   women_only: z.boolean().default(false),
+  men_only: z.boolean().default(false),
   neighborhood_teaser: z.string().max(140).optional(),
   tables: z.number().int().min(1).max(20).default(1),
 });

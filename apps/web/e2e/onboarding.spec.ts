@@ -17,6 +17,10 @@ test("new user: login → quiz → archetype reveal → profile", async ({ page 
   // ── Quiz intro: name + start ───────────────────────────────────
   await expect(page.getByTestId("name-input")).toBeVisible({ timeout: 20_000 });
   await page.getByTestId("name-input").fill("Meera");
+  // Gender is collected at account creation now — the booking rules for
+  // women-only and men-only tables are enforced server-side against it, so the
+  // step will not advance without one.
+  await page.getByTestId("gender-woman").click({ force: true });
   await page.getByTestId("start-quiz").click();
 
   // ── Answer all 15 questions, whatever kind shows up ────────────
@@ -70,6 +74,7 @@ test("quiz is resumable after a refresh", async ({ page }) => {
 
   await expect(page.getByTestId("name-input")).toBeVisible({ timeout: 20_000 });
   await page.getByTestId("name-input").fill("Kabir");
+  await page.getByTestId("gender-man").click({ force: true });
   await page.getByTestId("start-quiz").click();
 
   // Answer the first two questions (both single-choice in seed order)

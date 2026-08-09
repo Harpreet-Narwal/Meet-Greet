@@ -116,6 +116,7 @@ export default async function EventPage({ params }: Params) {
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone="accent">{EVENT_TYPE_LABELS[event.type]}</Badge>
           {event.women_only ? <Badge tone="sage">Women only</Badge> : null}
+          {event.men_only ? <Badge tone="sage">Men only</Badge> : null}
           {event.seats_left === 0 && !isPast ? <Badge tone="neutral">Waitlist open</Badge> : null}
         </div>
         <h1 className="mt-5 text-h1">

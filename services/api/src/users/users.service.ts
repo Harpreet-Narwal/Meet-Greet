@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import type { PersonalityProfile, User } from "@prisma/client";
 
+import { Prisma } from "@prisma/client";
+
 import { PrismaService } from "../prisma/prisma.service";
 import type { UpdateMeDto } from "./users.types";
 
@@ -100,11 +102,13 @@ export class UsersService {
       if (!city) throw new BadRequestException(`unknown city: ${dto.city_slug}`);
       cityId = city.id;
     }
-    await this.prisma.user.update({
+    try {
+      await this.prisma.user.update({
       where: { id: userId },
       data: {
         fullName: dto.full_name,
         firstName: dto.first_name,
+        email: dto.email,
         dob: dto.dob,
         gender: dto.gender,
         cityId,
@@ -115,7 +119,17 @@ export class UsersService {
         languages: dto.languages,
         interests: dto.interests,
       },
-    });
+      });
+    } catch (error) {
+      // `email` is @unique — a clash is the caller's mistake, not a 500.
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        throw new BadRequestException("that email is already on another account");
+      }
+      throw error;
+    }
     return this.getMe(userId);
   }
 }

@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { Button, Card, LogoMark } from "@mulaqat/ui";
 
+import { BackLink } from "@/components/back-link";
 import { postJson } from "@/lib/client";
 
 /** "+91 98765 43210" | "9876543210" → E.164. Bare 10-digit numbers assume India. */
@@ -70,6 +71,7 @@ export function LoginFlow() {
   return (
     <main className="min-h-dvh flex items-center justify-center px-6 py-16">
       <Card large className="w-full max-w-md p-8 sm:p-10">
+        <BackLink href="/" label="Home" className="mb-6" />
         <LogoMark size={36} className="text-ink" />
         <h1 className="mt-6 text-h1">Pull up a chair.</h1>
         <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">

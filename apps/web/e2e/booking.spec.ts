@@ -50,4 +50,14 @@ test("book a table end-to-end with mock payments", async ({ page }) => {
   await expect(page.getByTestId("next-booking")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("next-booking")).toContainText("Chai & Chill");
   await expect(page.getByTestId("next-booking")).toContainText("Confirmed");
+
+  // Release the seat. This spec books a REAL seat on a seeded table, and the
+  // chai table is only twelve chairs — left uncancelled, a dozen runs sell it
+  // out and every later run fails on an aria-disabled "Waitlist open" row that
+  // looks nothing like the actual cause.
+  await page.evaluate(async () => {
+    const mine = await (await fetch("/api/bff/me/bookings")).json();
+    const booking = (mine.upcoming ?? [])[0];
+    if (booking) await fetch(`/api/bff/bookings/${booking.id}`, { method: "DELETE" });
+  });
 });

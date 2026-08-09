@@ -41,7 +41,7 @@ export function EventRow({ event }: { event: PublicEvent }) {
 
       <span className="label col-start-1 row-start-3 md:col-start-3 md:row-start-1 md:text-right">
         {EVENT_TYPE_LABELS[event.type]}
-        {event.women_only ? " · Women only" : ""}
+        {event.women_only ? " · Women only" : event.men_only ? " · Men only" : ""}
       </span>
 
       <span className="label col-start-2 row-start-1 !text-ink md:col-start-4 md:row-start-1 md:text-right">

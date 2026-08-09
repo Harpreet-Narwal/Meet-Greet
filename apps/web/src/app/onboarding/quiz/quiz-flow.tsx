@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Button, Card, LogoMark, cn } from "@mulaqat/ui";
 
+import { BackLink } from "@/components/back-link";
 import { getJson, postJson } from "@/lib/client";
 
 interface QuizOption {
@@ -52,6 +53,8 @@ export function QuizFlow() {
   const router = useRouter();
   const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
   const [needsName, setNeedsName] = useState(false);
+  const [gender, setGender] = useState<string>("");
+  const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [started, setStarted] = useState(false);
   const [index, setIndex] = useState(0);
@@ -135,8 +138,16 @@ export function QuizFlow() {
   async function saveName(event: React.FormEvent) {
     event.preventDefault();
     const trimmed = name.trim();
-    if (trimmed.length < 2) return;
-    const result = await postJson("/api/bff/me", { first_name: trimmed }, "PATCH");
+    if (trimmed.length < 2 || !gender) return;
+    // Gender is collected here, at account creation, because the booking rules
+    // depend on it: women-only and men-only tables are refused server-side, and
+    // a user with no gender set simply cannot book either. Asking later would
+    // mean a dead end at checkout.
+    const result = await postJson(
+      "/api/bff/me",
+      { first_name: trimmed, ...(gender ? { gender } : {}), ...(email.trim() ? { email: email.trim() } : {}) },
+      "PATCH",
+    );
     if (!result.ok) {
       setError(result.message ?? "Couldn't save your name — try again.");
       return;
@@ -169,6 +180,9 @@ export function QuizFlow() {
     return (
       <main className="min-h-dvh flex items-center justify-center px-6 py-16">
         <Card large className="w-full max-w-md p-8 sm:p-10">
+          {/* The intro/account-creation screen only. Once the questions start,
+              a "Home" link mid-quiz would read as an invitation to abandon it. */}
+          <BackLink href="/" label="Home" className="mb-6" />
           <LogoMark size={36} className="text-ink" />
           <h1 className="mt-6 text-h1">
             Five minutes. Fifteen questions. Zero wrong answers.
@@ -195,8 +209,60 @@ export function QuizFlow() {
                 className="h-12 rounded-card border border-line bg-paper px-4 text-[17px] outline-none transition-colors focus-visible:border-accent"
                 data-testid="name-input"
               />
-              <Button type="submit" size="lg" data-testid="start-quiz">
-                Let's go
+              <label className="label mt-2" htmlFor="signup-email">
+                Email — for your booking confirmation and a nudge two hours before
+              </label>
+              <input
+                id="signup-email"
+                type="email"
+                autoComplete="email"
+                maxLength={120}
+                placeholder="you@example.com (optional)"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className="h-12 border border-line bg-paper px-4 text-body outline-none transition-colors focus-visible:border-accent"
+                data-testid="email-input"
+              />
+
+              <fieldset className="mt-2">
+                <legend className="label">
+                  And how should we seat you?
+                </legend>
+                <p className="mt-2 text-small text-ink-soft">
+                  Some tables are women-only or men-only — this is the only thing we use it
+                  for. It is never shown on your profile.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {[
+                    { value: "woman", label: "Woman" },
+                    { value: "man", label: "Man" },
+                    { value: "nonbinary", label: "Non-binary" },
+                    { value: "prefer_not", label: "Rather not say" },
+                  ].map((option) => (
+                    <label
+                      key={option.value}
+                      className={`label cursor-pointer border px-4 py-2.5 transition-colors ${
+                        gender === option.value
+                          ? "border-ink bg-ink !text-paper"
+                          : "border-line hover:border-ink hover:!text-ink"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="gender"
+                        value={option.value}
+                        checked={gender === option.value}
+                        onChange={(event) => setGender(event.target.value)}
+                        className="sr-only"
+                        data-testid={`gender-${option.value}`}
+                      />
+                      {option.label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <Button type="submit" size="lg" disabled={!gender} data-testid="start-quiz">
+                Let&apos;s go
               </Button>
             </form>
           ) : (

@@ -359,6 +359,7 @@ model Event {
   capacity           Int
   budgetBand         BudgetBand  @map("budget_band")
   womenOnly          Boolean     @default(false) @map("women_only")
+  menOnly            Boolean     @default(false) @map("men_only")
   hostId             String?     @map("host_id") @db.Uuid
   status             EventStatus @default(draft)
   neighborhoodTeaser String?     @map("neighborhood_teaser")
@@ -405,6 +406,7 @@ model Booking {
   status    BookingStatus @default(pending_payment)
   amountInr Int           @map("amount_inr")
   twoTruths Json?         @map("two_truths") // {truths: [a, b], lie: c} collected at booking
+  reminderSentAt DateTime? @map("reminder_sent_at")
   createdAt DateTime      @default(now()) @map("created_at")
   updatedAt DateTime      @updatedAt @map("updated_at")
 
