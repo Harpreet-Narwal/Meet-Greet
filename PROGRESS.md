@@ -19,6 +19,23 @@
   `poweredByHeader: false`. Verified: zero CSP violations across the public pages, fonts and
   hydration unaffected, Lighthouse best-practices 1.00 with `csp-xss` passing.
 
+### Decision — release images are amd64 only (deviates from IMPLEMENTATION_PLAN §9.1)
+
+The plan asked for `linux/amd64` + `linux/arm64`. Dropped arm64, deliberately, because
+nothing consumed it and it was breaking the pipeline:
+
+- `docker-compose.yml` **builds** every app image locally (`build:`, not `image:`), so an
+  Apple Silicon dev machine never pulls these. The terraform sets no `runtime_platform`,
+  so ECS Fargate runs **X86_64**. The arm64 image had no consumer at all.
+- arm64 was cross-built under QEMU, which emulates a full `next build`. Measured on one
+  release: **api 44s, ai 39s, web 12m09s** — and an earlier cold-cache run sat on the web
+  image for **over 4.5 hours**. Because the release concurrency group is
+  `cancel-in-progress: false`, that one slow job also queues every later push behind it;
+  two intermediate releases were cancelled while waiting.
+
+If the deployment ever moves to Graviton, restore arm64 with **native** runners — a matrix
+over `ubuntu-24.04` / `ubuntu-24.04-arm` with a manifest merge — never with emulation.
+
 ### Known limits, deliberately not papered over
 - **CSP still allows `'unsafe-inline'` for scripts in production.** Tightening it needs a
   nonce middleware threaded through the app router; styles will always need it while Next
