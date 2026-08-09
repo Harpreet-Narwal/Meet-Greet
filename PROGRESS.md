@@ -44,6 +44,23 @@ The spec now cancels its event in a final step — cancelling drops it from publ
 while leaving the bookings and game state intact for debugging. Verified: a full run now
 goes from 0 published test events to 0.
 
+### Fixed — the generated API client had drifted 1091 lines
+
+`packages/types/src/api.gen.d.ts` is what `apps/web` type-checks against, so when it drifts,
+web compiles happily against an API that no longer exists. Regenerating it after an api
+change is a documented habit in CLAUDE.md with nothing enforcing it, and it had fallen far
+behind (my own `POST /bookings/:id/pay` was only the most recent miss). Regenerated, and
+`ci-web` now regenerates and `git diff --exit-code`s the file so it cannot drift again —
+the stack is already up in that job, so the check is nearly free.
+
+### Audited and found sound (no change needed)
+- **Terraform durability** — RDS is encrypted, has 7-day backup retention (module default),
+  `deletion_protection = true` in prod, and takes a final snapshot on destroy. ECS services
+  have ALB health checks and CPU autoscaling.
+- **Session cookies** — httpOnly, sameSite=lax, `secure` in production.
+- **`db:seed` is idempotent** — stable slugs with dates rebased to now, so re-running it is
+  safe. The event pile-up in the dev database was the e2e suite, not the seed.
+
 ### Known limits, deliberately not papered over
 - **CSP still allows `'unsafe-inline'` for scripts in production.** Tightening it needs a
   nonce middleware threaded through the app router; styles will always need it while Next
