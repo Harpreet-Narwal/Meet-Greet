@@ -127,10 +127,16 @@ async function main(): Promise<void> {
     // event.hour is IST wall-clock (8 PM dinner = 20). Build the instant whose
     // IST representation is that hour, regardless of the server's timezone, so
     // the UI (which formats in Asia/Kolkata) shows the intended local time.
-    const startsAt = new Date();
-    startsAt.setDate(startsAt.getDate() + event.daysFromNow);
-    startsAt.setUTCHours(event.hour, 0, 0, 0);
-    startsAt.setTime(startsAt.getTime() - IST_OFFSET_MS);
+    let startsAt: Date;
+    if (event.hoursFromNow !== undefined) {
+      // Relative to *now*, not to a wall-clock hour — see the field's comment.
+      startsAt = new Date(Date.now() + event.hoursFromNow * 3600_000);
+    } else {
+      startsAt = new Date();
+      startsAt.setDate(startsAt.getDate() + event.daysFromNow);
+      startsAt.setUTCHours(event.hour, 0, 0, 0);
+      startsAt.setTime(startsAt.getTime() - IST_OFFSET_MS);
+    }
     const row = await prisma.event.upsert({
       where: { slug: event.slug },
       update: { startsAt, status: event.status },
@@ -168,6 +174,7 @@ async function main(): Promise<void> {
       update: {},
       create: {
         phone: seedUser.phone,
+        email: seedUser.email,
         fullName: seedUser.fullName,
         firstName: seedUser.firstName,
         gender: seedUser.gender,
@@ -229,6 +236,8 @@ async function main(): Promise<void> {
     }
   }
 
+  await seedTableChat();
+
   const [cities, users, quizQuestions, venueCount, eventCount, deckCount, cardCount] =
     await Promise.all([
       prisma.city.count(),
@@ -243,6 +252,86 @@ async function main(): Promise<void> {
     `Seeded ✓  cities=${cities} users=${users} quiz_questions=${quizQuestions} venues=${venueCount} ` +
       `events=${eventCount} decks=${deckCount} deck_cards=${cardCount}`,
   );
+}
+
+/**
+ * Give the dev fixture table a group chat that is already alive.
+ *
+ * `ensureTableChat` (bookings.service) adds a paying guest to their table's chat,
+ * but on a fresh database that chat has exactly one member and nothing in it —
+ * which tests the plumbing and none of the experience. This seats five demo
+ * guests and leaves a conversation mid-flow, so booking `test-table-tonight`
+ * lands you somewhere with people already talking.
+ *
+ * Idempotent: keyed on the chat's event, and it re-runs only when empty.
+ */
+async function seedTableChat(): Promise<void> {
+  const event = await prisma.event.findUnique({ where: { slug: "test-table-tonight" } });
+  if (!event) return;
+
+  const chat =
+    (await prisma.chat.findFirst({ where: { eventId: event.id, kind: "table_group" } })) ??
+    (await prisma.chat.create({
+      data: {
+        kind: "table_group",
+        eventId: event.id,
+        // A table chat outlives the dinner by a week, matching production.
+        expiresAt: new Date(Date.now() + 7 * 24 * 3600_000),
+      },
+    }));
+
+  if ((await prisma.message.count({ where: { chatId: chat.id } })) > 0) return;
+
+  // Demo guests, by the phones buildSeedUsers() assigns.
+  const phones = [
+    "+919876000001",
+    "+919876000003",
+    "+919876000005",
+    "+919876000007",
+    "+919876000009",
+  ];
+  const guests = await prisma.user.findMany({ where: { phone: { in: phones } } });
+  if (guests.length === 0) return;
+
+  for (const guest of guests) {
+    await prisma.chatMember.upsert({
+      where: { chatId_userId: { chatId: chat.id, userId: guest.id } },
+      update: {},
+      create: { chatId: chat.id, userId: guest.id },
+    });
+  }
+
+  // Written to read like people who have not met yet — the tone the real
+  // table chat opens in, not filler.
+  const script: [number, string][] = [
+    [0, "Okay who's actually on time tonight? I'm notoriously 10 minutes late."],
+    [1, "Guilty. But I'll bring the good chocolate as an apology in advance."],
+    [2, "Ooh which one — the sea salt one from that place in Indiranagar?"],
+    [1, "That's the one. Consider it settled then."],
+    [3, "I'm coming straight from work so I may be the one in office clothes, be kind."],
+    [0, "Honestly same. Solidarity."],
+    [4, "Has anyone been to this place before? Asking for my very indecisive self."],
+    [2, "Not yet! Heard the filter coffee is unreasonably good though."],
+    [3, "Sold. See you all at 8."],
+  ];
+
+  const base = Date.now() - script.length * 4 * 60_000;
+  for (const [index, [speaker, body]] of script.entries()) {
+    const sender = guests[speaker % guests.length];
+    if (!sender) continue;
+    await prisma.message.create({
+      data: {
+        chatId: chat.id,
+        senderId: sender.id,
+        kind: "text",
+        body,
+        // Spread backwards from now so the thread has a believable rhythm
+        // instead of nine messages sharing one timestamp.
+        createdAt: new Date(base + index * 4 * 60_000),
+      },
+    });
+  }
+  await prisma.chat.update({ where: { id: chat.id }, data: { updatedAt: new Date() } });
 }
 
 main()

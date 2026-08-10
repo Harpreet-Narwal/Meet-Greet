@@ -94,6 +94,13 @@ export interface SeedEvent {
   /** Days from the seed base date (negative = past). */
   daysFromNow: number;
   hour: number;
+  /**
+   * Overrides `daysFromNow`/`hour` with an offset from the moment of seeding.
+   * Only the dev fixture uses it: pinning that table a fixed number of hours out
+   * is what puts it inside the T-2h reminder window on every reseed, whatever
+   * time of day you happen to run it.
+   */
+  hoursFromNow?: number;
   durationMin: number;
   priceInr: number;
   capacity: number;
@@ -181,6 +188,38 @@ export const events: SeedEvent[] = [
     status: "published",
     neighborhoodTeaser: "Bandstand side of the park, where the morning light hits right",
     tables: 5,
+  },
+  {
+    /*
+     * The dev fixture. Everything else in this list is a plausible listing;
+     * this one exists to be booked immediately and exercise what happens after.
+     *
+     * Two hours out, so it sits inside the T-2h reminder window the moment it is
+     * seeded — book it and the reminder mail lands in Mailhog on the next tick
+     * of the scheduler rather than in three days' time.
+     *
+     * ₹99 keeps it on the paid path (a free table skips checkout entirely), and
+     * `seedTableChat` pre-fills its group chat with other guests, so booking it
+     * drops you into a conversation already in progress instead of an empty room.
+     */
+    slug: "test-table-tonight",
+    title: "Test Table — Tonight, Indiranagar",
+    description:
+      "The table we keep set for trying things out. Books in one tap, opens the group chat straight away, and the reminder lands in your inbox within minutes. Six seats, same as any other night.",
+    type: "dinner",
+    venueSlug: "toast-tonic-indiranagar",
+    daysFromNow: 0,
+    hour: 20,
+    hoursFromNow: 2,
+    durationMin: 120,
+    priceInr: 99,
+    capacity: 6,
+    budgetBand: "budget",
+    womenOnly: false,
+    menOnly: false,
+    status: "published",
+    neighborhoodTeaser: "The usual Indiranagar corner, held for a dry run",
+    tables: 1,
   },
   {
     slug: "game-night-hsr-w1",
@@ -330,6 +369,13 @@ function makeRandom(seed: number): () => number {
 
 export interface SeedUser {
   phone: string;
+  /**
+   * Demo users need one for the booking-confirmation and reminder mails to have
+   * anywhere to go — both skip a user with no address. `.test` is reserved by
+   * RFC 2606 and can never resolve, so these cannot reach a real inbox even if
+   * this data escaped a dev machine. In dev everything is caught by Mailhog.
+   */
+  email: string;
   fullName: string;
   firstName: string;
   gender: "woman" | "man" | "nonbinary";
@@ -363,6 +409,7 @@ export function buildSeedUsers(count = 30): SeedUser[] {
     const [archetype, emoji] = ARCHETYPES[index % ARCHETYPES.length] as [string, string];
     return {
       phone: `+9198${String(76000000 + index)}`,
+      email: `${firstName.toLowerCase()}${index}@mulaqat.test`,
       fullName: `${firstName} ${pick(LAST_NAMES)}`,
       firstName,
       gender,
