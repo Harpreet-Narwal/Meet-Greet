@@ -277,10 +277,30 @@ export const events: SeedEvent[] = [
   },
 ];
 
-const FIRST_NAMES = [
-  "Aarav", "Diya", "Vihaan", "Ananya", "Arjun", "Isha", "Kabir", "Meera", "Rohan", "Sara",
-  "Advait", "Naina", "Dev", "Priya", "Kunal", "Tara", "Nikhil", "Zoya", "Aditya", "Rhea",
-  "Farhan", "Anjali", "Siddharth", "Pooja", "Imran", "Lakshmi", "Varun", "Nandini", "Jai", "Simran",
+/**
+ * Demo people, with gender carried alongside the name.
+ *
+ * This used to be a bare name list with gender derived as `index % 2 === 0 ?
+ * "woman" : …`. The names happen to alternate male/female starting with a male
+ * one, so that rule labelled every single person as the opposite of what their
+ * name suggests — Aarav came out "woman", Diya "man". Harmless while gender was
+ * decorative, actively misleading now that men-only and women-only tables are
+ * gated on it: the refusal looks like a bug when you sign in as Aarav and get
+ * turned away from the men-only table.
+ *
+ * Keeping the pair in one tuple is the point — the two can no longer drift.
+ * A few entries are nonbinary; a name implies nothing about that, so the choice
+ * of which is arbitrary on purpose.
+ */
+const PEOPLE: readonly (readonly [string, "woman" | "man" | "nonbinary"])[] = [
+  ["Aarav", "man"], ["Diya", "woman"], ["Vihaan", "man"], ["Ananya", "woman"],
+  ["Arjun", "man"], ["Isha", "woman"], ["Kabir", "man"], ["Meera", "woman"],
+  ["Rohan", "man"], ["Sara", "woman"], ["Advait", "nonbinary"], ["Naina", "woman"],
+  ["Dev", "man"], ["Priya", "woman"], ["Kunal", "man"], ["Tara", "nonbinary"],
+  ["Nikhil", "man"], ["Zoya", "woman"], ["Aditya", "man"], ["Rhea", "woman"],
+  ["Farhan", "man"], ["Anjali", "woman"], ["Siddharth", "man"], ["Pooja", "woman"],
+  ["Imran", "nonbinary"], ["Lakshmi", "woman"], ["Varun", "man"], ["Nandini", "woman"],
+  ["Jai", "man"], ["Simran", "woman"],
 ];
 const LAST_NAMES = [
   "Sharma", "Iyer", "Menon", "Gupta", "Reddy", "Khan", "Patel", "Nair", "Singh", "Das",
@@ -338,14 +358,14 @@ export function buildSeedUsers(count = 30): SeedUser[] {
   const trait = () => Math.round((random() * 2 - 1) * 100) / 100;
 
   return Array.from({ length: count }, (_unused, index) => {
-    const firstName = FIRST_NAMES[index % FIRST_NAMES.length] as string;
+    const [firstName, gender] = PEOPLE[index % PEOPLE.length] as (typeof PEOPLE)[number];
     const traits = { energy: trait(), depth: trait(), novelty: trait(), structure: trait() };
     const [archetype, emoji] = ARCHETYPES[index % ARCHETYPES.length] as [string, string];
     return {
       phone: `+9198${String(76000000 + index)}`,
       fullName: `${firstName} ${pick(LAST_NAMES)}`,
       firstName,
-      gender: index % 2 === 0 ? "woman" : index % 7 === 3 ? "nonbinary" : "man",
+      gender,
       dobYear: 1992 + (index % 11),
       dietary: pick(DIETARY_POOL),
       languages: ["English", ...pickMany(LANGUAGE_POOL.slice(1), 1 + Math.floor(random() * 2))],
