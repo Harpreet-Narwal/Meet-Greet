@@ -1,5 +1,71 @@
 # Mulaqat — Progress
 
+## Mobile app (Expo / React Native)   [IN PROGRESS — 2026-08-10]
+
+Operator chose **React Native / Expo**, and **"mobile first"** — Razorpay wiring,
+real SMS OTP, and the booking-confirmation email are explicitly deferred behind it.
+
+`apps/mobile` runs on the real api and shares the palette with the web app
+through `packages/tokens` (drift test: 26 assertions, green).
+
+- [x] Expo Router shell — index, login, explore, event/[slug], you
+- [x] Shared design tokens; system-driven dark mode (a phone has an OS setting; the
+      web app's opt-in localStorage toggle would be wrong here)
+- [x] OTP auth against the same api, tokens in the OS keychain, refresh-on-401
+- [x] Browse → event detail (venue withheld until the T-24h reveal) → book →
+      paywall → pay → confirmed, verified end to end
+- [x] Gender gating enforced server-side, surfaced natively
+- [x] `ci-mobile` workflow: typecheck, token parity, **and a real Metro bundle**
+- [ ] Parity gaps still open: onboarding quiz, game room, chats/connections,
+      profile editing + avatar crop, push notifications
+
+### Decisions
+
+**Expo resolves under pnpm's isolated layout — no workspace hoisting.** The
+blocker was `disableHierarchicalLookup: true` in `metro.config.js`, copied from
+Expo's monorepo guide. That guide assumes npm/yarn, where every transitive dep is
+hoisted flat; turning the upward walk off there costs nothing. Under pnpm a
+package's own deps live *only* in `.pnpm/<pkg>/node_modules`, and that walk is
+the sole way to reach them — so the flag made every deep import inside a
+dependency (`@expo/log-box`, …) unresolvable. Setting it to `false` fixed it.
+
+A workspace-wide `node-linker=hoisted` had been applied as a workaround; the
+operator rejected it and it has been **reverted** — root `node_modules` is back
+to 12 entries with `expo` symlinked into the store. Rejecting it was right: it
+would have flattened the whole monorepo to work around one wrong flag. Note
+`pnpm install` alone does not undo it — its up-to-date check reads the lockfile,
+not the linker, so the flat tree survives and `node_modules` must be removed.
+
+CI bundles with Metro rather than only typechecking, because this class of bug is
+invisible to `tsc`.
+
+**`expo-secure-store` is native-only**, so the declared web target crashed on
+first call. Split by filename (`secure-store.ts` / `secure-store.web.ts`) rather
+than branching on `Platform.OS`, which keeps the localStorage fallback out of the
+native bundle entirely. Expo Web is a dev-preview surface only — real browsers
+get the Next.js app and its httpOnly cookies.
+
+**`CORS_ORIGINS` added to the api** (env-driven, empty by default). Browsers
+reach the api through the web BFF server-side, where CORS never applies; Expo Web
+is a genuine cross-origin browser client. Explicit allowlist, never a wildcard —
+these routes take bearer tokens. Native builds ignore CORS entirely.
+
+**Seed genders were inverted.** `demo-content.ts` derived gender as
+`index % 2 === 0 ? "woman" : …` over a name list that alternates male/female
+starting male — so every demo user was labelled opposite to their name (Aarav
+"woman", Diya "man"). Harmless while gender was decorative; actively misleading
+once men-only/women-only tables gate on it, because a correct refusal looks like
+a bug. Gender now travels in a tuple with the name so the two cannot drift.
+`seed.ts` keeps `update: {}` — re-seeding must never overwrite a real user's own
+gender — so existing dev databases need the 30 demo rows corrected by hand, or a
+`make down -v` for a clean volume.
+
+### Blockers
+- **No iOS simulator on this machine** — only Xcode command-line tools are
+  installed, so the native build could not be run here. Verified instead against
+  the Expo Web target (same JS, same api, same components) plus a real Metro
+  bundle for iOS. Needs a device/simulator pass before it ships.
+
 ## Production readiness   [2026-08-08]
 
 **All five workflows are green.** `ci-web` was the last red one; it now passes at
