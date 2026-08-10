@@ -60,6 +60,27 @@ a bug. Gender now travels in a tuple with the name so the two cannot drift.
 gender — so existing dev databases need the 30 demo rows corrected by hand, or a
 `make down -v` for a clean volume.
 
+**Pinned to Expo SDK 56, not 57.** Scanning the QR with Expo Go reported the
+project needed a newer Expo Go, on a phone already running the App Store's
+latest. SDK 57 had just gone stable — npm's `next` and `latest` tags both pointed
+at `57.0.11`, with canary already on 58 — and Expo Go supports exactly one SDK at
+a time, shipped in a store binary that lags the npm release by Apple review plus
+rollout. So the phone was on 56 and the project on 57.
+
+`expo@~56.0.19` + `expo install --fix` moved the whole SDK down together
+(react-native 0.86.2 → 0.85.3, and every `expo-*` package). Typecheck clean,
+Metro bundles (2.6MB iOS), verified running against the live api.
+
+Two leftovers, both harmless: pnpm keeps stale `@expo/log-box@57` /
+`@expo/dom-webview@57` peer resolutions in the lockfile that a forced re-resolve
+did not clear — warnings only, the bundle resolves the SDK-56 copies from expo's
+own tree. And `expo install --fix` added `expo-status-bar` to the plugin list.
+
+This pin is temporary: it comes off once Expo Go ships SDK 57, or immediately if
+the project moves to an EAS dev build, which is the better answer anyway — Expo
+Go cannot run custom native modules, and push notifications are still on the
+parity list above.
+
 ### Blockers
 - **No iOS simulator on this machine** — only Xcode command-line tools are
   installed, so the native build could not be run here. Verified instead against
