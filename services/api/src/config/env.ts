@@ -19,6 +19,13 @@ const EnvSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   MAIL_FROM: z.string().default("Mulaqat <hello@mulaqat.app>"),
+  // Browser origins allowed to call the api directly, comma-separated.
+  //
+  // Empty by default, and that is the correct production value: real browsers
+  // reach the api through the Next.js BFF server-side, where CORS never
+  // applies. This exists for the Expo Web target during development, which is
+  // a genuine browser on its own origin. Native builds ignore CORS entirely.
+  CORS_ORIGINS: z.string().default(""),
   AI_URL: z.string().url().default("http://localhost:8000"),
   INTERNAL_API_TOKEN: z.string().default("dev-internal-token-change-me"),
   AUTH_SECRET: z.string().default("dev-auth-secret-change-me"),
