@@ -1,0 +1,45 @@
+name: ci-mobile
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/mobile/**"
+      - "packages/tokens/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/ci-mobile.yml"
+  pull_request:
+    paths:
+      - "apps/mobile/**"
+      - "packages/tokens/**"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/ci-mobile.yml"
+
+concurrency:
+  group: ci-mobile-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm --filter @mulaqat/mobile typecheck
+      # The shared palette lives in packages/tokens and is consumed by both the
+      # web CSS variables and the native StyleSheets. This suite is what stops
+      # the two drifting into different brands.
+      - name: Design token parity
+        run: pnpm --filter @mulaqat/tokens test
+      # The real regression risk here is module resolution, not types: Expo's
+      # deep imports resolve differently under pnpm's isolated node_modules than
+      # under the flat layout its own docs assume. A bundle is the only thing
+      # that actually proves metro.config.js still works — tsc will not catch it.
+      - name: Bundle with Metro
+        run: pnpm --filter @mulaqat/mobile exec expo export --platform ios --output-dir /tmp/expo-export
