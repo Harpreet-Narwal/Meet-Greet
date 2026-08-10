@@ -6,7 +6,10 @@ import { AppModule } from "./app.module";
 import { env } from "./config/env";
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  // `rawBody` keeps the untouched request bytes alongside the parsed body.
+  // Razorpay signs the exact bytes it sent, so verifying against a re-serialised
+  // object would fail on any key reordering or whitespace difference.
+  const app = await NestFactory.create(AppModule, { bufferLogs: true, rawBody: true });
   app.useLogger(app.get(Logger));
   app.enableShutdownHooks();
 

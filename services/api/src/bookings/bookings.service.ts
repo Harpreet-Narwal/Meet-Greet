@@ -8,6 +8,7 @@ import {
 import type { Booking, Event, Prisma } from "@prisma/client";
 
 import { env } from "../config/env";
+import { BookingMailService } from "../mail/booking-mail.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { getPaymentProvider } from "../payments/payment-provider";
 import {
@@ -24,6 +25,11 @@ export interface BookingView {
   status: Booking["status"];
   amount_inr: number;
   two_truths_submitted: boolean;
+  /**
+   * Hosted checkout to open, when the gateway needs one. Null on mock (settled
+   * in-app) and on anything already confirmed.
+   */
+  checkout_url?: string | null;
   event: {
     id: string;
     slug: string;
@@ -40,14 +46,21 @@ export class BookingsService {
   private readonly logger = new Logger(BookingsService.name);
   private readonly provider = getPaymentProvider();
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly bookingMail: BookingMailService,
+  ) {}
 
-  private toView(booking: Booking & { event: Event }): BookingView {
+  private toView(
+    booking: Booking & { event: Event },
+    checkoutUrl?: string | null,
+  ): BookingView {
     return {
       id: booking.id,
       status: booking.status,
       amount_inr: booking.amountInr,
       two_truths_submitted: booking.twoTruths !== null,
+      checkout_url: checkoutUrl ?? null,
       event: {
         id: booking.event.id,
         slug: booking.event.slug,
@@ -130,23 +143,32 @@ export class BookingsService {
     );
 
     if (created.status === "pending_payment") {
-      return this.toView(await this.collectPayment(created.id, created.amountInr));
+      const { booking, checkoutUrl } = await this.collectPayment(created.id, created.amountInr);
+      return this.toView(booking, checkoutUrl);
     }
     return this.toView(created);
   }
 
-  /** Create the payment order; the mock provider auto-succeeds → confirmed. */
+  /**
+   * Create the payment order.
+   *
+   * Returns the checkout URL separately from the booking row because it is not
+   * persisted state — it belongs to this one attempt, and a real gateway's link
+   * expires. Only the caller that created it hands it to the client.
+   */
   private async collectPayment(
     bookingId: string,
     amountInr: number,
-  ): Promise<Booking & { event: Event }> {
+  ): Promise<{ booking: Booking & { event: Event }; checkoutUrl: string | null }> {
     if (amountInr === 0) {
       // Free formats (run clubs): no order, straight to confirmed.
-      return this.prisma.booking.update({
+      const free = await this.prisma.booking.update({
         where: { id: bookingId },
         data: { status: "confirmed" },
         include: { event: true },
       });
+      await this.bookingMail.sendConfirmation(free.id);
+      return { booking: free, checkoutUrl: null };
     }
     const order = await this.provider.createOrder(amountInr, bookingId);
     await this.prisma.payment.create({
@@ -160,16 +182,20 @@ export class BookingsService {
       },
     });
     if (order.auto_paid) {
-      return this.prisma.booking.update({
+      const paid = await this.prisma.booking.update({
         where: { id: bookingId },
         data: { status: "confirmed" },
         include: { event: true },
       });
+      return { booking: paid, checkoutUrl: null };
     }
-    return this.prisma.booking.findUniqueOrThrow({
-      where: { id: bookingId },
-      include: { event: true },
-    });
+    return {
+      booking: await this.prisma.booking.findUniqueOrThrow({
+        where: { id: bookingId },
+        include: { event: true },
+      }),
+      checkoutUrl: order.checkout_url ?? null,
+    };
   }
 
   /**
@@ -202,6 +228,7 @@ export class BookingsService {
       include: { event: true },
     });
     await this.ensureTableChat(userId, confirmed.eventId);
+    await this.bookingMail.sendConfirmation(confirmed.id);
     return this.toView(confirmed);
   }
 
@@ -258,6 +285,10 @@ export class BookingsService {
         where: { id: payment.bookingId },
         data: { status: "confirmed" },
       });
+      // The real-gateway path: with Razorpay the seat is confirmed here, not in
+      // payBooking, so the confirmation mail has to hang off the webhook too.
+      await this.ensureTableChat(payment.booking.userId, payment.booking.eventId);
+      await this.bookingMail.sendConfirmation(payment.bookingId);
     }
   }
 

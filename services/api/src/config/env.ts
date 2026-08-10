@@ -31,6 +31,14 @@ const EnvSchema = z.object({
   AUTH_SECRET: z.string().default("dev-auth-secret-change-me"),
   OTP_PROVIDER: z.enum(["mock", "msg91", "twilio"]).default("mock"),
   PAYMENT_PROVIDER: z.enum(["mock", "razorpay"]).default("mock"),
+  // Razorpay. Unset by default and never committed — with PAYMENT_PROVIDER=mock
+  // none of these are read. Test keys (rzp_test_…) exercise the full hosted
+  // checkout, UPI included, without moving real money.
+  RAZORPAY_KEY_ID: z.string().optional(),
+  RAZORPAY_KEY_SECRET: z.string().optional(),
+  // Chosen in the Razorpay dashboard; separate from the API key pair. Without
+  // it the webhook cannot be trusted, so it refuses every call.
+  RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
   S3_ENDPOINT: z.string().default("http://localhost:9000"),
   // Browser-reachable base for stored object URLs (defaults to S3_ENDPOINT;
   // in compose the internal endpoint is http://minio:9000 but photos are
