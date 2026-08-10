@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "Mulaqat",
+    "slug": "mulaqat",
+    "scheme": "mulaqat",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ede5d9"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.mulaqat.client"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png",
+        "backgroundColor": "#ede5d9"
+      },
+      "package": "app.mulaqat.client"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font",
+      "expo-splash-screen"
+    ],
+    "extra": {
+      "apiUrl": "http://localhost:4000"
+    }
+  }
+}
