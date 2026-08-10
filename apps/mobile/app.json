@@ -34,8 +34,7 @@
       "expo-router",
       "expo-secure-store",
       "expo-font",
-      "expo-splash-screen",
-      "expo-status-bar"
+      "expo-splash-screen"
     ],
     "extra": {
       "apiUrl": "http://localhost:4000"

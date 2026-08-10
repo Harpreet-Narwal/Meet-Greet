@@ -60,26 +60,32 @@ a bug. Gender now travels in a tuple with the name so the two cannot drift.
 gender — so existing dev databases need the 30 demo rows corrected by hand, or a
 `make down -v` for a clean volume.
 
-**Pinned to Expo SDK 56, not 57.** Scanning the QR with Expo Go reported the
-project needed a newer Expo Go, on a phone already running the App Store's
-latest. SDK 57 had just gone stable — npm's `next` and `latest` tags both pointed
-at `57.0.11`, with canary already on 58 — and Expo Go supports exactly one SDK at
-a time, shipped in a store binary that lags the npm release by Apple review plus
-rollout. So the phone was on 56 and the project on 57.
+**Pinned to Expo SDK 54** — the version the operator's Expo Go actually reports.
 
-`expo@~56.0.19` + `expo install --fix` moved the whole SDK down together
-(react-native 0.86.2 → 0.85.3, and every `expo-*` package). Typecheck clean,
-Metro bundles (2.6MB iOS), verified running against the live api.
+Took two attempts, and the first one's reasoning was wrong in an instructive
+way. Scanning the QR said the project needed a newer Expo Go on a phone already
+running the App Store's latest, so the project was pinned 57 → 56 on the theory
+that the store binary simply lagged the npm release (SDK 57 had just gone
+stable — `next` and `latest` both on `57.0.11`, canary on 58). Still failed.
+The client itself reports **SDK 54**: the App Store serves the newest Expo Go
+*compatible with that handset's iOS*, so "latest available to you" is not
+"latest released". Ask the client what it is instead of deriving it from
+release dates.
 
-Two leftovers, both harmless: pnpm keeps stale `@expo/log-box@57` /
-`@expo/dom-webview@57` peer resolutions in the lockfile that a forced re-resolve
-did not clear — warnings only, the bundle resolves the SDK-56 copies from expo's
-own tree. And `expo install --fix` added `expo-status-bar` to the plugin list.
+`expo@~54.0.36` + `expo install --fix` moved the set down together: react-native
+0.81.5, react 19.1.0, and the SDK-54 era independent versioning for the modules
+(`expo-constants` 18.x, `expo-font` 14.x, `expo-router` 6.x). TypeScript also
+lands on 5.9.3, matching the rest of the monorepo. Typecheck clean, Metro bundles
+(2.59MB iOS), dev server serves `sdkVersion: 54.0.0`.
 
-This pin is temporary: it comes off once Expo Go ships SDK 57, or immediately if
-the project moves to an EAS dev build, which is the better answer anyway — Expo
-Go cannot run custom native modules, and push notifications are still on the
-parity list above.
+`expo-status-bar` had to come **out** of the `plugins` array: the SDK-56
+`expo install --fix` added it, and on 54 that package ships no config plugin, so
+every export died with `PluginError: Unable to resolve a valid config plugin`.
+
+The pin is temporary and tracks the *phone*, not the ecosystem — it lifts when
+that handset can run a newer Expo Go, or immediately on an EAS dev build, which
+is the better answer regardless: Expo Go cannot run custom native modules, and
+push notifications are still on the parity list above.
 
 ### Blockers
 - **No iOS simulator on this machine** — only Xcode command-line tools are
