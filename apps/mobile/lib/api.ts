@@ -13,8 +13,33 @@ import { deleteItem, getItem, setItem } from "./secure-store";
 const ACCESS = "mulaqat.access";
 const REFRESH = "mulaqat.refresh";
 
-const BASE =
-  (Constants.expoConfig?.extra?.apiUrl as string | undefined) ?? "http://localhost:4000";
+const CONFIGURED = Constants.expoConfig?.extra?.apiUrl as string | undefined;
+const LOOPBACK = /^https?:\/\/(localhost|127\.0\.0\.1)\b/i;
+
+/**
+ * Where the api lives.
+ *
+ * `localhost` is a trap on a real phone: it resolves to the handset itself, not
+ * to the laptop running the api, so every call dies in `fetch` and surfaces as
+ * the bare "No connection" state below. It only looks fine in the simulator and
+ * on Expo Web, which genuinely do share a loopback with the api.
+ *
+ * Expo already knows the right address — `hostUri` is where the device just
+ * fetched the bundle from — so borrow that hostname and keep the api's port.
+ * A non-loopback `extra.apiUrl` always wins: that is the production path, where
+ * there is no dev server to borrow from.
+ */
+function resolveBase(): string {
+  if (CONFIGURED && !LOOPBACK.test(CONFIGURED)) return CONFIGURED;
+
+  const port = CONFIGURED?.match(/:(\d+)/)?.[1] ?? "4000";
+  const host = Constants.expoConfig?.hostUri?.split(":")[0];
+  if (host && !["localhost", "127.0.0.1"].includes(host)) return `http://${host}:${port}`;
+
+  return CONFIGURED ?? "http://localhost:4000";
+}
+
+const BASE = resolveBase();
 
 export async function setSession(access: string, refresh: string): Promise<void> {
   await setItem(ACCESS, access);
