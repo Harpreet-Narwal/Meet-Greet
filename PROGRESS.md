@@ -1,5 +1,74 @@
 # Mulaqat — Progress
 
+## Native mobile shell, onboarding, chat, Razorpay/UPI   [2026-08-10]
+
+Operator: the app "feels like a website", a new sign-in "didn't ask me any
+questions", there was "no way to chat", and they want UPI alongside Razorpay
+plus a bookable fixture that produces a real chat and a real email.
+
+- [x] **Native iOS shell.** Real `UITabBar` via `expo-router/unstable-native-tabs`
+      (Tables / Chats / You) with `minimizeBehavior="onScrollDown"` so the bar
+      minimises as you scroll on iOS 26+. Large titles, modal presentation for
+      sign-in and onboarding, inset grouped sections with disclosure chevrons,
+      and Taptic feedback on real state changes.
+- [x] **Onboarding.** A new number now lands in a one-question-per-screen flow:
+      name + email first, then the 15-question quiz, then the archetype.
+- [x] **Chat.** Chats tab and a message thread with iMessage-style bubbles,
+      speaker grouping, and a composer that rides the keyboard.
+- [x] **Fixture.** `test-table-tonight`, ₹99, two hours out, with a group chat
+      pre-seeded with five guests mid-conversation.
+- [x] **Booking confirmation email**, plus emails on demo users so the mails
+      have somewhere to go.
+- [x] **Razorpay + UPI**, hosted-checkout flavour, signature-verified webhook.
+
+### Decisions
+
+**What actually made it feel like a website.** Not the typeface — the structure.
+It was a stack of full-bleed rows with a marketing landing page as the entry
+point, no tab bar, no pressed states, and nothing answering a touch. The fix is
+grammar, not brand: content in inset grouped sections, rows that look tappable
+and say where they lead, full-width thumb-reachable controls, native modals, and
+haptics. `components/ios.tsx` holds that vocabulary so screens compose it. The
+Quiet Editorial palette and type are untouched.
+
+The marketing landing screen is **gone** on mobile — the app opens straight into
+Tables. A native app that greets you with a hero and a "Find your table" button
+is a website in a phone frame; browsing is the product.
+
+**Web target gets its own tab layout** (`_layout.web.tsx`). `NativeTabs` has no
+UITabBar to delegate to in a browser and falls back to a segmented control at
+the *top*, which is precisely the wrong impression. Native keeps the real thing;
+web gets a matching bottom bar. The iOS 26 minimize-on-scroll is deliberately
+**not** reimplemented in JS for web — a scroll-listener imitation stutters
+against browser momentum and would look worse than a static bar.
+
+**Razorpay via Payment Links, not the native SDK.** `react-native-razorpay` is a
+native module and Expo Go cannot load it, so adopting it would force every
+tester onto a dev build. A payment link is an https URL opened in the system
+browser: same code path in Expo Go, dev builds, and web. **UPI is a method
+inside that hosted page** (QR, VPA, or handing off to an installed UPI app) —
+not a second gateway to integrate, which is what "UPI as well as Razorpay"
+resolves to in practice.
+
+The seat is confirmed by the **webhook only**, never by the browser closing —
+someone can dismiss the sheet mid-payment or pay and never return. The webhook
+verifies `X-Razorpay-Signature` (HMAC-SHA256 over the *raw* bytes, which is why
+`rawBody: true` is now set in `main.ts`) and **fails closed** when no secret is
+configured. Nine named tests cover it, including a tampered-body replay.
+
+Mock stays the default; no keys are committed.
+
+**Seed users now carry `@mulaqat.test` addresses** — RFC 2606 reserves `.test`
+so it can never resolve to a real inbox. Without an address both the
+confirmation and reminder mails silently skip the user, which is why no mail
+appeared before.
+
+### Blockers
+- **Still no iOS simulator here** (command-line tools only), so the native shell
+  — UITabBar, large titles, haptics, minimize-on-scroll — is verified by a
+  successful Metro bundle and by exercising every screen on Expo Web, *not* by
+  seeing it run on iOS. Haptics cannot fire on web at all. Needs a device pass.
+
 ## Mobile app (Expo / React Native)   [IN PROGRESS — 2026-08-10]
 
 Operator chose **React Native / Expo**, and **"mobile first"** — Razorpay wiring,
