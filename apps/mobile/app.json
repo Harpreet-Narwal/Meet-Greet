@@ -34,7 +34,8 @@
       "expo-router",
       "expo-secure-store",
       "expo-font",
-      "expo-splash-screen"
+      "expo-splash-screen",
+      "expo-web-browser"
     ],
     "extra": {
       "apiUrl": "http://localhost:4000"

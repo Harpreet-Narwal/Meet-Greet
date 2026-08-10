@@ -10,8 +10,8 @@ import {
   View,
 } from "react-native";
 
-import { apiPublic, setSession } from "../lib/api";
-import { body, display, label, space, type, usePalette } from "../lib/theme";
+import { api, apiPublic, setSession } from "../lib/api";
+import { body, display, haptics, label, space, type, usePalette } from "../lib/theme";
 
 /** Phone → OTP, the same two-step the web uses. Dev accepts 000000. */
 export default function Login() {
@@ -57,7 +57,31 @@ export default function Login() {
       return;
     }
     await setSession(result.data.access_token, result.data.refresh_token);
-    router.replace("/explore");
+    haptics.success();
+
+    /*
+     * Where a verified number lands.
+     *
+     * A brand-new account has no name, no email and no personality profile, so
+     * sending it straight into the tabs is what made signing in feel like
+     * nothing happened — and left matching with no traits to work with. Anyone
+     * missing the profile goes to onboarding instead; returning users go back
+     * to whatever they were doing.
+     *
+     * `/me` is the authority rather than a local flag, so reinstalling the app
+     * or signing in on a second device does not re-ask someone who has already
+     * answered.
+     */
+    const me = await api<{
+      user: { first_name: string | null; email: string | null };
+      personality: unknown | null;
+    }>("/me");
+    const needsOnboarding =
+      !me.data?.personality || !me.data.user.first_name || !me.data.user.email;
+
+    if (needsOnboarding) router.replace("/onboarding");
+    else if (router.canGoBack()) router.back();
+    else router.replace("/(tabs)");
   }
 
   const input = {

@@ -1,9 +1,53 @@
-import { useColorScheme } from "react-native";
+import * as Haptics from "expo-haptics";
+import { Platform, useColorScheme } from "react-native";
 
 import { dark, fonts, light, lineHeight, space, trackingLabel, type } from "@mulaqat/tokens";
 import type { Palette } from "@mulaqat/tokens";
 
 export { fonts, lineHeight, space, trackingLabel, type };
+
+/**
+ * Corner radii, native-only.
+ *
+ * Deliberately not in `packages/tokens`: the web design is squared-off by
+ * intent, while iOS reads a sharp-cornered container as a web page embedded in
+ * an app. These are a platform idiom rather than a brand decision, so they live
+ * here instead of in the shared palette the parity test guards.
+ */
+export const radius = {
+  /** Grouped-list sections and cards — matches iOS inset grouped tables. */
+  group: 12,
+  /** Full-width buttons. */
+  control: 14,
+  /** Chat bubbles. */
+  bubble: 20,
+} as const;
+
+/**
+ * Taptic feedback.
+ *
+ * The single biggest reason an app "feels like a website" is that nothing
+ * answers back when you touch it. Confined to real state changes — a booking, a
+ * sent message, a completed step — because haptics on every tap becomes noise
+ * people turn off.
+ *
+ * Android has no equivalent vocabulary and the effects land as a buzz, so this
+ * is iOS-only. No-ops in the simulator, which has no Taptic Engine.
+ */
+export const haptics = {
+  select(): void {
+    if (Platform.OS === "ios") void Haptics.selectionAsync();
+  },
+  commit(): void {
+    if (Platform.OS === "ios") void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  },
+  success(): void {
+    if (Platform.OS === "ios") void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  },
+  warn(): void {
+    if (Platform.OS === "ios") void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+  },
+};
 
 /**
  * Unlike the web — where light is the default and dark is an explicit opt-in

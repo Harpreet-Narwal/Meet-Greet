@@ -2,8 +2,10 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
 
+import * as WebBrowser from "expo-web-browser";
+
 import { api, apiPublic, getAccess } from "../../lib/api";
-import { body, display, label, space, type, usePalette } from "../../lib/theme";
+import { body, display, haptics, label, space, type, usePalette } from "../../lib/theme";
 
 interface EventDetail {
   id: string;
@@ -24,6 +26,8 @@ interface EventDetail {
 interface Booking {
   id: string;
   status: "confirmed" | "waitlisted" | "pending_payment";
+  /** Present only when a real gateway is configured — see openCheckout(). */
+  checkout_url?: string | null;
 }
 
 export default function EventScreen() {
@@ -63,22 +67,66 @@ export default function EventScreen() {
     }
     setBooking(result.data);
     if (result.data.status === "waitlisted") {
+      haptics.warn();
       Alert.alert("You're on the waitlist", "We'll text you the moment a seat frees up.");
+    } else {
+      haptics.select();
     }
   }
 
+  /**
+   * Settle the seat.
+   *
+   * Two paths, chosen by what the api handed back rather than by a build flag.
+   * With a real gateway the booking carries `checkout_url` — a Razorpay hosted
+   * page offering UPI (QR, VPA, or handing off to an installed UPI app),
+   * cards and netbanking. It opens in the system browser sheet, so no native
+   * SDK is involved and this still runs under Expo Go.
+   *
+   * The seat is confirmed by Razorpay's webhook, never by the browser closing:
+   * someone can dismiss the sheet mid-payment, or pay and never return. So on
+   * dismissal we just re-read the booking and show whatever the server now
+   * believes.
+   *
+   * With the mock provider there is no URL and POST /pay settles it in-app.
+   */
   async function pay() {
     if (!booking) return;
     setBusy(true);
     setError(null);
+
+    if (booking.checkout_url) {
+      await WebBrowser.openBrowserAsync(booking.checkout_url);
+      setBusy(false);
+      await refreshBooking();
+      return;
+    }
+
     const result = await api<Booking>(`/bookings/${booking.id}/pay`, { method: "POST" });
     setBusy(false);
     if (!result.ok || !result.data) {
+      haptics.warn();
       setError(result.message ?? "The payment didn't go through — your seat is still held.");
       return;
     }
+    haptics.success();
     setBooking(result.data);
     await load();
+  }
+
+  /** Re-read our own seat after returning from an external checkout. */
+  async function refreshBooking() {
+    const mine = await api<{ upcoming: { id: string; status: Booking["status"] }[] }>(
+      "/me/bookings",
+    );
+    const found = mine.data?.upcoming.find((b) => b.id === booking?.id);
+    if (found?.status === "confirmed") {
+      haptics.success();
+      setBooking({ id: found.id, status: "confirmed" });
+      await load();
+    } else {
+      setError("We haven't seen the payment yet. If you completed it, give it a moment.");
+    }
   }
 
   if (!event) {

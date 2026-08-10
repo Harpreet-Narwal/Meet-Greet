@@ -9,7 +9,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
-import { usePalette } from "../lib/theme";
+import { fonts, type, usePalette } from "../lib/theme";
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -35,16 +35,36 @@ export default function RootLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: palette.paper },
         headerTintColor: palette.ink,
-        headerTitleStyle: { fontFamily: "InstrumentSerif_400Regular", fontSize: 20 },
+        headerTitleStyle: { fontFamily: fonts.display, fontSize: type.h4 },
+        // The iOS large title: big and inline with the content at rest, then
+        // collapsing into the bar as you scroll. It is the strongest native
+        // signal a screen can give, and it is why the tab screens carry no
+        // hand-rolled heading of their own any more.
+        headerLargeTitleStyle: { fontFamily: fonts.display, fontSize: type.h1, color: palette.ink },
+        headerLargeTitleShadowVisible: false,
         contentStyle: { backgroundColor: palette.paper },
         headerShadowVisible: false,
       }}
     >
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="login" options={{ title: "Sign in" }} />
-      <Stack.Screen name="explore" options={{ title: "Tables" }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+      {/* Sign-in and onboarding are sheets, not pushes. They interrupt what you
+          were doing and hand you back to it — the modal presentation says that
+          without a word of copy, and gives the swipe-down people expect. */}
+      <Stack.Screen name="login" options={{ presentation: "modal", title: "Sign in" }} />
+      <Stack.Screen
+        name="onboarding"
+        options={{
+          presentation: "modal",
+          title: "About you",
+          // No swipe-away: leaving half-finished strands the account without a
+          // profile, which is what made a new sign-in land nowhere.
+          gestureEnabled: false,
+        }}
+      />
+
       <Stack.Screen name="event/[slug]" options={{ title: "" }} />
-      <Stack.Screen name="you" options={{ title: "You" }} />
+      <Stack.Screen name="chat/[id]" options={{ title: "" }} />
     </Stack>
   );
 }
