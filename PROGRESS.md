@@ -63,6 +63,66 @@ so it can never resolve to a real inbox. Without an address both the
 confirmation and reminder mails silently skip the user, which is why no mail
 appeared before.
 
+### Closing the remaining parity gaps
+
+- [x] **Web Razorpay checkout.** `booking-flow.tsx` only ever called `POST /pay`,
+      so flipping `PAYMENT_PROVIDER=razorpay` would have left web checkout dead
+      while mobile worked. It now follows `checkout_url` when the api returns
+      one. Full navigation rather than a popup — blockers eat popups, and a
+      checkout that silently fails to open is worse than leaving the page.
+- [x] **Live chat on mobile.** The thread only fetched on mount, so incoming
+      messages never appeared; a chat you must leave and re-enter to read is not
+      a chat. Now on the same `/chat` socket namespace the web uses. Sending
+      stays on REST so the sender gets the server's id and timestamp rather than
+      an optimistic guess, and the socket echo is de-duped by id.
+- [x] **Game room on mobile** (`/room/[tableId]`), on the `/games` namespace with
+      the same events as web, so phones and laptops can sit at one table. The
+      server owns the state machine and nothing is applied optimistically — a
+      device that guessed would show a different card from the rest of the table.
+      Reachable from a confirmed seat, and only once matching has assigned a
+      `table_id`, so the button never dead-ends.
+- [x] **Profile photo on mobile.** Uses the OS picker's own crop
+      (`allowsEditing`, square) rather than porting the web's hand-written
+      cropper — the web needs one because a browser has no system cropper; a
+      phone does, and the native sheet is smoother, familiar, and free. Re-encode
+      at 0.85 also strips EXIF/GPS. Attached only after the upload succeeds, so a
+      failed upload can't leave a broken avatar.
+
+Sockets read the bearer token straight from the keychain: the web needs its
+`/api/socket-token` hop only because its token lives in an httpOnly cookie its
+own JavaScript cannot read.
+
+**Two bugs the live-chat work uncovered, both fixed:**
+
+`POST /chats/:id/messages` **never broadcast.** Only the socket's `chat:send`
+handler emitted, so a message sent over REST was stored and then seen by nobody
+until they reloaded — and because the sender's own screen updated from the
+response, it looked like it worked. The endpoint's own Swagger summary had
+claimed "also broadcast over the socket" the whole time. The controller now
+calls `gateway.broadcast()`. Verified by subscribing one client and posting as
+another: the message arrives live.
+
+**Sockets never refreshed the access token.** The gateway verifies once at
+handshake and disconnects on a bad token; unlike the REST layer there was no
+refresh-and-retry, so once the 15-minute token expired the live channel failed
+to open permanently, with nothing but "WebSocket connection failed" to show for
+it. `connectSocket` now makes one cheap authenticated call first, which runs the
+existing refresh-on-401 path.
+
+Also: `seedTableChat` now **re-arms the chat's `expiresAt` on every reseed**.
+It previously kept the expiry from first seeding, so a database left a week — or
+a container whose clock jumps after the host sleeps, which is exactly what
+happened here — came back with a closed chat that refused every message, and
+reseeding did not fix it.
+
+### Still not done
+- **Push notifications.** Needs a dev build and APNs credentials — Expo Go
+  cannot receive them, and there is no way to verify it on this machine. Left
+  alone rather than committed blind.
+- **Mobile debrief / connections / Spark** (`/debrief/[id]`, `/people` on web).
+  The Spark privacy invariant is the most delicate rule in the product, so this
+  wants its own pass with tests rather than being tacked on here.
+
 ### Blockers
 - **Still no iOS simulator here** (command-line tools only), so the native shell
   — UITabBar, large titles, haptics, minimize-on-scroll — is verified by a
