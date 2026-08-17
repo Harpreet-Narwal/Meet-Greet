@@ -23,6 +23,8 @@ interface EventInput {
 interface BookingResult {
   id: string;
   status: "confirmed" | "waitlisted" | "pending_payment";
+  /** Set only when a real gateway is configured — see pay(). */
+  checkout_url?: string | null;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("en-IN", {
@@ -73,6 +75,22 @@ export function BookingFlow({ event }: { event: EventInput }) {
     if (!booking) return;
     setBusy(true);
     setError(null);
+
+    /*
+     * Two checkout paths, chosen by what the api returned rather than by a build
+     * flag. With a real gateway the booking carries `checkout_url` — a Razorpay
+     * hosted page offering UPI, cards and netbanking — and the seat is confirmed
+     * by the webhook, not by this navigation. So hand the browser over and let
+     * the callback bring them back to /you.
+     *
+     * A full navigation, not a popup: blockers eat popups, and a checkout that
+     * silently fails to open is worse than leaving the page.
+     */
+    if (booking.checkout_url) {
+      window.location.href = booking.checkout_url;
+      return;
+    }
+
     const result = await postJson<BookingResult>(`/api/bff/bookings/${booking.id}/pay`, {});
     setBusy(false);
     if (!result.ok || !result.data) {
