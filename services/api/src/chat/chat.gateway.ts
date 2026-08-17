@@ -70,9 +70,23 @@ export class ChatGateway implements OnGatewayConnection {
     if (!userId) return;
     try {
       const message = await this.chat.send(userId, body.chat_id, body.body);
-      this.server.to(room(body.chat_id)).emit("chat:message", message);
+      this.broadcast(body.chat_id, message);
     } catch (error) {
       client.emit("error:send", { message: (error as Error).message });
     }
+  }
+
+  /**
+   * Push a stored message to everyone in the room.
+   *
+   * Public because sending is not socket-only: the REST endpoint
+   * (`POST /chats/:id/messages`) is the path the native client uses, so that it
+   * gets the server's id and timestamp back rather than inventing them. Before
+   * this existed, a message sent that way was stored and then seen by nobody
+   * until they reloaded — the sender's own screen updated from the response, so
+   * it looked like it had worked.
+   */
+  broadcast(chatId: string, message: unknown): void {
+    this.server.to(room(chatId)).emit("chat:message", message);
   }
 }

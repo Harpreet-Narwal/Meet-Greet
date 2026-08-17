@@ -269,16 +269,22 @@ async function seedTableChat(): Promise<void> {
   const event = await prisma.event.findUnique({ where: { slug: "test-table-tonight" } });
   if (!event) return;
 
-  const chat =
-    (await prisma.chat.findFirst({ where: { eventId: event.id, kind: "table_group" } })) ??
-    (await prisma.chat.create({
-      data: {
-        kind: "table_group",
-        eventId: event.id,
-        // A table chat outlives the dinner by a week, matching production.
-        expiresAt: new Date(Date.now() + 7 * 24 * 3600_000),
-      },
-    }));
+  // A table chat outlives the dinner by a week, matching production.
+  const expiresAt = new Date(Date.now() + 7 * 24 * 3600_000);
+
+  const existing = await prisma.chat.findFirst({
+    where: { eventId: event.id, kind: "table_group" },
+  });
+  const chat = existing
+    ? // Re-arm on every reseed. Without this the fixture rots: the chat keeps
+      // the expiry from whenever it was first seeded, so a database left alone
+      // for a week — or a container whose clock jumps after the host sleeps —
+      // comes back with a closed chat that refuses every message, and reseeding
+      // does not fix it. The event's startsAt is refreshed for the same reason.
+      await prisma.chat.update({ where: { id: existing.id }, data: { expiresAt } })
+    : await prisma.chat.create({
+        data: { kind: "table_group", eventId: event.id, expiresAt },
+      });
 
   if ((await prisma.message.count({ where: { chatId: chat.id } })) > 0) return;
 
