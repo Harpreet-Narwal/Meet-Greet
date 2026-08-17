@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Loading } from "../../components/ios";
 import { api } from "../../lib/api";
+import { connectSocket, type Socket } from "../../lib/sockets";
 import {
   body,
   fonts,
@@ -125,6 +126,50 @@ export default function ChatThread() {
     void load();
   }, [load]);
 
+  /*
+   * Live delivery.
+   *
+   * Without this the thread only ever showed what was there when you opened it —
+   * a chat you have to leave and re-enter to read is not a chat. Same `/chat`
+   * namespace the web uses.
+   *
+   * Sending still goes over REST: the POST returns the stored message, so the
+   * sender gets the server's id and timestamp rather than an optimistic guess.
+   * The socket is for what *other* people say, and `chat:message` echoes our own
+   * too — hence the de-dupe on id below.
+   */
+  useEffect(() => {
+    let socket: Socket | null = null;
+    let active = true;
+
+    void (async () => {
+      const connection = await connectSocket("/chat");
+      if (!connection) return;
+      if (!active) {
+        connection.disconnect();
+        return;
+      }
+      socket = connection;
+      const join = () => connection.emit("chat:join", { chat_id: id });
+      connection.on("connect", join);
+      // Rejoin after a reconnect, or the room membership is silently lost when
+      // the phone comes back from a tunnel or a backgrounded app.
+      connection.io.on("reconnect", join);
+      connection.on("chat:message", (incoming: Message) => {
+        setMessages((current) => {
+          const seen = current ?? [];
+          if (seen.some((m) => m.id === incoming.id)) return seen;
+          return [...seen, incoming];
+        });
+      });
+    })();
+
+    return () => {
+      active = false;
+      socket?.disconnect();
+    };
+  }, [id]);
+
   useLayoutEffect(() => {
     navigation.setOptions({ title });
   }, [navigation, title]);
@@ -144,7 +189,12 @@ export default function ChatThread() {
     }
     haptics.select();
     setDraft("");
-    setMessages((current) => [...(current ?? []), result.data as Message]);
+    // De-dupe: the socket echoes this back to us as well.
+    const sent = result.data;
+    setMessages((current) => {
+      const seen = current ?? [];
+      return seen.some((m) => m.id === sent.id) ? seen : [...seen, sent];
+    });
     requestAnimationFrame(() => listRef.current?.scrollToEnd({ animated: true }));
   }
 

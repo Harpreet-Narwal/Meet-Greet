@@ -4,6 +4,8 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "rea
 
 import * as WebBrowser from "expo-web-browser";
 
+import { PrimaryButton } from "../../components/ios";
+
 import { api, apiPublic, getAccess } from "../../lib/api";
 import { body, display, haptics, label, space, type, usePalette } from "../../lib/theme";
 
@@ -38,6 +40,7 @@ export default function EventScreen() {
   const [booking, setBooking] = useState<Booking | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tableId, setTableId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const result = await apiPublic<EventDetail>(`/events/${slug}`);
@@ -113,6 +116,21 @@ export default function EventScreen() {
     setBooking(result.data);
     await load();
   }
+
+  /**
+   * The table we've been seated at, once matching has assigned one. Null before
+   * that, which is why the game-room button is conditional rather than a link
+   * that would dead-end.
+   */
+  const loadTable = useCallback(async () => {
+    if (!event) return;
+    const result = await api<{ table_id: string | null }>(`/events/${event.id}/my-table`);
+    setTableId(result.data?.table_id ?? null);
+  }, [event]);
+
+  useEffect(() => {
+    if (booking && booking.status !== "waitlisted") void loadTable();
+  }, [booking, loadTable]);
 
   /** Re-read our own seat after returning from an external checkout. */
   async function refreshBooking() {
@@ -216,6 +234,29 @@ export default function EventScreen() {
               ? "We'll let you know the moment someone drops out."
               : "See you there. We'll send a reminder two hours before."}
           </Text>
+
+          {/* The way into the table's own surfaces once the seat is real. The
+              game room needs a table_id, which only exists after matching has
+              run — so it appears when the api has one, not before. */}
+          {booking.status !== "waitlisted" ? (
+            <View style={{ marginTop: 20, gap: 10 }}>
+              {tableId ? (
+                <PrimaryButton
+                  title="Open the game room"
+                  onPress={() => router.push(`/room/${tableId}`)}
+                />
+              ) : (
+                <Text style={[label(palette), { color: palette.inkMuted }]}>
+                  Your table — and its games — unlock once seating is matched
+                </Text>
+              )}
+              <PrimaryButton
+                title="Table chat"
+                tone="accent"
+                onPress={() => router.push("/(tabs)/chats")}
+              />
+            </View>
+          ) : null}
         </View>
       ) : (
         <Pressable onPress={book} disabled={busy} style={primary} testID="book-cta">

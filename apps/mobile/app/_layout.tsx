@@ -65,6 +65,7 @@ export default function RootLayout() {
 
       <Stack.Screen name="event/[slug]" options={{ title: "" }} />
       <Stack.Screen name="chat/[id]" options={{ title: "" }} />
+      <Stack.Screen name="room/[tableId]" options={{ title: "At the table" }} />
     </Stack>
   );
 }
