@@ -1,5 +1,57 @@
 # Mulaqat — Progress
 
+## Theme fixes, game room, connections, photo   [2026-08-10]
+
+Closing the mobile↔web parity gap, plus two real theming bugs the operator spotted.
+
+- [x] **Themed native chrome.** The status bar was never told which way to paint
+      its glyphs, so the clock and battery were dark-on-near-black in dark mode.
+      `NativeTabs` likewise had no colours set and rendered UIKit's default
+      white/grey bar with the system blue tint under warm paper. Both now follow
+      `usePalette()`. The splash screen gained a `dark` variant — it was pinned
+      to light beige and flashed on every dark-mode cold start.
+- [x] **Game room on mobile** over the same `/games` socket namespace the web
+      uses, so phones and laptops can sit at one table.
+- [x] **Live chat.** The thread only ever showed what was there when it opened;
+      it now subscribes to `/chat`.
+- [x] **Profile photo** with the OS crop sheet.
+- [x] **People / connections**, respecting the one-sided-Spark invariant.
+- [x] **Razorpay checkout on web**, which had been wired on mobile only.
+
+### Decisions
+
+**Native chrome inherits nothing.** Both theme bugs share one cause: the tab bar
+and status bar are drawn by UIKit, not by our Views, so no amount of palette
+discipline in components reaches them. They have to be passed the colours
+explicitly. Worth remembering for anything else native that gets added.
+
+**`expo-status-bar` belongs in `dependencies`, never in `plugins`.** On SDK 54
+that package ships no config plugin, and listing it fails every `expo export`
+with `PluginError`. I hit this twice — once when `expo install --fix` added it
+on SDK 56, and again when I re-added it by hand for the status-bar fix. The
+component works without any plugin entry.
+
+**The OS crop sheet instead of porting `avatar-cropper.tsx`.** The web ships a
+hand-written pan-and-zoom cropper because a browser has no system one; a phone
+does. `allowsEditing` is the interaction people already know, is gesture-smooth
+because it is native, and costs no bundle size.
+
+**Spark privacy is enforced server-side, and the mobile screen relies on that.**
+`GET /me/connections` returns only rows you sent or that are mutual, so a
+one-sided Spark toward you never reaches the device. The screen therefore has no
+"someone sparked you" state to leak — deliberately, because a client-side filter
+is one refactor away from failing.
+
+### Blockers
+- **Still no iOS simulator here.** Everything native — the themed UITabBar, the
+  status bar, haptics, minimize-on-scroll, the splash variants, and the OS crop
+  sheet — is verified only by a clean Metro bundle and by Expo Web, which cannot
+  render any of it. This needs a device pass.
+- **Push notifications not attempted.** They need a dev build plus APNs
+  credentials, neither of which exists here, so building them blind would ship
+  something unverifiable.
+
+
 ## Native mobile shell, onboarding, chat, Razorpay/UPI   [2026-08-10]
 
 Operator: the app "feels like a website", a new sign-in "didn't ask me any

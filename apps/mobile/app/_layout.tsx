@@ -6,15 +6,17 @@ import { JetBrainsMono_500Medium } from "@expo-google-fonts/jetbrains-mono";
 import { Newsreader_400Regular } from "@expo-google-fonts/newsreader";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
-import { fonts, type, usePalette } from "../lib/theme";
+import { fonts, type, usePalette, useScheme } from "../lib/theme";
 
 void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const palette = usePalette();
+  const scheme = useScheme();
   const [loaded] = useFonts({
     InstrumentSerif_400Regular,
     InstrumentSerif_400Regular_Italic,
@@ -31,6 +33,15 @@ export default function RootLayout() {
   if (!loaded) return null;
 
   return (
+    <>
+      {/*
+        The clock, battery and signal are drawn by the OS over our background,
+        and nothing tells it which way to paint them. Left unset it assumed dark
+        glyphs — legible on the light paper, invisible against the dark theme's
+        near-black. `style` here is the *content* colour, so it inverts the
+        palette: light glyphs on the dark theme.
+      */}
+      <StatusBar style={scheme === "dark" ? "light" : "dark"} />
     <Stack
       screenOptions={{
         headerStyle: { backgroundColor: palette.paper },
@@ -66,6 +77,8 @@ export default function RootLayout() {
       <Stack.Screen name="event/[slug]" options={{ title: "" }} />
       <Stack.Screen name="chat/[id]" options={{ title: "" }} />
       <Stack.Screen name="room/[tableId]" options={{ title: "At the table" }} />
+      <Stack.Screen name="people" options={{ title: "People" }} />
     </Stack>
+    </>
   );
 }

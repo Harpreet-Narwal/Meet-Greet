@@ -89,3 +89,15 @@ export function body(palette: Palette, size: number = type.body) {
     color: palette.ink,
   };
 }
+
+/**
+ * The resolved appearance, for the handful of places that need the *name* of
+ * the scheme rather than a colour — the status bar being the main one, since
+ * iOS wants "light content" / "dark content", not a hex value.
+ *
+ * Defaults to light when the OS reports null, matching the web app, where light
+ * is the default and dark is opt-in.
+ */
+export function useScheme(): "light" | "dark" {
+  return useColorScheme() === "dark" ? "dark" : "light";
+}

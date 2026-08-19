@@ -193,6 +193,12 @@ export default function You() {
         )}
       </Section>
 
+      <Section title="People" footer="Only from tables you actually sat at.">
+        <Row last onPress={() => router.push("/people")}>
+          <Text style={[body(palette), { color: palette.ink }]}>Who you've met</Text>
+        </Row>
+      </Section>
+
       <Section title="Account">
         <Row>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>

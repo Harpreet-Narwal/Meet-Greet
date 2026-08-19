@@ -1,5 +1,7 @@
 import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 
+import { fonts, usePalette } from "../../lib/theme";
+
 /**
  * The tab bar is a real UITabBar, not a row of Views pretending to be one.
  *
@@ -17,8 +19,26 @@ import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
  * correctly between filled and outline for the selected state.
  */
 export default function TabsLayout() {
+  const palette = usePalette();
+
   return (
     <NativeTabs
+      /*
+       * Theme the bar explicitly.
+       *
+       * Left alone, UIKit paints its own defaults — a white/grey bar with the
+       * system blue tint — which sat under warm paper (#ede5d9) looking like a
+       * component borrowed from a different app. Nothing inherits the palette
+       * automatically here, because the bar is native chrome rather than one of
+       * our Views.
+       *
+       * These follow usePalette(), so the bar flips with the OS appearance
+       * along with everything else.
+       */
+      backgroundColor={palette.paper}
+      tintColor={palette.accent}
+      iconColor={palette.inkMuted}
+      labelStyle={{ fontFamily: fonts.mono, fontSize: 10, color: palette.inkMuted }}
       // Hide-on-scroll, done by UIKit rather than by us listening to scroll
       // offsets: the bar shrinks away as you read down a list and springs back
       // the moment you scroll up. Handing this to the platform is what makes it
